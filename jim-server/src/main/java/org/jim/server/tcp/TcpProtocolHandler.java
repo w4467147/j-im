@@ -4,26 +4,23 @@
 package org.jim.server.tcp;
 
 import org.apache.log4j.Logger;
-import org.jim.common.ImAio;
-import org.jim.common.ImConfig;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.ImStatus;
+import org.jim.common.config.ImConfig;
+import org.jim.common.exception.ImDecodeException;
+import org.jim.common.exception.ImException;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.RespBody;
-import org.jim.common.protocol.IProtocol;
-import org.jim.common.tcp.TcpPacket;
-import org.jim.common.tcp.TcpProtocol;
-import org.jim.common.tcp.TcpServerDecoder;
-import org.jim.common.tcp.TcpServerEncoder;
+import org.jim.common.protocol.AbstractProtocol;
+import org.jim.common.tcp.*;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
+import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.AbstractProtocolHandler;
-import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
-import org.tio.core.exception.AioDecodeException;
-import org.tio.core.intf.Packet;
-
 import java.nio.ByteBuffer;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
@@ -32,40 +29,44 @@ import java.nio.ByteBuffer;
 public class TcpProtocolHandler extends AbstractProtocolHandler {
 	
 	Logger logger = Logger.getLogger(TcpProtocolHandler.class);
-	
-	@Override
-	public void init(ImConfig imConfig) {
+
+	public TcpProtocolHandler(){
+		this.protocol = new TcpProtocol(new TcpConvertPacket());
+	}
+
+	public TcpProtocolHandler(AbstractProtocol protocol){
+		super(protocol);
 	}
 
 	@Override
-	public ByteBuffer encode(Packet packet, GroupContext groupContext,ChannelContext channelContext) {
-		TcpPacket tcpPacket = (TcpPacket)packet;
-		return TcpServerEncoder.encode(tcpPacket, groupContext, channelContext);
+	public void init(ImServerConfig imServerConfig) {
+		logger.info("J-IM TCP协议初始化完毕...");
+	}
+	@Override
+	public ByteBuffer encode(ImPacket imPacket, ImConfig imConfig, ImChannelContext imChannelContext) {
+		TcpPacket tcpPacket = (TcpPacket)imPacket;
+		return TcpServerEncoder.encode(tcpPacket, imConfig, imChannelContext);
 	}
 
 	@Override
-	public void handler(Packet packet, ChannelContext channelContext)throws Exception {
+	public void handler(ImPacket packet, ImChannelContext imChannelContext)throws ImException {
 		TcpPacket tcpPacket = (TcpPacket)packet;
 		AbstractCmdHandler cmdHandler = CommandManager.getCommand(tcpPacket.getCommand());
 		if(cmdHandler == null){
 			ImPacket imPacket = new ImPacket(Command.COMMAND_UNKNOW, new RespBody(Command.COMMAND_UNKNOW,ImStatus.C10017).toByte());
-			ImAio.send(channelContext, imPacket);
+			Jim.send(imChannelContext, imPacket);
 			return;
 		}
-		ImPacket response = cmdHandler.handler(tcpPacket, channelContext);
+		ImPacket response = cmdHandler.handler(tcpPacket, imChannelContext);
 		if(response != null && tcpPacket.getSynSeq() < 1){
-			ImAio.send(channelContext,response);
+			Jim.send(imChannelContext, response);
 		}
 	}
 
 	@Override
-	public TcpPacket decode(ByteBuffer buffer, ChannelContext channelContext)throws AioDecodeException {
-		TcpPacket tcpPacket = TcpServerDecoder.decode(buffer, channelContext);
+	public TcpPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext)throws ImDecodeException {
+		TcpPacket tcpPacket = TcpServerDecoder.decode(buffer, imChannelContext);
 		return tcpPacket;
 	}
 
-	@Override
-	public IProtocol protocol() {
-		return new TcpProtocol();
-	}
 }

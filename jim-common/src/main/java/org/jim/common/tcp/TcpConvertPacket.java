@@ -3,27 +3,28 @@
  */
 package org.jim.common.tcp;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
+import org.jim.common.ImSessionContext;
 import org.jim.common.packets.Command;
-import org.jim.common.protocol.IConvertProtocolPacket;
-import org.tio.core.ChannelContext;
+import org.jim.common.protocol.IProtocolConverter;
 
 /**
  * TCP协议消息转化包
  * @author WChao
  *
  */
-public class TcpConvertPacket implements IConvertProtocolPacket {
+public class TcpConvertPacket implements IProtocolConverter {
 
 	/**
 	 * 转TCP协议响应包;
 	 */
 	@Override
-	public ImPacket RespPacket(byte[] body, Command command,ChannelContext channelContext) {
-		Object sessionContext = channelContext.getAttribute();
-		if(sessionContext instanceof TcpSessionContext){//转TCP协议响应包;
+	public ImPacket RespPacket(byte[] body, Command command, ImChannelContext imChannelContext) {
+		ImSessionContext sessionContext = imChannelContext.getSessionContext();
+		if(sessionContext instanceof TcpSessionContext){
 			TcpPacket tcpPacket = new TcpPacket(command,body);
-			TcpServerEncoder.encode(tcpPacket, channelContext.getGroupContext(), channelContext);
+			TcpServerEncoder.encode(tcpPacket, imChannelContext.getImConfig(), imChannelContext);
 			tcpPacket.setCommand(command);
 			return tcpPacket;
 		}
@@ -33,11 +34,11 @@ public class TcpConvertPacket implements IConvertProtocolPacket {
 	 * 转TCP协议请求包;
 	 */
 	@Override
-	public ImPacket ReqPacket(byte[] body, Command command,ChannelContext channelContext) {
-		Object sessionContext = channelContext.getAttribute();
-		if(sessionContext instanceof TcpSessionContext){//转TCP协议请求包;
+	public ImPacket ReqPacket(byte[] body, Command command, ImChannelContext channelContext) {
+		Object sessionContext = channelContext.getSessionContext();
+		if(sessionContext instanceof TcpSessionContext){
 			TcpPacket tcpPacket = new TcpPacket(command,body);
-			TcpServerEncoder.encode(tcpPacket, channelContext.getGroupContext(), channelContext);
+			TcpServerEncoder.encode(tcpPacket, channelContext.getImConfig(), channelContext);
 			tcpPacket.setCommand(command);
 			return tcpPacket;
 		}

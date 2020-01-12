@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
 import org.tio.core.Node;
-import org.jim.common.http.HttpConst.RequestBodyFormat;
 import org.jim.common.http.session.HttpSession;
+import org.tio.utils.hutool.ArrayUtil;
 
-import cn.hutool.core.util.ArrayUtil;
 /**
  *
  * @author wchao
@@ -20,7 +21,7 @@ import cn.hutool.core.util.ArrayUtil;
  */
 public class HttpRequest extends HttpPacket {
 
-	//	private static Logger log = LoggerFactory.getLogger(HttpRequest.class);
+	private static Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
 	private static final long serialVersionUID = -3849253977016967211L;
 
@@ -43,14 +44,12 @@ public class HttpRequest extends HttpPacket {
 	private Map<String, Cookie> cookieMap = null;
 	private int contentLength;
 	private String bodyString;
-	private RequestBodyFormat bodyFormat;
-	private String charset = HttpConst.CHARSET_NAME;
+	private Http.RequestBodyFormat bodyFormat;
+	private String charset = Http.CHARSET_NAME;
 	private Boolean isAjax = null;
 	private Boolean isSupportGzip = null;
 	private HttpSession httpSession;
-	private Node remote = null;
-	private ChannelContext channelContext;
-
+	private Node remote;
 	private HttpConfig httpConfig;
 
 	/**
@@ -84,7 +83,7 @@ public class HttpRequest extends HttpPacket {
 	/**
 	 * @return the bodyFormat
 	 */
-	public RequestBodyFormat getBodyFormat() {
+	public Http.RequestBodyFormat getBodyFormat() {
 		return bodyFormat;
 	}
 
@@ -93,13 +92,6 @@ public class HttpRequest extends HttpPacket {
 	 */
 	public String getBodyString() {
 		return bodyString;
-	}
-
-	/**
-	 * @return the channelContext
-	 */
-	public ChannelContext getChannelContext() {
-		return channelContext;
 	}
 
 	/**
@@ -156,7 +148,7 @@ public class HttpRequest extends HttpPacket {
 	 */
 	public Boolean getIsAjax() {
 		if (isAjax == null) {
-			String X_Requested_With = this.getHeader(HttpConst.RequestHeaderKey.X_Requested_With);
+			String X_Requested_With = this.getHeader(Http.RequestHeaderKey.X_Requested_With);
 			if (X_Requested_With != null && "XMLHttpRequest".equalsIgnoreCase(X_Requested_With)) {
 				isAjax = true;
 			} else {
@@ -172,7 +164,7 @@ public class HttpRequest extends HttpPacket {
 	 */
 	public Boolean getIsSupportGzip() {
 		if (isSupportGzip == null) {
-			String Accept_Encoding = getHeader(HttpConst.RequestHeaderKey.Accept_Encoding);
+			String Accept_Encoding = getHeader(Http.RequestHeaderKey.Accept_Encoding);
 			if (StringUtils.isNoneBlank(Accept_Encoding)) {
 				String[] ss = StringUtils.split(Accept_Encoding, ",");
 				if (ArrayUtil.contains(ss, "gzip")) {
@@ -219,7 +211,7 @@ public class HttpRequest extends HttpPacket {
 	}
 
 	public void parseCookie() {
-		String cookieLine = headers.get(HttpConst.RequestHeaderKey.Cookie);
+		String cookieLine = headers.get(Http.RequestHeaderKey.Cookie);
 		if (StringUtils.isNotBlank(cookieLine)) {
 			cookies = new ArrayList<>();
 			cookieMap = new HashMap<>();
@@ -233,7 +225,7 @@ public class HttpRequest extends HttpPacket {
 				Cookie cookie = Cookie.buildCookie(cookieOneMap);
 				cookies.add(cookie);
 				cookieMap.put(cookie.getName(), cookie);
-				//log.error("{}, 收到cookie:{}", channelContext, cookie.toString());
+				log.info("{}, 收到cookie:{}", imChannelContext, cookie.toString());
 			}
 		}
 	}
@@ -241,7 +233,7 @@ public class HttpRequest extends HttpPacket {
 	/**
 	 * @param bodyFormat the bodyFormat to set
 	 */
-	public void setBodyFormat(RequestBodyFormat bodyFormat) {
+	public void setBodyFormat(Http.RequestBodyFormat bodyFormat) {
 		this.bodyFormat = bodyFormat;
 	}
 
@@ -253,13 +245,6 @@ public class HttpRequest extends HttpPacket {
 	}
 
 	/**
-	 * @param channelContext the channelContext to set
-	 */
-	public void setChannelContext(ChannelContext channelContext) {
-		this.channelContext = channelContext;
-	}
-
-	/**
 	 * @param charset the charset to set
 	 */
 	public void setCharset(String charset) {
@@ -267,7 +252,7 @@ public class HttpRequest extends HttpPacket {
 	}
 
 	/**
-	 * @param bodyLength the bodyLength to set
+	 * @param contentLength the bodyLength to set
 	 */
 	public void setContentLength(int contentLength) {
 		this.contentLength = contentLength;
@@ -290,7 +275,6 @@ public class HttpRequest extends HttpPacket {
 	/**
 	 * 设置好header后，会把cookie等头部信息也设置好
 	 * @param headers the headers to set
-	 * @param channelContext
 	 */
 	@Override
 	public void setHeaders(Map<String, String> headers) {

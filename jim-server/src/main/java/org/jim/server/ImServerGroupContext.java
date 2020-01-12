@@ -3,31 +3,19 @@
  */
 package org.jim.server;
 
-import org.jim.common.ImConst;
-import org.jim.common.ImAio;
-import org.jim.common.ImConfig;
-import org.jim.common.cache.redis.RedissonTemplate;
-import org.jim.common.cluster.redis.RedisCluster;
-import org.jim.common.cluster.redis.RedisClusterConfig;
-import org.jim.server.command.CommandManager;
-import org.jim.server.handler.ImServerAioHandler;
-import org.jim.server.handler.ProtocolHandlerManager;
-import org.jim.server.listener.ImServerAioListener;
+import org.jim.common.config.ImConfig;
+import org.jim.server.handler.ImServerHandler;
+import org.jim.server.listener.ImServerListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.server.ServerGroupContext;
-import org.tio.utils.Threads;
-import org.tio.utils.thread.pool.DefaultThreadFactory;
 import org.tio.utils.thread.pool.SynThreadPoolExecutor;
-
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
  * @author WChao
  *
  */
-public class ImServerGroupContext extends ServerGroupContext{
+public class ImServerGroupContext /*extends TioConfig */{
 
 	private Logger log = LoggerFactory.getLogger(ImServerGroupContext.class);
 	
@@ -39,8 +27,8 @@ public class ImServerGroupContext extends ServerGroupContext{
 	
 	protected SynThreadPoolExecutor timExecutor = null;
 	
-	public ImServerGroupContext(ImConfig imConfig , ImServerAioHandler imServerAioHandler,ImServerAioListener imServerAioListener) {
-		super(imServerAioHandler, imServerAioListener);
+	public ImServerGroupContext(ImConfig imConfig , ImServerHandler imServerAioHandler, ImServerListenerAdapter imServerAioListener) {
+		/*super(imServerAioHandler, imServerAioListener);
 		this.imConfig = imConfig;
 		this.setHeartbeatTimeout(imConfig.getHeartbeatTimeout());
 		//是否开启集群
@@ -67,7 +55,7 @@ public class ImServerGroupContext extends ServerGroupContext{
 		imConfig.setGroupContext(this);
 		ProtocolHandlerManager.init(imConfig);
 		CommandManager.init(imConfig);
-		ImAio.imConfig = imConfig;
+		Jim.imConfig = imConfig;*/
 	}
 
 	public SynThreadPoolExecutor getTimExecutor() {

@@ -1,9 +1,9 @@
 package org.jim.common.ws;
 
 import org.tio.core.intf.TioUuid;
+import org.tio.utils.hutool.Snowflake;
 
-import cn.hutool.core.lang.Snowflake;
-import cn.hutool.core.util.RandomUtil;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author WChao
@@ -13,11 +13,11 @@ public class WsTioUuid implements TioUuid {
 	private Snowflake snowflake;
 
 	public WsTioUuid() {
-		snowflake = new Snowflake(RandomUtil.randomInt(1, 30), RandomUtil.randomInt(1, 30));
+		snowflake = new Snowflake(ThreadLocalRandom.current().nextInt(1, 30), ThreadLocalRandom.current().nextInt(1, 30));
 	}
 
-	public WsTioUuid(long workerId, long datacenterId) {
-		snowflake = new Snowflake(workerId, datacenterId);
+	public WsTioUuid(long workerId, long dataCenterId) {
+		snowflake = new Snowflake(workerId, dataCenterId);
 	}
 
 	/**

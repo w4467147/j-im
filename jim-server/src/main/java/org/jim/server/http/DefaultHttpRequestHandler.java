@@ -10,12 +10,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jim.common.ImConst;
+import org.jim.common.exception.ImException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
 import org.jim.common.http.Cookie;
 import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpConst;
 import org.jim.common.http.HttpRequest;
 import org.jim.common.http.HttpResponse;
 import org.jim.common.http.HttpResponseStatus;
@@ -38,15 +39,8 @@ import cn.hutool.core.util.ClassUtil;
  * @author WChao
  *
  */
-public class DefaultHttpRequestHandler implements IHttpRequestHandler {
+public class DefaultHttpRequestHandler implements IHttpRequestHandler,ImConst.Http {
 	private static Logger log = LoggerFactory.getLogger(DefaultHttpRequestHandler.class);
-
-	//	/**
-	//	 * 静态资源的CacheName
-	//	 * key:   path 譬如"/index.html"
-	//	 * value: HttpResponse
-	//	 */
-	//	private static final String STATIC_RES_CACHENAME = "TIO_HTTP_STATIC_RES";
 
 	/**
 	 * 静态资源的CacheName
@@ -55,21 +49,9 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 	 */
 	private static final String STATIC_RES_CONTENT_CACHENAME = "TIO_HTTP_STATIC_RES_CONTENT";
 
-	/**
-	 * @param args
-	 *
-	 * @author WChao
-	 * 2016年11月18日 上午9:13:15
-	 *
-	 */
-	public static void main(String[] args) {
-	}
-
 	protected HttpConfig httpConfig;
 
 	protected Routes routes = null;
-
-	//	private LoadingCache<String, HttpSession> loadingCache = null;
 
 	private IHttpServerListener httpServerListener;
 
@@ -84,7 +66,6 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 		this.httpConfig = httpConfig;
 
 		if (httpConfig.getMaxLiveTimeOfStaticRes() > 0) {
-			//			GuavaCache.register(STATIC_RES_CACHENAME, (long) httpConfig.getMaxLiveTimeOfStaticRes(), null);
 			staticResCache = GuavaCache.register(STATIC_RES_CONTENT_CACHENAME, (long) httpConfig.getMaxLiveTimeOfStaticRes(), null);
 		}
 		this.setHttpServerListener(httpConfig.getHttpServerListener());
@@ -102,7 +83,7 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 	}
 
 	/**
-	 * 创建httpsession
+	 * 创建httpSession
 	 * @return
 	 * @author WChao
 	 */
@@ -136,11 +117,11 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 	}
 
 	@Override
-	public HttpResponse handler(HttpRequest request, RequestLine requestLine) throws Exception {
+	public HttpResponse handler(HttpRequest request, RequestLine requestLine) throws ImException {
 		HttpResponse ret = null;
 		try {
 			processCookieBeforeHandler(request, requestLine);
-			HttpSession httpSession = request.getHttpSession();//(HttpSession) channelContext.getAttribute();
+			HttpSession httpSession = request.getHttpSession();
 
 			if (httpServerListener != null) {
 				ret = httpServerListener.doBeforeHandler(request, requestLine, ret);
@@ -175,7 +156,7 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 							} else if (paramType.isAssignableFrom(HttpConfig.class)) {
 								paramValues[i] = httpConfig;
 							} else if (paramType.isAssignableFrom(ChannelContext.class)) {
-								paramValues[i] = request.getChannelContext();
+								paramValues[i] = request.getImChannelContext();
 							} else {
 								if (params != null) {
 									if (ClassUtils.isSimpleTypeOrArray(paramType)) {
@@ -188,7 +169,8 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 											}
 										}
 									} else {
-										paramValues[i] = paramType.newInstance();//BeanUtil.mapToBean(params, paramType, true);
+										//BeanUtil.mapToBean(params, paramType, true);
+										paramValues[i] = paramType.newInstance();
 										Set<Entry<String, Object[]>> set = params.entrySet();
 										label2: for (Entry<String, Object[]> entry : set) {
 											String fieldName = entry.getKey();
@@ -254,7 +236,7 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 
 					ret = HttpResps.try304(request, lastModified);
 					if (ret != null) {
-						ret.addHeader(HttpConst.ResponseHeaderKey.tio_from_cache, "true");
+						ret.addHeader(ResponseHeaderKey.tio_from_cache, "true");
 
 						return ret;
 					}
@@ -281,21 +263,21 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 
 						if (contentCache != null && request.getIsSupportGzip()) {
 							if (ret.getBody() != null && ret.getStatus() == HttpResponseStatus.C200) {
-								String contentType = ret.getHeader(HttpConst.ResponseHeaderKey.Content_Type);
-								String contentEncoding = ret.getHeader(HttpConst.ResponseHeaderKey.Content_Encoding);
-								String lastModified = ret.getHeader(HttpConst.ResponseHeaderKey.Last_Modified);
+								String contentType = ret.getHeader(ResponseHeaderKey.Content_Type);
+								String contentEncoding = ret.getHeader(ResponseHeaderKey.Content_Encoding);
+								String lastModified = ret.getHeader(ResponseHeaderKey.Last_Modified);
 
 								Map<String, String> headers = new HashMap<>();
 								if (StringUtils.isNotBlank(contentType)) {
-									headers.put(HttpConst.ResponseHeaderKey.Content_Type, contentType);
+									headers.put(ResponseHeaderKey.Content_Type, contentType);
 								}
 								if (StringUtils.isNotBlank(contentEncoding)) {
-									headers.put(HttpConst.ResponseHeaderKey.Content_Encoding, contentEncoding);
+									headers.put(ResponseHeaderKey.Content_Encoding, contentEncoding);
 								}
 								if (StringUtils.isNotBlank(lastModified)) {
-									headers.put(HttpConst.ResponseHeaderKey.Last_Modified, lastModified);
+									headers.put(ResponseHeaderKey.Last_Modified, lastModified);
 								}
-								headers.put(HttpConst.ResponseHeaderKey.tio_from_cache, "true");
+								headers.put(ResponseHeaderKey.tio_from_cache, "true");
 
 								fileCache = new FileCache(headers, file.lastModified(), ret.getBody());
 								contentCache.put(initPath, fileCache);
@@ -342,24 +324,22 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 		String sessionId = null;
 
 		if (cookie == null) {
-			String domain = request.getHeader(HttpConst.RequestHeaderKey.Host);
+			String domain = request.getHeader(RequestHeaderKey.Host);
 			String name = httpConfig.getSessionCookieName();
 			long maxAge = httpConfig.getSessionTimeout();
-			//			maxAge = Integer.MAX_VALUE; //把过期时间掌握在服务器端
-
-			sessionId = httpSession.getId();//randomCookieValue();
+			sessionId = httpSession.getId();
 
 			cookie = new Cookie(domain, name, sessionId, maxAge);
 			httpResponse.addCookie(cookie);
 			httpConfig.getSessionStore().put(sessionId, httpSession);
-			log.info("{} 创建会话Cookie, {}", request.getChannelContext(), cookie);
+			log.info("{} 创建会话Cookie, {}", request.getImChannelContext(), cookie);
 		} else {
 			sessionId = cookie.getValue();
 			HttpSession httpSession1 = (HttpSession) httpConfig.getSessionStore().get(sessionId);
 
 			if (httpSession1 == null) {//有cookie但是超时了
 				sessionId = httpSession.getId();
-				String domain = request.getHeader(HttpConst.RequestHeaderKey.Host);
+				String domain = request.getHeader(RequestHeaderKey.Host);
 				String name = httpConfig.getSessionCookieName();
 				long maxAge = httpConfig.getSessionTimeout();
 				//				maxAge = Long.MAX_VALUE; //把过期时间掌握在服务器端
@@ -381,7 +361,7 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler {
 			String sessionId = cookie.getValue();
 			httpSession = (HttpSession) httpConfig.getSessionStore().get(sessionId);
 			if (httpSession == null) {
-				log.info("{} session【{}】超时", request.getChannelContext(), sessionId);
+				log.info("{} session【{}】超时", request.getImChannelContext(), sessionId);
 				httpSession = createSession();
 			}
 		}

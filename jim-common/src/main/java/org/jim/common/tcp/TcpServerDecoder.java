@@ -6,11 +6,11 @@ package org.jim.common.tcp;
 import java.nio.ByteBuffer;
 
 import org.apache.log4j.Logger;
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
 import org.jim.common.ImPacket;
 import org.jim.common.ImStatus;
-import org.jim.common.Protocol;
-import org.tio.core.ChannelContext;
-import org.tio.core.exception.AioDecodeException;
+import org.jim.common.exception.ImDecodeException;
 import org.jim.common.packets.Command;
 
 /**
@@ -18,11 +18,11 @@ import org.jim.common.packets.Command;
  * 功能说明: 
  * @author : WChao 创建时间: 2017年8月21日 下午3:08:04
  */
-public class TcpServerDecoder {
+public class TcpServerDecoder implements ImConst {
 	
 	private static Logger logger = Logger.getLogger(TcpServerDecoder.class);
 	
-	public static TcpPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws AioDecodeException{
+	public static TcpPacket decode(ByteBuffer buffer, ImChannelContext imChannelContext) throws ImDecodeException {
 		//校验协议头
 		if(!isHeaderLength(buffer)) {
 			return null;
@@ -30,7 +30,7 @@ public class TcpServerDecoder {
 		//获取第一个字节协议版本号;
 		byte version = buffer.get();
 		if(version != Protocol.VERSION){
-			throw new AioDecodeException(ImStatus.C10013.getText());
+			throw new ImDecodeException(ImStatus.C10013.getText());
 		}
 		//标志位
 		byte maskByte = buffer.get();
@@ -42,13 +42,13 @@ public class TcpServerDecoder {
 		//cmd命令码
 		byte cmdByte = buffer.get();
 		if(Command.forNumber(cmdByte) == null){
-			throw new AioDecodeException(ImStatus.C10014.getText());
+			throw new ImDecodeException(ImStatus.C10014.getText());
 		}
 		int bodyLen = buffer.getInt();
-		//数据不正确，则抛出AioDecodeException异常
+		//数据不正确，则抛出ImDecodeException异常
 		if (bodyLen < 0)
 		{
-			throw new AioDecodeException("bodyLength [" + bodyLen + "] is not right, remote:" + channelContext.getClientNode());
+			throw new ImDecodeException("bodyLength [" + bodyLen + "] is not right, remote:" + imChannelContext.getClientNode());
 		}
 		int readableLength = buffer.limit() - buffer.position();
 		int validateBodyLen = readableLength - bodyLen;
@@ -72,7 +72,7 @@ public class TcpServerDecoder {
 		if(synSeq > 0){
 			tcpPacket.setSynSeq(synSeq);
 			try {
-				channelContext.getGroupContext().getAioHandler().handler(tcpPacket, channelContext);
+				//channelContext.getGroupContext().getAioHandler().handler(tcpPacket, channelContext);
 			} catch (Exception e) {
 				logger.error("同步发送解码调用handler异常!"+e);
 			}
@@ -83,9 +83,9 @@ public class TcpServerDecoder {
 	 * 判断是否符合协议头长度
 	 * @param buffer
 	 * @return
-	 * @throws AioDecodeException
+	 * @throws ImDecodeException
 	 */
-	private static boolean isHeaderLength(ByteBuffer buffer) throws AioDecodeException{
+	private static boolean isHeaderLength(ByteBuffer buffer) throws ImDecodeException{
 		int readableLength = buffer.limit() - buffer.position();
 		if(readableLength == 0) {
 			return false;

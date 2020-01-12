@@ -3,11 +3,10 @@ package org.jim.client;
 import java.nio.ByteBuffer;
 
 import org.jim.common.ImConst;
-import org.jim.common.Protocol;
 import org.tio.client.intf.ClientAioHandler;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
-import org.tio.core.exception.AioDecodeException;
+import org.tio.core.exception.ImDecodeException;
 import org.tio.core.intf.AioHandler;
 import org.tio.core.intf.Packet;
 import org.jim.common.packets.Command;
@@ -52,7 +51,7 @@ public class HelloClientAioHandler  implements AioHandler,ClientAioHandler
 	}
 	
 	@Override
-	public TcpPacket decode(ByteBuffer buffer,int limit, int position, int readableLength,ChannelContext channelContext) throws AioDecodeException {
+	public TcpPacket decode(ByteBuffer buffer,int limit, int position, int readableLength,ChannelContext channelContext) throws ImDecodeException {
 		TcpPacket tcpPacket = TcpServerDecoder.decode(buffer, channelContext);
 		return tcpPacket;
 	}

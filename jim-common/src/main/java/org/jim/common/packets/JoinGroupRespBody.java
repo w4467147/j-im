@@ -3,6 +3,8 @@
  */
 package org.jim.common.packets;
 
+import org.jim.common.Status;
+
 /**
  * 版本: [1.0]
  * 功能说明: 加入群组响应
@@ -13,6 +15,10 @@ public class JoinGroupRespBody extends RespBody {
 	private static final long serialVersionUID = 6635620192752369689L;
 	public JoinGroupResult result;
 	public String group;
+
+	public JoinGroupRespBody(Command command , Status status){
+		super(command, status);
+	}
 	public JoinGroupResult getResult() {
 		return result;
 	}

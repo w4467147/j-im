@@ -12,7 +12,7 @@ public class ImException extends Exception{
     /**
      * @Author WChao
      * @Description //TODO
-     * @param []
+     * @param
      * @return
      **/
     public ImException() {
@@ -21,7 +21,7 @@ public class ImException extends Exception{
     /**
      * @Author WChao
      * @Description //TODO
-     * @param [message]
+     * @param message
      * @return
      **/
     public ImException(String message) {
@@ -32,7 +32,7 @@ public class ImException extends Exception{
     /**
      * @Author WChao
      * @Description //TODO
-     * @param [message, cause]
+     * @param message, cause
      * @return
      **/
     public ImException(String message, Throwable cause) {
@@ -43,7 +43,7 @@ public class ImException extends Exception{
     /**
      * @Author WChao
      * @Description //TODO
-     * @param [message, cause, enableSuppression, writableStackTrace]
+     * @param message, cause, enableSuppression, writableStackTrace
      * @return
      **/
     public ImException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
@@ -54,7 +54,7 @@ public class ImException extends Exception{
     /**
      * @Author WChao
      * @Description //TODO
-     * @param [cause]
+     * @param cause
      * @return
      **/
     public ImException(Throwable cause) {

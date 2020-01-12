@@ -1,5 +1,6 @@
 package org.jim.common.ws;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
 import org.tio.core.ChannelContext;
 import org.jim.common.ws.WsRequestPacket;
@@ -13,43 +14,43 @@ public interface IWsMsgHandler
 	/**
 	 * 
 	 * @param packet
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 *
 	 * @author: WChao
 	 * 2016年11月18日 下午1:08:45
 	 *
 	 */
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext)  throws Exception;
+	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext)  throws Exception;
 	/**
-	 * @param websocketPacket
+	 * @param wsPacket
 	 * @param text
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return 可以是WsResponsePacket、byte[]、ByteBuffer、String或null，如果是null，框架不会回消息
 	 * @throws Exception
 	 * @author: WChao
 	 */
-	Object onText(WsRequestPacket wsPacket, String text, ChannelContext channelContext) throws Exception;
+	Object onText(WsRequestPacket wsPacket, String text, ImChannelContext imChannelContext) throws Exception;
 	
 	/**
 	 * 
-	 * @param websocketPacket
+	 * @param webSocketPacket
 	 * @param bytes
 	 * @param channelContext
 	 * @return 可以是WsResponsePacket、byte[]、ByteBuffer、String或null，如果是null，框架不会回消息
 	 * @throws Exception
 	 * @author: WChao
 	 */
-	Object onClose(WsRequestPacket websocketPacket, byte[] bytes, ChannelContext channelContext) throws Exception;
+	Object onClose(WsRequestPacket webSocketPacket, byte[] bytes, ImChannelContext channelContext) throws Exception;
 
 	/**
 	 * 
-	 * @param websocketPacket
+	 * @param webSocketPacket
 	 * @param bytes
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return 可以是WsResponsePacket、byte[]、ByteBuffer、String或null，如果是null，框架不会回消息
 	 * @throws Exception
 	 * @author: WChao
 	 */
-	Object onBytes(WsRequestPacket websocketPacket, byte[] bytes, ChannelContext channelContext) throws Exception;
+	Object onBytes(WsRequestPacket webSocketPacket, byte[] bytes, ImChannelContext imChannelContext) throws Exception;
 }

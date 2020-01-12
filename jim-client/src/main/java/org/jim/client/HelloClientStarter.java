@@ -1,7 +1,7 @@
 package org.jim.client;
 
 import org.jim.common.ImConst;
-import org.jim.common.ImAio;
+import org.jim.common.Jim;
 import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.LoginReqBody;
@@ -63,7 +63,7 @@ public class HelloClientStarter {
 		byte[] loginBody = new LoginReqBody("hello_client","123").toByte();
 		TcpPacket loginPacket = new TcpPacket(Command.COMMAND_LOGIN_REQ,loginBody);
 		//先登录;
-		ImAio.send(clientChannelContext, loginPacket);
+		Jim.send(clientChannelContext, loginPacket);
 		ChatBody chatBody = ChatBody.newBuilder()
 				.setFrom("hello_client")
 				.setTo("admin")
@@ -72,6 +72,6 @@ public class HelloClientStarter {
 				.setGroup_id("100")
 				.setContent("Socket普通客户端消息测试!").build();
 		TcpPacket chatPacket = new TcpPacket(Command.COMMAND_CHAT_REQ,chatBody.toByte());
-		ImAio.send(clientChannelContext, chatPacket);
+		Jim.send(clientChannelContext, chatPacket);
 	}
 }

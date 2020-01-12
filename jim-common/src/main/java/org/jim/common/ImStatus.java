@@ -39,7 +39,7 @@ public enum ImStatus implements Status{
 	
 	private String text;
 
-	private ImStatus(int status, String description, String text) {
+	ImStatus(int status, String description, String text) {
 		this.status = status;
 		this.description = description;
 		this.text = text;

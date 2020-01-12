@@ -5,10 +5,7 @@ package org.jim.server.demo.service;
 
 import cn.hutool.core.util.RandomUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
-import org.jim.common.ImSessionContext;
-import org.jim.common.ImStatus;
+import org.jim.common.*;
 import org.jim.common.http.HttpConst;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.Group;
@@ -51,17 +48,17 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	
 	/**
 	 * 根据用户名和密码获取用户
-	 * @param loginname
+	 * @param loginName
 	 * @param password
 	 * @return
 	 * @author: WChao
 	 */
-	public User getUser(String loginname, String password) {
-		String text = loginname+password;
+	public User getUser(String loginName, String password) {
+		String text = loginName+password;
 		String key = ImConst.AUTH_KEY;
-		String token = Md5.sign(text, key, HttpConst.CHARSET_NAME);
+		String token = Md5.sign(text, key, CHARSET);
 		User user = getUser(token);
-		user.setId(loginname);
+		user.setId(loginName);
 		return user;
 	}
 	/**
@@ -124,17 +121,17 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	 * 当登陆失败时设置user属性需要为空，相反登陆成功user属性是必须非空的;
 	 */
 	@Override
-	public LoginRespBody doLogin(LoginReqBody loginReqBody , ChannelContext channelContext) {
-		String loginname = loginReqBody.getLoginname();
+	public LoginRespBody doLogin(LoginReqBody loginReqBody , ImChannelContext channelContext) {
+		String loginName = loginReqBody.getLoginname();
 		String password = loginReqBody.getPassword();
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+		ImSessionContext imSessionContext = channelContext.getSessionContext();
 		String handshakeToken = imSessionContext.getToken();
 		User user;
 		LoginRespBody loginRespBody;
 		if (!StringUtils.isBlank(handshakeToken)) {
 			user = this.getUser(handshakeToken);
 		}else{
-			user = this.getUser(loginname, password);
+			user = this.getUser(loginName, password);
 		}
 		if(user == null){
 			loginRespBody = new LoginRespBody(Command.COMMAND_LOGIN_RESP,ImStatus.C10008);
@@ -145,12 +142,13 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	}
 
 	@Override
-	public void onSuccess(ChannelContext channelContext) {
+	public void onSuccess(ImChannelContext channelContext) {
 		logger.info("登录成功回调方法");
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+		ImSessionContext imSessionContext = channelContext.getSessionContext();
 		User user = imSessionContext.getClient().getUser();
 		if(user.getGroups() != null){
-			for(Group group : user.getGroups()){//发送加入群组通知
+			//发送加入群组通知
+			for(Group group : user.getGroups()){
 				ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
 				try {
 					JoinGroupReqHandler joinGroupReqHandler = CommandManager.getCommand(Command.COMMAND_JOIN_GROUP_REQ, JoinGroupReqHandler.class);
@@ -163,7 +161,7 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	}
 
 	@Override
-	public boolean isProtocol(ChannelContext channelContext) {
+	public boolean isProtocol(ImChannelContext channelContext) {
 		 
 		return true;
 	}

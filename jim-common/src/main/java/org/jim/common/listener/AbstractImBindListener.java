@@ -4,7 +4,7 @@
 package org.jim.common.listener;
 
 import org.jim.common.ImConst;
-import org.jim.common.ImConfig;
+import org.jim.common.config.ImConfig;
 /**
  * @author WChao
  * 2018/08/26

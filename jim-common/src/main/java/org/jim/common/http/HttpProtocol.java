@@ -4,62 +4,58 @@
 package org.jim.common.http;
 
 import java.nio.ByteBuffer;
-
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
 import org.jim.common.ImSessionContext;
-import org.jim.common.Protocol;
+import org.jim.common.exception.ImException;
 import org.jim.common.http.session.HttpSession;
-import org.jim.common.protocol.AbProtocol;
-import org.jim.common.protocol.IConvertProtocolPacket;
+import org.jim.common.protocol.AbstractProtocol;
+import org.jim.common.protocol.IProtocolConverter;
 import org.jim.common.utils.ImUtils;
-import org.tio.core.ChannelContext;
-
 /**
  *
  * Http协议校验器
  * @author WChao
  *
  */
-public class HttpProtocol extends AbProtocol {
+public class HttpProtocol extends AbstractProtocol {
 
 	@Override
 	public String name() {
 		return Protocol.HTTP;
 	}
 
+	public HttpProtocol(IProtocolConverter protocolConverter){
+		super(protocolConverter);
+	}
+
 	@Override
-	public boolean isProtocolByBuffer(ByteBuffer buffer,ChannelContext channelContext) throws Throwable {
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
-		if(imSessionContext != null && imSessionContext instanceof HttpSession) {
+	protected void init(ImChannelContext imChannelContext) {
+		imChannelContext.setSessionContext(new HttpSession(imChannelContext));
+		ImUtils.setClient(imChannelContext);
+	}
+
+	@Override
+	public boolean validateProtocol(ImSessionContext imSessionContext) throws ImException {
+		if(imSessionContext instanceof HttpSession) {
 			return true;
-		}
-		if(buffer != null){
-			HttpRequest request = HttpRequestDecoder.decode(buffer, channelContext,false);
-			if(request.getHeaders().get(HttpConst.RequestHeaderKey.Sec_WebSocket_Key) == null)
-			{
-				channelContext.setAttribute(new HttpSession());
-				ImUtils.setClient(channelContext);
-				return true;
-			}
 		}
 		return false;
 	}
 
 	@Override
-	public IConvertProtocolPacket converter() {
-		return new HttpConvertPacket();
+	public boolean validateProtocol(ByteBuffer buffer, ImChannelContext imChannelContext) throws ImException {
+		HttpRequest request = HttpRequestDecoder.decode(buffer, imChannelContext,false);
+		if(request.getHeaders().get(Http.RequestHeaderKey.Sec_WebSocket_Key) == null)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	@Override
-	public boolean isProtocol(ImPacket imPacket,ChannelContext channelContext) throws Throwable {
-		if(imPacket == null) {
-			return false;
-		}
+	public boolean validateProtocol(ImPacket imPacket) throws ImException {
 		if(imPacket instanceof HttpPacket){
-			Object sessionContext = channelContext.getAttribute();
-			if(sessionContext == null){
-				channelContext.setAttribute(new HttpSession());
-			}
 			return true;
 		}
 		return false;

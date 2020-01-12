@@ -1,11 +1,9 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImConst;
-import org.jim.common.ImAio;
-import org.jim.common.ImPacket;
-import org.jim.common.ImSessionContext;
-import org.jim.common.ImStatus;
+import org.jim.common.*;
+import org.jim.common.config.ImConfig;
+import org.jim.common.exception.ImException;
 import org.jim.common.message.MessageHelper;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.Group;
@@ -15,13 +13,15 @@ import org.jim.common.packets.User;
 import org.jim.common.protocol.IProtocol;
 import org.jim.common.utils.ImKit;
 import org.jim.common.utils.JsonKit;
+import org.jim.server.ImServerChannelContext;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.processor.login.LoginCmdProcessor;
+import org.jim.server.handler.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.Aio;
 import org.tio.core.ChannelContext;
+import org.tio.core.Tio;
 
 import java.util.List;
 
@@ -34,22 +34,23 @@ public class LoginReqHandler extends AbstractCmdHandler {
 	private static Logger log = LoggerFactory.getLogger(LoginReqHandler.class);
 
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception {
+	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
+		ImServerChannelContext imServerChannelContext = (ImServerChannelContext)imChannelContext;
 		if (packet.getBody() == null) {
-			Aio.remove(channelContext, "body is null");
+			Jim.remove(imChannelContext, "body is null");
 			return null;
 		}
-		List<LoginCmdProcessor> loginProcessors = this.getProcessor(channelContext, LoginCmdProcessor.class);
+		List<LoginCmdProcessor> loginProcessors = this.getProcessor(imChannelContext, LoginCmdProcessor.class);
 		if(CollectionUtils.isEmpty(loginProcessors)){
 			log.info("登录失败,没有登录命令业务处理器!");
-			Aio.remove(channelContext, "no login serviceHandler processor!");
+			Jim.remove(imChannelContext, "no login serviceHandler processor!");
 			return null;
 		}
 		LoginCmdProcessor loginServiceHandler = loginProcessors.get(0);
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(),LoginReqBody.class);
 		
-		LoginRespBody loginRespBody = loginServiceHandler.doLogin(loginReqBody,channelContext);
+		LoginRespBody loginRespBody = loginServiceHandler.doLogin(loginReqBody, imChannelContext);
 		if (loginRespBody == null || loginRespBody.getUser() == null) {
 			log.info("登录失败, loginName:{}, password:{}", loginReqBody.getLoginname(), loginReqBody.getPassword());
 			if(loginRespBody == null){
@@ -57,32 +58,30 @@ public class LoginReqHandler extends AbstractCmdHandler {
 			}
 			loginRespBody.clear();
 			ImPacket loginRespPacket = new ImPacket(Command.COMMAND_LOGIN_RESP, loginRespBody.toByte());
-			ImAio.bSend(channelContext,loginRespPacket);
-			ImAio.remove(channelContext, "loginName and token is incorrect");
+			Jim.bSend(imChannelContext, loginRespPacket);
+			Jim.remove(imChannelContext, "loginName and token is incorrect");
 			return null;
 		}
 		User user = loginRespBody.getUser();
-		String userId = user.getId();
-		IProtocol protocol = ImKit.protocol(null, channelContext);
+		IProtocol protocol = imServerChannelContext.getProtocolHandler().getProtocol();
 		String terminal = protocol == null ? "" : protocol.name();
 		user.setTerminal(terminal);
 		imSessionContext.getClient().setUser(user);
-		ImAio.bindUser(channelContext,userId,imConfig.getMessageHelper().getBindListener());
+		Jim.bindUser(imServerChannelContext, user.getId());
 		//初始化绑定或者解绑群组;
-		bindUnbindGroup(channelContext, user);
-		loginServiceHandler.onSuccess(channelContext);
+		bindUnbindGroup(imChannelContext, user);
+		loginServiceHandler.onSuccess(imChannelContext);
 		loginRespBody.clear();
-		ImPacket loginRespPacket = new ImPacket(Command.COMMAND_LOGIN_RESP, loginRespBody.toByte());
-		return loginRespPacket;
+		return ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext);
 	}
 	/**
 	 * 初始化绑定或者解绑群组;
 	 */
-	public void bindUnbindGroup(ChannelContext channelContext , User user)throws Exception{
+	public void bindUnbindGroup(ImChannelContext imChannelContext , User user)throws ImException{
 		String userId = user.getId();
 		List<Group> groups = user.getGroups();
 		if( groups != null){
-			boolean isStore = ImConst.ON.equals(imConfig.getIsStore());
+			boolean isStore = ImConfig.Const.ON.equals(imConfig.getIsStore());
 			MessageHelper messageHelper = null;
 			List<String> groupIds = null;
 			if(isStore){
@@ -97,14 +96,14 @@ public class LoginReqHandler extends AbstractCmdHandler {
 				ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
 				try {
 					JoinGroupReqHandler joinGroupReqHandler = CommandManager.getCommand(Command.COMMAND_JOIN_GROUP_REQ, JoinGroupReqHandler.class);
-					joinGroupReqHandler.bindGroup(groupPacket, channelContext);
+					joinGroupReqHandler.bindGroup(groupPacket, imChannelContext);
 				} catch (Exception e) {
 					log.error(e.toString(),e);
 				}
 			}
 			if(isStore && groupIds != null){
 				for(String groupId : groupIds){
-					messageHelper.getBindListener().onAfterGroupUnbind(channelContext, groupId);
+					messageHelper.getBindListener().onAfterGroupUnbind(imChannelContext, groupId);
 				}
 			}
 		}

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * 版本: [1.0]
  * 功能说明: 
- * 作者: WChao 创建时间: 2017年7月26日 下午3:13:47
+ * @author : WChao 创建时间: 2017年7月26日 下午3:13:47
  */
 public class User implements Serializable{
 	

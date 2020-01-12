@@ -3,9 +3,9 @@
  */
 package org.jim.server.command;
 
-import org.jim.common.ImConfig;
 import org.jim.common.packets.Command;
 import org.jim.server.command.handler.processor.CmdProcessor;
+import org.jim.server.config.ImServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +24,7 @@ public class CommandManager{
 	 */
 	private static  Map<Integer, AbstractCmdHandler> handlerMap = new HashMap<>();
 	private static Logger LOG = LoggerFactory.getLogger(CommandManager.class);
-	
-	private static ImConfig imConfig;
-	
+
 	private CommandManager(){};
 	
 	static{
@@ -63,7 +61,6 @@ public class CommandManager{
 		}
 		if(handlerMap.get(cmd_number) == null)
 		{
-			imCommandHandler.setImConfig(imConfig);
 			return handlerMap.put(cmd_number,imCommandHandler);
 		}
 		return null;
@@ -94,19 +91,5 @@ public class CommandManager{
 			return null;
 		}
 		return handlerMap.get(command.getNumber());
-	}
-	
-	public static void init(ImConfig config) {
-		imConfig = config;
-		for(Entry<Integer,AbstractCmdHandler> entry : handlerMap.entrySet()){
-			try {
-				entry.getValue().setImConfig(imConfig);
-			} catch (Exception e) {
-				LOG.error(e.toString());
-			}
-		}
-	}
-	public static ImConfig getImConfig() {
-		return imConfig;
 	}
 }

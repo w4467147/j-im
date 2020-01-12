@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jim.common.ImConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * @author wchao
  * 2017年5月29日 上午7:45:58
  */
-public class Cookie {
+public class Cookie implements ImConst {
 	private static Logger log = LoggerFactory.getLogger(Cookie.class);
 
 	/**
@@ -50,7 +51,7 @@ public class Cookie {
 			default:
 				cookie.setName(cookieMapItem.getKey());
 				try {
-					cookie.setValue(URLDecoder.decode(cookieMapItem.getValue(), HttpConst.CHARSET_NAME));
+					cookie.setValue(URLDecoder.decode(cookieMapItem.getValue(), Http.CHARSET_NAME));
 				} catch (UnsupportedEncodingException e) {
 					log.error(e.toString(), e);
 				}

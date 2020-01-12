@@ -3,7 +3,7 @@
  */
 package org.jim.server.command.handler.processor.login;
 
-import org.tio.core.ChannelContext;
+import org.jim.common.ImChannelContext;
 import org.jim.common.packets.LoginReqBody;
 import org.jim.common.packets.LoginRespBody;
 import org.jim.server.command.handler.processor.CmdProcessor;
@@ -15,14 +15,14 @@ public interface LoginCmdProcessor extends CmdProcessor {
 	/**
 	 * 执行登录操作接口方法
 	 * @param loginReqBody
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 */
-	public LoginRespBody doLogin(LoginReqBody loginReqBody ,ChannelContext channelContext);
+	 LoginRespBody doLogin(LoginReqBody loginReqBody , ImChannelContext imChannelContext);
 
 	/**
 	 * 登录成功回调方法
-	 * @param channelContext
+	 * @param imChannelContext
 	 */
-	public void onSuccess(ChannelContext channelContext);
+	 void onSuccess(ImChannelContext imChannelContext);
 }

@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jim.common.ImChannelContext;
+import org.jim.common.exception.ImDecodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
-import org.tio.core.exception.AioDecodeException;
 import org.tio.core.exception.LengthOverflowException;
 import org.tio.core.utils.ByteBufferUtils;
 import org.jim.common.utils.HttpParseUtils;
@@ -83,31 +83,20 @@ public class HttpMultiBodyDecoder {
 	 * @author wchao
 	 * 2017年7月27日 上午10:18:01
 	 */
-	public static interface MultiBodyHeaderKey {
+	public  interface MultiBodyHeaderKey {
 		String Content_Disposition = "Content-Disposition".toLowerCase();
 		String Content_Type = "Content-Type".toLowerCase();
 	}
 
-	public static enum Step {
+	public  enum Step {
 		BOUNDARY, HEADER, BODY, END
 	}
 
 	private static Logger log = LoggerFactory.getLogger(HttpMultiBodyDecoder.class);
 
-	//    public static int processReadIndex(ByteBuffer buffer)
-	//    {
-	//        int newReaderIndex = buffer.readerIndex();
-	//        if (newReaderIndex < buffer.capacity())
-	//        {
-	//            buffer.readerIndex(newReaderIndex + 1);
-	//            return 1;
-	//        }
-	//        return 0;
-	//    }
-
-	public static void decode(HttpRequest request, RequestLine firstLine, byte[] bodyBytes, String initboundary, ChannelContext channelContext) throws AioDecodeException {
-		if (StringUtils.isBlank(initboundary)) {
-			throw new AioDecodeException("boundary is null");
+	public static void decode(HttpRequest request, RequestLine firstLine, byte[] bodyBytes, String initBoundary, ImChannelContext channelContext) throws ImDecodeException {
+		if (StringUtils.isBlank(initBoundary)) {
+			throw new ImDecodeException("boundary is null");
 		}
 
 		long start = SystemTimer.currentTimeMillis();
@@ -115,25 +104,21 @@ public class HttpMultiBodyDecoder {
 		ByteBuffer buffer = ByteBuffer.wrap(bodyBytes);
 		buffer.position(0);
 
-		String boundary = "--" + initboundary;
+		String boundary = "--" + initBoundary;
 		String endBoundary = boundary + "--";
-
-		//        int boundaryLength = boundary.getBytes().length;
 		Step step = Step.BOUNDARY;
-		//        int bufferLength = buffer.capacity();
 		try {
 			label1: while (true) {
 				if (step == Step.BOUNDARY) {
 					String line = ByteBufferUtils.readLine(buffer, request.getCharset(), HttpConfig.MAX_LENGTH_OF_BOUNDARY);
-					//                    int offset = HttpMultiBodyDecoder.processReadIndex(buffer);
 					if (boundary.equals(line)) {
 						step = Step.HEADER;
-					} else if (endBoundary.equals(line)) // 结束了
+						// 结束了
+					} else if (endBoundary.equals(line))
 					{
-						//                        int ss = buffer.readerIndex() + 2 - offset;
 						break;
 					} else {
-						throw new AioDecodeException("line need:" + boundary + ", but is: " + line + "");
+						throw new ImDecodeException("line need:" + boundary + ", but is: " + line + "");
 					}
 				}
 
@@ -164,7 +149,7 @@ public class HttpMultiBodyDecoder {
 
 			}
 		} catch (LengthOverflowException loe) {
-			throw new AioDecodeException(loe);
+			throw new ImDecodeException(loe);
 		} catch (UnsupportedEncodingException e) {
 			log.error(channelContext.toString(), e);
 		} finally {
@@ -174,37 +159,6 @@ public class HttpMultiBodyDecoder {
 		}
 
 	}
-
-	/**
-	 * 返回值不包括最后的\r\n
-	 * @param buffer
-	 * @param charset
-	 * @return
-	 * @throws UnsupportedEncodingException
-	 */
-	//	public static String getLine(ByteBuffer buffer, String charset) throws UnsupportedEncodingException {
-	//		char lastByte = 0; // 上一个字节
-	//		int initPosition = buffer.position();
-	//
-	//		while (buffer.hasRemaining()) {
-	//			char b = (char) buffer.get();
-	//
-	//			if (b == '\n') {
-	//				if (lastByte == '\r') {
-	//					int startIndex = initPosition;
-	//					int endIndex = buffer.position() - 2;
-	//					int length = endIndex - startIndex;
-	//					byte[] dst = new byte[length];
-	//
-	//					System.arraycopy(buffer.array(), startIndex, dst, 0, length);
-	//					String line = new String(dst, charset);
-	//					return line;
-	//				}
-	//			}
-	//			lastByte = b;
-	//		}
-	//		return null;
-	//	}
 
 	/**
 	 * @param args
@@ -234,7 +188,7 @@ public class HttpMultiBodyDecoder {
 	 * @throws LengthOverflowException
 	 * @author wchao
 	 */
-	public static Step parseBody(Header header, HttpRequest request, ByteBuffer buffer, String boundary, String endBoundary, ChannelContext channelContext)
+	public static Step parseBody(Header header, HttpRequest request, ByteBuffer buffer, String boundary, String endBoundary, ImChannelContext channelContext)
 			throws UnsupportedEncodingException, LengthOverflowException {
 		int initPosition = buffer.position();
 
@@ -249,10 +203,11 @@ public class HttpMultiBodyDecoder {
 				byte[] dst = new byte[length];
 
 				System.arraycopy(buffer.array(), startIndex, dst, 0, length);
+				//该字段类型是file
 				String filename = header.getFilename();
-				if (filename != null)//该字段类型是file
+				if (filename != null)
 				{
-					if (!"".equals(filename)) { //
+					if (!"".equals(filename)) {
 						UploadFile uploadFile = new UploadFile();
 						uploadFile.setName(filename);
 						uploadFile.setData(dst);
@@ -285,24 +240,22 @@ public class HttpMultiBodyDecoder {
 	 * @param header
 	 * @author wchao
 	 */
-	public static void parseHeader(List<String> lines, Header header, ChannelContext channelContext) throws AioDecodeException {
+	public static void parseHeader(List<String> lines, Header header, ImChannelContext channelContext) throws ImDecodeException {
 		if (lines == null || lines.size() == 0) {
-			throw new AioDecodeException("multipart_form_data 格式不对，没有头部信息");
+			throw new ImDecodeException("multipart_form_data 格式不对，没有头部信息");
 		}
-
 		try {
 			for (String line : lines) {
-				String[] keyvalue = StringUtils.split(line, ":");
-				String key = StringUtils.lowerCase(StringUtils.trim(keyvalue[0]));//
-				String value = StringUtils.trim(keyvalue[1]);
+				String[] keyValue = StringUtils.split(line, ":");
+				String key = StringUtils.lowerCase(StringUtils.trim(keyValue[0]));
+				String value = StringUtils.trim(keyValue[1]);
 				header.map.put(key, value);
 			}
 
 			String contentDisposition = header.map.get(MultiBodyHeaderKey.Content_Disposition);
 			String name = HttpParseUtils.getPerprotyEqualValue(header.map, MultiBodyHeaderKey.Content_Disposition, "name");
 			String filename = HttpParseUtils.getPerprotyEqualValue(header.map, MultiBodyHeaderKey.Content_Disposition, "filename");
-			String contentType = header.map.get(MultiBodyHeaderKey.Content_Type);//.HttpParseUtils.getPerprotyEqualValue(header.map, MultiBodyHeaderKey.Content_Type, "filename");
-
+			String contentType = header.map.get(MultiBodyHeaderKey.Content_Type);
 			header.setContentDisposition(contentDisposition);
 			header.setName(name);
 			header.setFilename(filename);
@@ -310,29 +263,8 @@ public class HttpMultiBodyDecoder {
 
 		} catch (Exception e) {
 			log.error(channelContext.toString(), e);
-			throw new AioDecodeException(e.toString());
+			throw new ImDecodeException(e.toString());
 		}
-
-		//		for (int i = 0; i < lines.size(); i++) {
-		//			String line = lines.get(i);
-		//			if (i == 0) {
-		//				String[] mapStrings = StringUtils.split(line, ";");
-		//				String s = mapStrings[0];//
-		//
-		//				String[] namekeyvalue = StringUtils.split(mapStrings[1], "=");
-		//				header.setName(namekeyvalue[1].substring(1, namekeyvalue[1].length() - 1));
-		//
-		//				if (mapStrings.length == 3) {
-		//					String[] finenamekeyvalue = StringUtils.split(mapStrings[2], "=");
-		//					String filename = finenamekeyvalue[1].substring(1, finenamekeyvalue[1].length() - 1);
-		//					header.setFilename(FilenameUtils.getName(filename));
-		//				}
-		//			} else if (i == 1) {
-		//				String[] map = StringUtils.split(line, ":");
-		//				String contentType = map[1].trim();//
-		//				header.setContentType(contentType);
-		//			}
-		//		}
 	}
 
 	/**

@@ -1,15 +1,17 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImAio;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.ImStatus;
+import org.jim.common.exception.ImException;
 import org.jim.common.packets.CloseReqBody;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.RespBody;
 import org.jim.common.utils.ImKit;
 import org.jim.common.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
-import org.tio.core.ChannelContext;
+import org.jim.server.handler.ProtocolManager;
 
 /**
  * 版本: [1.0]
@@ -19,22 +21,23 @@ import org.tio.core.ChannelContext;
 public class CloseReqHandler extends AbstractCmdHandler
 {
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception
+	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException
 	{
 		CloseReqBody closeReqBody = null;
 		try{
 			closeReqBody = JsonKit.toBean(packet.getBody(),CloseReqBody.class);
 		}catch (Exception e) {
 			//关闭请求消息格式不正确
-			return ImKit.ConvertRespPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10020), channelContext);
+			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10020), imChannelContext);
 		}
+		Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10021), imChannelContext));
 		if(closeReqBody == null || closeReqBody.getUserid() == null){
-			ImAio.remove(channelContext, "收到关闭请求");
+			Jim.remove(imChannelContext, "收到关闭请求");
 		}else{
 			String userId = closeReqBody.getUserid();
-			ImAio.remove(userId, "收到关闭请求!");
+			Jim.remove(userId, "收到关闭请求!");
 		}
-		return ImKit.ConvertRespPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10021), channelContext);
+		return null;
 	}
 
 	@Override

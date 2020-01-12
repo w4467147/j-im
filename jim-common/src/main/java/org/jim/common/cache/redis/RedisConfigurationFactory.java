@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Properties;
 
-import org.jim.common.ImAio;
+import org.jim.common.Jim;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -87,7 +87,7 @@ public class RedisConfigurationFactory {
             url = standardClassloader.getResource(DEFAULT_CLASSPATH_CONFIGURATION_FILE);
         }
         if (url == null) {
-        	url = ImAio.class.getResource(DEFAULT_CLASSPATH_CONFIGURATION_FILE);
+        	url = Jim.class.getResource(DEFAULT_CLASSPATH_CONFIGURATION_FILE);
         }
         if (url != null) {
             LOG.debug("Configuring redis from jim.properties found in the classpath: " + url);

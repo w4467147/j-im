@@ -2,15 +2,13 @@ package org.jim.common;
 
 import org.jim.common.packets.Client;
 import org.tio.monitor.RateLimiterWrap;
-import org.tio.server.intf.ServerAioHandler;
 
 /**
  * 
  * @author wchao 
  *
  */
-public class ImSessionContext extends SessionContext
-{
+public class ImSessionContext {
 	/**
 	 * 消息请求频率控制器
 	 */
@@ -19,21 +17,19 @@ public class ImSessionContext extends SessionContext
 	protected Client client = null;
 	
 	protected String token = null;
+
+	protected ImChannelContext imChannelContext;
+
+	protected String id;
+
 	/**
-	 * 通道所属协议处理器;
-	 */
-	private ServerAioHandler protocolHandler;
-	
-	/**
-	 * 
-	 *
-	 * @author: wchao
+	 * @author: WChao
 	 * 2017年2月21日 上午10:27:54
-	 * 
 	 */
-	public ImSessionContext()
-	{
-		
+	public ImSessionContext(){}
+
+	public ImSessionContext(ImChannelContext imChannelContext){
+		this.imChannelContext = imChannelContext;
 	}
 	/**
 	 * @return the client
@@ -81,12 +77,19 @@ public class ImSessionContext extends SessionContext
 		this.requestRateLimiter = requestRateLimiter;
 	}
 
-	public ServerAioHandler getProtocolHandler() {
-		return protocolHandler;
+	public ImChannelContext getImChannelContext() {
+		return imChannelContext;
 	}
 
-	public ImSessionContext setProtocolHandler(ServerAioHandler protocolHandler) {
-		this.protocolHandler = protocolHandler;
-		return this;
+	public void setImChannelContext(ImChannelContext imChannelContext) {
+		this.imChannelContext = imChannelContext;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
 	}
 }

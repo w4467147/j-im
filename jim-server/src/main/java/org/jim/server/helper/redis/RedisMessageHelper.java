@@ -3,7 +3,7 @@ package org.jim.server.helper.redis;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConfig;
+import org.jim.common.config.ImConfig;
 import org.jim.common.cache.redis.JedisTemplate;
 import org.jim.common.cache.redis.RedisCache;
 import org.jim.common.cache.redis.RedisCacheManager;
@@ -47,9 +47,6 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 	}
 	
 	public RedisMessageHelper(){
-		this(null);
-	}
-	public RedisMessageHelper(ImConfig imConfig){
 		this.groupCache = RedisCacheManager.getCache(GROUP);
 		this.pushCache = RedisCacheManager.getCache(PUSH);
 		this.storeCache = RedisCacheManager.getCache(STORE);

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImSessionContext;
 import org.jim.common.http.HttpConfig;
 
@@ -18,15 +19,16 @@ public class HttpSession extends ImSessionContext implements java.io.Serializabl
 
 	private Map<String, Serializable> data = new ConcurrentHashMap<>();
 
-	private String id = null;
-
-	public HttpSession() {
+	public HttpSession(String id){
+		this(id, null);
 	}
 
-	/**
-	 * @author wchao
-	 */
-	public HttpSession(String id) {
+	public HttpSession(ImChannelContext imChannelContext){
+		this(null, imChannelContext);
+	}
+
+	public HttpSession(String id, ImChannelContext imChannelContext){
+		super(imChannelContext);
 		this.id = id;
 	}
 

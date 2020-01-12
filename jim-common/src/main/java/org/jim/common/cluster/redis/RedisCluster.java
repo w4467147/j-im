@@ -6,7 +6,6 @@ package org.jim.common.cluster.redis;
 import org.jim.common.ImPacket;
 import org.jim.common.cluster.ImCluster;
 import org.jim.common.cluster.ImClusterVo;
-import org.tio.core.GroupContext;
 /**
  * @author WChao
  *
@@ -18,7 +17,7 @@ public class RedisCluster extends ImCluster{
 	}
 
 	@Override
-	public void clusterToUser(GroupContext groupContext, String userid,ImPacket packet) {
+	public void clusterToUser( String userid,ImPacket packet) {
 		if (clusterConfig.isCluster4user()) {
 			ImClusterVo imClusterVo = new ImClusterVo(packet);
 			imClusterVo.setUserid(userid);
@@ -27,7 +26,7 @@ public class RedisCluster extends ImCluster{
 	}
 
 	@Override
-	public void clusterToGroup(GroupContext groupContext, String group,ImPacket packet) {
+	public void clusterToGroup(String group,ImPacket packet) {
 		if(clusterConfig.isCluster4group()){
 			ImClusterVo imClusterVo = new ImClusterVo(packet);
 			imClusterVo.setGroup(group);
@@ -36,7 +35,7 @@ public class RedisCluster extends ImCluster{
 	}
 
 	@Override
-	public void clusterToIp(GroupContext groupContext, String ip,ImPacket packet) {
+	public void clusterToIp(String ip,ImPacket packet) {
 		if(clusterConfig.isCluster4ip()){
 			ImClusterVo imClusterVo = new ImClusterVo(packet);
 			imClusterVo.setIp(ip);
@@ -45,7 +44,7 @@ public class RedisCluster extends ImCluster{
 	}
 
 	@Override
-	public void clusterToChannelId(GroupContext groupContext, String channelId,ImPacket packet) {
+	public void clusterToChannelId(String channelId,ImPacket packet) {
 		if(clusterConfig.isCluster4channelId()){
 			ImClusterVo imClusterVo = new ImClusterVo(packet);
 			imClusterVo.setChannelId(channelId);

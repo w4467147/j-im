@@ -4,7 +4,7 @@
 package org.jim.common.message;
 
 import org.jim.common.ImConst;
-import org.jim.common.ImConfig;
+import org.jim.common.config.ImConfig;
 
 /**
  * @author HP

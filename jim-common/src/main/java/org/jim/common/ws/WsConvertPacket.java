@@ -3,24 +3,24 @@
  */
 package org.jim.common.ws;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
+import org.jim.common.ImSessionContext;
 import org.jim.common.packets.Command;
-import org.jim.common.protocol.IConvertProtocolPacket;
-import org.tio.core.ChannelContext;
-
+import org.jim.common.protocol.IProtocolConverter;
 /**
  * Ws协议消息转化包
  * @author WChao
  *
  */
-public class WsConvertPacket implements IConvertProtocolPacket {
+public class WsConvertPacket implements IProtocolConverter {
 
 	/**
 	 * WebSocket响应包;
 	 */
 	@Override
-	public ImPacket RespPacket(byte[] body, Command command,ChannelContext channelContext) {
-		Object sessionContext = channelContext.getAttribute();
+	public ImPacket RespPacket(byte[] body, Command command, ImChannelContext channelContext) {
+		ImSessionContext sessionContext = channelContext.getSessionContext();
 		//转ws协议响应包;
 		if(sessionContext instanceof WsSessionContext){
 			WsResponsePacket wsResponsePacket = new WsResponsePacket();
@@ -33,7 +33,7 @@ public class WsConvertPacket implements IConvertProtocolPacket {
 	}
 
 	@Override
-	public ImPacket ReqPacket(byte[] body, Command command,ChannelContext channelContext) {
+	public ImPacket ReqPacket(byte[] body, Command command, ImChannelContext channelContext) {
 		
 		return null;
 	}

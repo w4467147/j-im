@@ -3,24 +3,21 @@
  */
 package org.jim.server.command;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImConfig;
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
+import org.jim.common.config.ImConfig;
 import org.jim.server.command.handler.processor.CmdProcessor;
-import org.tio.core.ChannelContext;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.jim.server.config.ImServerConfig;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * 版本: [1.0]
  * 功能说明: 
  * @author: WChao 创建时间: 2017年9月11日 下午2:07:44
  */
-public abstract class AbstractCmdHandler implements CmdHandler {
+public abstract class AbstractCmdHandler implements CmdHandler, ImConst {
 	/**
 	 * 不同协议cmd处理命令如(ws、socket、自定义协议)握手、心跳命令等.
 	 */
@@ -28,14 +25,10 @@ public abstract class AbstractCmdHandler implements CmdHandler {
 	/**
 	 * IM相关配置类
 	 */
-	protected ImConfig imConfig;
+	protected ImServerConfig imConfig = ImConfig.Global.get();
 	
 	public AbstractCmdHandler() {};
 	
-	public AbstractCmdHandler(ImConfig imConfig) {
-		this.imConfig = imConfig;
-	}
-
 	public AbstractCmdHandler addProcessor(CmdProcessor processor){
 		this.processors.put(processor.name(), processor);
 		return this;
@@ -43,16 +36,16 @@ public abstract class AbstractCmdHandler implements CmdHandler {
 
 	/**
 	 * 根据当前通道所属协议获取cmd业务处理器
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 */
-	public <T> List<T> getProcessor(ChannelContext channelContext,Class<T> clazz){
+	public <T> List<T> getProcessor(ImChannelContext imChannelContext, Class<T> clazz){
 		List<T> processorList = null;
 		for(Entry<String,CmdProcessor> processorEntry : processors.entrySet()){
 			CmdProcessor processor = processorEntry.getValue();
-			if(processor.isProtocol(channelContext)){
+			if(processor.isProtocol(imChannelContext)){
 				if(CollectionUtils.isEmpty(processorList)){
-					processorList = Lists.newArrayList();
+					processorList = new ArrayList<>();
 				}
 				processorList.add((T)processor);
 			}
@@ -71,7 +64,7 @@ public abstract class AbstractCmdHandler implements CmdHandler {
 			CmdProcessor processor = processorEntry.getValue();
 			if(name.equals(processor.name())){
 				if(CollectionUtils.isEmpty(processorList)){
-					processorList = Lists.newArrayList();
+					processorList = new ArrayList<>();
 				}
 				processorList.add((T)processor);
 			}
@@ -89,7 +82,7 @@ public abstract class AbstractCmdHandler implements CmdHandler {
 		for(Entry<String,CmdProcessor> processorEntry : processors.entrySet()){
 			CmdProcessor processor = processorEntry.getValue();
 			if(CollectionUtils.isEmpty(processorList)){
-				processorList = Lists.newArrayList();
+				processorList = new ArrayList<>();
 			}
 			if(CollectionUtils.isEmpty(names)){
 				processorList.add((T)processor);
@@ -105,13 +98,9 @@ public abstract class AbstractCmdHandler implements CmdHandler {
 		
 		return processors.remove(name);
 	}
-	
-	public ImConfig getImConfig() {
+
+	public ImServerConfig getImConfig() {
 		return imConfig;
 	}
 
-	public void setImConfig(ImConfig imConfig) {
-		this.imConfig = imConfig;
-	}
-	
 }

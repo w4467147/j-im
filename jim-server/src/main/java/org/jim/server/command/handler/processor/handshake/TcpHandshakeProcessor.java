@@ -3,14 +3,16 @@
  */
 package org.jim.server.command.handler.processor.handshake;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
-import org.jim.common.Protocol;
-import org.tio.core.ChannelContext;
+import org.jim.common.ImSessionContext;
+import org.jim.common.exception.ImException;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.HandshakeBody;
 import org.jim.common.packets.RespBody;
 import org.jim.common.tcp.TcpSessionContext;
-import org.jim.common.utils.ImKit;
+import org.jim.server.handler.ProtocolManager;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
@@ -19,9 +21,9 @@ import org.jim.common.utils.ImKit;
 public class TcpHandshakeProcessor implements HandshakeCmdProcessor {
 
 	@Override
-	public ImPacket handshake(ImPacket packet, ChannelContext channelContext) throws Exception {
+	public ImPacket handshake(ImPacket packet, ImChannelContext channelContext) throws ImException {
 		RespBody handshakeBody = new RespBody(Command.COMMAND_HANDSHAKE_RESP,new HandshakeBody(Protocol.HANDSHAKE_BYTE));
-		ImPacket handshakePacket = ImKit.ConvertRespPacket(handshakeBody,channelContext);
+		ImPacket handshakePacket = ProtocolManager.Converter.respPacket(handshakeBody,channelContext);
 		return handshakePacket;
 	}
 
@@ -29,16 +31,16 @@ public class TcpHandshakeProcessor implements HandshakeCmdProcessor {
 	 * 握手成功后
 	 * @param packet
 	 * @param channelContext
-	 * @throws Exception
+	 * @throws ImException
 	 * @author Wchao
 	 */
 	@Override
-	public void onAfterHandshaked(ImPacket packet, ChannelContext channelContext)throws Exception {
+	public void onAfterHandshake(ImPacket packet, ImChannelContext channelContext)throws ImException {
 		
 	}
 	@Override
-	public boolean isProtocol(ChannelContext channelContext){
-		Object sessionContext = channelContext.getAttribute();
+	public boolean isProtocol(ImChannelContext channelContext){
+		ImSessionContext sessionContext = channelContext.getSessionContext();
 		if(sessionContext == null){
 			return false;
 		}else if(sessionContext instanceof TcpSessionContext){

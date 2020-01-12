@@ -2,10 +2,11 @@ package org.jim.common.ws;
 
 import java.nio.ByteBuffer;
 
+import org.jim.common.ImChannelContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
+import org.tio.core.TioConfig;
 import org.tio.core.utils.ByteBufferUtils;
 
 /**
@@ -34,8 +35,9 @@ public class WsServerEncoder {
 		}
 	}
 
-	public static ByteBuffer encode(WsResponsePacket wsResponsePacket, GroupContext groupContext, ChannelContext channelContext) {
-		byte[] imBody = wsResponsePacket.getBody();//就是ws的body，不包括ws的头
+	public static ByteBuffer encode(WsResponsePacket wsResponsePacket, ImChannelContext imChannelContext) {
+		//就是ws的body，不包括ws的头
+		byte[] imBody = wsResponsePacket.getBody();
 		int wsBodyLength = 0;
 
 		if (imBody != null) {

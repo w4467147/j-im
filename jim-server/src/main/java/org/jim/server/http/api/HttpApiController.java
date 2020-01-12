@@ -3,7 +3,8 @@
  */
 package org.jim.server.http.api;
 
-import org.jim.common.ImAio;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.ImStatus;
 import org.jim.common.http.HttpConfig;
@@ -28,7 +29,7 @@ import org.tio.core.ChannelContext;
 public class HttpApiController {
 	
 	@RequestPath(value = "/message/send")
-	public HttpResponse chat(HttpRequest request, HttpConfig httpConfig, ChannelContext channelContext)throws Exception {
+	public HttpResponse chat(HttpRequest request, HttpConfig httpConfig, ImChannelContext channelContext)throws Exception {
 		HttpResponse response = new HttpResponse(request,httpConfig);
 		ChatReqHandler chatReqHandler = CommandManager.getCommand(Command.COMMAND_CHAT_REQ,ChatReqHandler.class);
 		ImPacket chatPacket = chatReqHandler.handler(request, channelContext);
@@ -52,7 +53,7 @@ public class HttpApiController {
 			return HttpResps.json(request, new RespBody(ImStatus.C10020));
 		}
 		String userId = params[0].toString();
-		User user = ImAio.getUser(userId);
+		User user = null/*Jim.getUser(userId)*/;
 		if(user != null){
 			return HttpResps.json(request, new RespBody(ImStatus.C10019));
 		}else{
@@ -68,7 +69,7 @@ public class HttpApiController {
 	 * @throws Exception
 	 */
 	@RequestPath(value = "user/close")
-	public HttpResponse close(HttpRequest request, HttpConfig httpConfig, ChannelContext channelContext)throws Exception {
+	public HttpResponse close(HttpRequest request, HttpConfig httpConfig, ImChannelContext channelContext)throws Exception {
 		Object[] params = request.getParams().get("userid");
 		if(params == null || params.length == 0){
 			return HttpResps.json(request, new RespBody(ImStatus.C10020));

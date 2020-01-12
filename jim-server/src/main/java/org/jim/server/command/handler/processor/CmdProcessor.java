@@ -3,24 +3,24 @@
  */
 package org.jim.server.command.handler.processor;
 
-import org.tio.core.ChannelContext;
-
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
 /**
  * 不同协议CMD命令处理接口
  * @author WChao
  *
  */
-public interface CmdProcessor {
+public interface CmdProcessor extends ImConst {
 	/**
 	 * 不同协议判断方法
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 */
-	public boolean isProtocol(ChannelContext channelContext);
+	boolean isProtocol(ImChannelContext imChannelContext);
 	/**
 	 * 该proCmd处理器名称(自定义)
 	 * @return
 	 */
-	public String name();
+	String name();
 	
 }

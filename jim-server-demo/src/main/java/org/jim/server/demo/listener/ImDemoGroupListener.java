@@ -1,33 +1,40 @@
 package org.jim.server.demo.listener;
 
-import org.jim.common.ImAio;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.ImSessionContext;
+import org.jim.common.exception.ImException;
+import org.jim.common.listener.ImGroupListener;
 import org.tio.core.ChannelContext;
 import org.jim.common.packets.Client;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.ExitGroupNotifyRespBody;
 import org.jim.common.packets.RespBody;
 import org.jim.common.packets.User;
-import org.jim.server.listener.ImGroupListener;
+
 /**
  * @author WChao 
  * 2017年5月13日 下午10:38:36
  */
-public class ImDemoGroupListener extends ImGroupListener{
-	/** 
+public class ImDemoGroupListener implements ImGroupListener {
+	@Override
+	public void onAfterBind(ImChannelContext imChannelContext, String group) throws ImException {
+		System.out.println("===绑定成功:"+group);
+	}
+
+	/**
 	 * @param channelContext
 	 * @param group
 	 * @throws Exception
 	 * @author: WChao
 	 */
 	@Override
-	public void onAfterUnbind(ChannelContext channelContext, String group) throws Exception {
+	public void onAfterUnbind(ImChannelContext channelContext, String group) throws ImException {
 		//发退出房间通知  COMMAND_EXIT_GROUP_NOTIFY_RESP
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
 		ExitGroupNotifyRespBody exitGroupNotifyRespBody = new ExitGroupNotifyRespBody();
 		exitGroupNotifyRespBody.setGroup(group);
-		Client client = imSessionContext.getClient();
+		Client client = channelContext.getSessionContext().getClient();
 		if(client == null){
 			return;
 		}
@@ -40,7 +47,7 @@ public class ImDemoGroupListener extends ImGroupListener{
 		
 		RespBody respBody = new RespBody(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP,exitGroupNotifyRespBody);
 		ImPacket imPacket = new ImPacket(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP, respBody.toByte());
-		ImAio.sendToGroup(group, imPacket);
+		Jim.sendToGroup(group, imPacket);
 		
 	}
 }

@@ -1,5 +1,6 @@
 package org.jim.server.command.handler.processor.chat;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
 import org.tio.core.ChannelContext;
 import org.jim.server.command.handler.processor.CmdProcessor;
@@ -12,8 +13,8 @@ public interface ChatCmdProcessor extends CmdProcessor {
 	/**
 	 * 聊天cmd业务处理器处理方法;
 	 * @param chatPacket
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @throws Exception
 	 */
-	public void handler(ImPacket chatPacket,ChannelContext channelContext);
+	void handler(ImPacket chatPacket, ImChannelContext imChannelContext);
 }

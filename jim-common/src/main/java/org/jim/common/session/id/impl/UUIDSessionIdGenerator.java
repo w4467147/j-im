@@ -5,9 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.jim.common.http.HttpConfig;
 import org.jim.common.session.id.ISessionIdGenerator;
 
-import cn.hutool.core.util.RandomUtil;
+import java.util.UUID;
+
 /**
- * @author wchao
+ * @author WChao
  * 2017年8月15日 上午10:53:39
  */
 public class UUIDSessionIdGenerator implements ISessionIdGenerator {
@@ -39,6 +40,6 @@ public class UUIDSessionIdGenerator implements ISessionIdGenerator {
 	 */
 	@Override
 	public String sessionId(HttpConfig httpConfig) {
-		return RandomUtil.randomUUID().replace("-", "");
+		return UUID.randomUUID().toString().replace("-", "");
 	}
 }

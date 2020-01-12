@@ -2,12 +2,11 @@ package org.jim.common.http;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tio.utils.hutool.ZipUtil;
 
-import cn.hutool.core.util.ZipUtil;
 /**
  *
  * @author WChao
@@ -36,12 +35,11 @@ public class HttpResponse extends HttpPacket {
 	 */
 	private boolean isStaticRes = false;
 
-	private HttpRequest request = null;
+	private HttpRequest request;
+
 	private volatile List<Cookie> cookies = null;
 
-	//	private int contentLength;
-	//	private byte[] bodyBytes;
-	private String charset = HttpConst.CHARSET_NAME;
+	private String charset = Http.CHARSET_NAME;
 
 	/**
 	 * 已经编码好的byte[]
@@ -57,29 +55,29 @@ public class HttpResponse extends HttpPacket {
 	public HttpResponse(HttpRequest request, HttpConfig httpConfig) {
 		this.request = request;
 
-		String Connection = StringUtils.lowerCase(request.getHeader(HttpConst.RequestHeaderKey.Connection));
+		String Connection = StringUtils.lowerCase(request.getHeader(Http.RequestHeaderKey.Connection));
 		RequestLine requestLine = request.getRequestLine();
 		String version = requestLine.getVersion();
 		if ("1.0".equals(version)) {
-			if (StringUtils.equals(Connection, HttpConst.RequestHeaderValue.Connection.keep_alive)) {
-				addHeader(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.keep_alive);
-				addHeader(HttpConst.ResponseHeaderKey.Keep_Alive, "timeout=10, max=20");
+			if (StringUtils.equals(Connection, Http.RequestHeaderValue.Connection.keep_alive)) {
+				addHeader(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.keep_alive);
+				addHeader(Http.ResponseHeaderKey.Keep_Alive, "timeout=10, max=20");
 			} else {
-				addHeader(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.close);
+				addHeader(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.close);
 			}
 		} else {
-			if (StringUtils.equals(Connection, HttpConst.RequestHeaderValue.Connection.close)) {
-				addHeader(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.close);
+			if (StringUtils.equals(Connection, Http.RequestHeaderValue.Connection.close)) {
+				addHeader(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.close);
 			} else {
-				addHeader(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.keep_alive);
-				addHeader(HttpConst.ResponseHeaderKey.Keep_Alive, "timeout=10, max=20");
+				addHeader(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.keep_alive);
+				addHeader(Http.ResponseHeaderKey.Keep_Alive, "timeout=10, max=20");
 			}
 		}
 		//暂时先设置为短连接...防止服务器一直不释放资源;
-		addHeader(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.close);
+		addHeader(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.close);
 		
 		if (httpConfig != null) {
-			addHeader(HttpConst.ResponseHeaderKey.Server, httpConfig.getServerInfo());
+			addHeader(Http.ResponseHeaderKey.Server, httpConfig.getServerInfo());
 		}
 	}
 
@@ -137,11 +135,11 @@ public class HttpResponse extends HttpPacket {
 				byte[] bs2 = ZipUtil.gzip(bs);
 				if (bs2.length < bs.length) {
 					this.body = bs2;
-					this.addHeader(HttpConst.ResponseHeaderKey.Content_Encoding, "gzip");
+					this.addHeader(Http.ResponseHeaderKey.Content_Encoding, "gzip");
 				}
 			}
 		} else {
-			log.info("{} 竟然不支持gzip, {}", request.getChannelContext(), request.getHeader(HttpConst.RequestHeaderKey.User_Agent));
+			log.info("{} 竟然不支持gzip, {}", request.getImChannelContext(), request.getHeader(Http.RequestHeaderKey.User_Agent));
 		}
 	}
 

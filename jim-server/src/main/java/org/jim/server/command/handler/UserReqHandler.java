@@ -4,10 +4,9 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConst;
-import org.jim.common.ImAio;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
+import org.jim.common.*;
+import org.jim.common.config.ImConfig;
+import org.jim.common.exception.ImException;
 import org.jim.common.message.MessageHelper;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.Group;
@@ -17,7 +16,7 @@ import org.jim.common.packets.UserReqBody;
 import org.jim.common.utils.ImKit;
 import org.jim.common.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
-import org.tio.core.ChannelContext;
+import org.jim.server.handler.ProtocolManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +33,13 @@ public class UserReqHandler extends AbstractCmdHandler {
 	}
 
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception {
+	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
 		UserReqBody userReqBody = JsonKit.toBean(packet.getBody(),UserReqBody.class);
 		User user = null;
 		RespBody resPacket = null;
-		
 		String userId = userReqBody.getUserid();
 		if(StringUtils.isEmpty(userId)) {
-			return ImKit.ConvertRespPacket(new RespBody(Command.COMMAND_GET_USER_RESP, ImStatus.C10004), channelContext);
+			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_GET_USER_RESP, ImStatus.C10004), imChannelContext);
 		}
 		//(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线]);
 		Integer type = userReqBody.getType() == null ? 2 : userReqBody.getType();
@@ -59,34 +57,34 @@ public class UserReqHandler extends AbstractCmdHandler {
 			}
 		}
 		if(user == null) {
-			return ImKit.ConvertRespPacket(new RespBody(Command.COMMAND_GET_USER_RESP, ImStatus.C10004), channelContext);
+			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_GET_USER_RESP, ImStatus.C10004), imChannelContext);
 		}
 		resPacket.setData(user);
-		return ImKit.ConvertRespPacket(resPacket, channelContext);
+		return ProtocolManager.Converter.respPacket(resPacket, imChannelContext);
 	}
 	
 	  /**
      * 根据用户id获取用户在线及离线用户;
-     * @param userid
+     * @param userId
      * @param type(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线])
      * @return
      */
-    public User getUserInfo(String userid , Integer type){
+    public User getUserInfo(String userId , Integer type){
     	User user = null;
 		//是否开启持久化;
-    	boolean isStore = ImConst.ON.equals(imConfig.getIsStore());
+    	boolean isStore = ImConfig.Const.ON.equals(imConfig.getIsStore());
 		//消息持久化助手;
     	MessageHelper messageHelper = imConfig.getMessageHelper();
     	if(isStore){
-    		user = messageHelper.getUserByType(userid, 2);
+    		user = messageHelper.getUserByType(userId, 2);
     		if(user == null) {
 				return null;
 			}
-			user.setFriends(messageHelper.getAllFriendUsers(userid, type));
-			user.setGroups(messageHelper.getAllGroupUsers(userid, type));
+			user.setFriends(messageHelper.getAllFriendUsers(userId, type));
+			user.setGroups(messageHelper.getAllGroupUsers(userId, type));
 			return user;
 		}else{
-			user = ImAio.getUser(userid);
+			//user = Jim.getUser(userId);
 		   	if(user == null) {
 				return null;
 			}
@@ -129,14 +127,14 @@ public class UserReqHandler extends AbstractCmdHandler {
 			 Group copyGroup = ImKit.copyGroupWithoutUsers(group);
 			 List<User> users = null;
 			 if(flag == 1){
-				 users = ImAio.getAllUserByGroup(group.getGroup_id());
+				 //users = Jim.getAllUserByGroup(group.getGroup_id());
 			 }else if(flag == 0){
 				 users = group.getUsers();
 			 }
 			 if(users != null && !users.isEmpty()){
 				 List<User> copyUsers = new ArrayList<User>();
 				 for(User userObj : users){
-					 User onlineUser = ImAio.getUser(userObj.getId());
+					 /*User onlineUser = Jim.getUser(userObj.getId());
 					 //在线
 					 if(onlineUser != null && type == 0){
 						 User copyOnlineUser = ImKit.copyUserWithoutFriendsGroups(onlineUser);
@@ -145,7 +143,7 @@ public class UserReqHandler extends AbstractCmdHandler {
 					 }else if(onlineUser == null && type == 1){
 						 User copyOnlineUser = ImKit.copyUserWithoutFriendsGroups(onlineUser);
 						 copyUsers.add(copyOnlineUser);
-					 }
+					 }*/
 				 }
 				 copyGroup.setUsers(copyUsers);
 			 }

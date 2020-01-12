@@ -1,5 +1,6 @@
 package org.jim.common;
 
+import org.tio.core.ChannelContext;
 import org.tio.core.intf.Packet;
 import org.jim.common.packets.Command;
 
@@ -8,7 +9,7 @@ import org.jim.common.packets.Command;
  * @author WChao 
  *
  */
-public class ImPacket extends Packet
+public class ImPacket extends Packet implements ImConst
 {
 	private static final long serialVersionUID = 2000118564569232098L;
 	/**
@@ -23,6 +24,8 @@ public class ImPacket extends Packet
 	 * 消息命令;
 	 */
 	private Command command;
+
+	protected ImChannelContext imChannelContext;
 	
 	public ImPacket(){}
 	
@@ -109,7 +112,7 @@ public class ImPacket extends Packet
 	 */
 	public int calcHeaderLength(boolean is4byteLength)
 	{
-		int ret = Protocol.LEAST_HEADER_LENGHT;
+		int ret = Protocol.LEAST_HEADER_LENGTH;
 		if (is4byteLength)
 		{
 			ret += 2;
@@ -165,4 +168,11 @@ public class ImPacket extends Packet
 		this.status = status;
 	}
 
+	public ImChannelContext getImChannelContext() {
+		return imChannelContext;
+	}
+
+	public void setImChannelContext(ImChannelContext imChannelContext) {
+		this.imChannelContext = imChannelContext;
+	}
 }

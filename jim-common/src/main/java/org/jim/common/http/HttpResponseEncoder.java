@@ -6,18 +6,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
-
 /**
  *
  * @author wchao
  * 2017年8月4日 上午9:41:12
  */
-public class HttpResponseEncoder {
-	public static enum Step {
+public class HttpResponseEncoder implements ImConst {
+	public enum Step {
 		firstLine, header, body
 	}
 
@@ -28,13 +28,12 @@ public class HttpResponseEncoder {
 	/**
 	 *
 	 * @param httpResponse
-	 * @param groupContext
 	 * @param channelContext
 	 * @param skipCookie true: 忽略掉cookie部分的编码
 	 * @return
-	 * @author wchao
+	 * @author WChao
 	 */
-	public static ByteBuffer encode(HttpResponse httpResponse, GroupContext groupContext, ChannelContext channelContext, boolean skipCookie) {
+	public static ByteBuffer encode(HttpResponse httpResponse, ImChannelContext channelContext, boolean skipCookie) {
 		byte[] encodedBytes = httpResponse.getEncodedBytes();
 		if (encodedBytes != null) {
 			ByteBuffer ret = ByteBuffer.wrap(encodedBytes);
@@ -56,7 +55,7 @@ public class HttpResponseEncoder {
 
 		Map<String, String> headers = httpResponse.getHeaders();
 		if (headers != null && headers.size() > 0) {
-			headers.put(HttpConst.ResponseHeaderKey.Content_Length, bodyLength + "");
+			headers.put(Http.ResponseHeaderKey.Content_Length, bodyLength + "");
 			Set<Entry<String, String>> set = headers.entrySet();
 			for (Entry<String, String> entry : set) {
 				sb.append(entry.getKey()).append(": ").append(entry.getValue()).append("\r\n");
@@ -68,7 +67,7 @@ public class HttpResponseEncoder {
 			List<Cookie> cookies = httpResponse.getCookies();
 			if (cookies != null) {
 				for (Cookie cookie : cookies) {
-					sb.append(HttpConst.ResponseHeaderKey.Set_Cookie).append(": ");
+					sb.append(Http.ResponseHeaderKey.Set_Cookie).append(": ");
 					sb.append(cookie.toString());
 					sb.append("\r\n");
 					if (log.isInfoEnabled()) {

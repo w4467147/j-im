@@ -10,7 +10,7 @@ package org.jim.common;
  */
 public interface Status {
 	
-	public int getCode();
+	 int getCode();
 	
-	public String getMsg();
+	 String getMsg();
 }

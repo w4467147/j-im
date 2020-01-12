@@ -1,7 +1,5 @@
 package org.jim.common.cluster;
 
-import org.tio.core.GroupContext;
-
 /**
  * 
  * @author WChao
@@ -30,7 +28,7 @@ public abstract class ImClusterConfig {
 	 */
 	private boolean cluster4all = true;
 
-	protected GroupContext groupContext = null;
+	//protected GroupContext groupContext = null;
 	
 	public abstract void send(ImClusterVo imClusterVo);
 	public abstract void sendAsyn(ImClusterVo imClusterVo);

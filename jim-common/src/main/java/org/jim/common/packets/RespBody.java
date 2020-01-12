@@ -15,16 +15,23 @@ import org.jim.common.utils.JsonKit;
 public class RespBody implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
+	/**
+	 * 响应状态码;
+	 */
+	private Integer code;
+	/**
+	 * 响应状态信息提示;
+	 */
+	private String msg;
+	/**
+	 * 响应cmd命令码;
+	 */
+	private Command command;
+	/**
+	 * 响应数据;
+	 */
+	private Object data;
 
-	private Integer code;//响应状态码;
-	
-	private String msg;//响应状态信息提示;
-	
-	private Command command;//响应cmd命令码;
-	
-	private Object data;//响应数据;
-
-	public RespBody(){}
 	public RespBody(Command command){
 		this.command = command;
 	}

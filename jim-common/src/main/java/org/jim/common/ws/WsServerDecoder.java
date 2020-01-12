@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
+import org.jim.common.exception.ImDecodeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
-import org.tio.core.exception.AioDecodeException;
 import org.tio.core.utils.ByteBufferUtils;
-import org.jim.common.http.HttpConst;
 import org.jim.common.http.HttpRequest;
 import org.jim.common.http.HttpResponse;
 import org.jim.common.http.HttpResponseStatus;
@@ -24,15 +24,15 @@ import org.jim.common.utils.SHA1Util;
  * @author wchao
  * 2017年7月30日 上午10:10:50
  */
-public class WsServerDecoder {
-	public static enum Step {
+public class WsServerDecoder implements ImConst{
+	public enum Step {
 		header, remain_header, data,
 	}
 
 	private static Logger log = LoggerFactory.getLogger(WsServerDecoder.class);
 
-	public static WsRequestPacket decode(ByteBuffer buf, ChannelContext channelContext) throws AioDecodeException {
-		WsSessionContext imSessionContext = (WsSessionContext) channelContext.getAttribute();
+	public static WsRequestPacket decode(ByteBuffer buf, ImChannelContext imChannelContext) throws ImDecodeException {
+		WsSessionContext imSessionContext = (WsSessionContext) imChannelContext.getSessionContext();
 		List<byte[]> lastParts = imSessionContext.getLastParts();
 
 		//第一阶段解析
@@ -70,7 +70,7 @@ public class WsServerDecoder {
 
 		// Client data must be masked
 		if (!hasMask) { //第9为为mask,必须为1
-			//throw new AioDecodeException("websocket client data must be masked");
+			//throw new ImDecodeException("websocket client data must be masked");
 		} else {
 			headLength += 4;
 		}
@@ -83,7 +83,7 @@ public class WsServerDecoder {
 				return null;
 			}
 			payloadLength = ByteBufferUtils.readUB2WithBigEdian(buf);
-			log.info("{} payloadLengthFlag: 126，payloadLength {}", channelContext, payloadLength);
+			log.info("{} payloadLengthFlag: 126，payloadLength {}", imChannelContext, payloadLength);
 
 		} else if (payloadLength == 127) { //127读8个字节,后8个字节为payloadLength
 			headLength += 8;
@@ -92,11 +92,11 @@ public class WsServerDecoder {
 			}
 
 			payloadLength = (int) buf.getLong();
-			log.info("{} payloadLengthFlag: 127，payloadLength {}", channelContext, payloadLength);
+			log.info("{} payloadLengthFlag: 127，payloadLength {}", imChannelContext, payloadLength);
 		}
 
 		if (payloadLength < 0 || payloadLength > WsPacket.MAX_BODY_LENGTH) {
-			throw new AioDecodeException("body length(" + payloadLength + ") is not right");
+			throw new ImDecodeException("body length(" + payloadLength + ") is not right");
 		}
 
 		if (readableLength < headLength + payloadLength) {
@@ -173,14 +173,14 @@ public class WsServerDecoder {
 	 * 本方法改编自baseio: https://git.oschina.net/generallycloud/baseio<br>
 	 * 感谢开源作者的付出
 	 * @param request
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 * @author wchao
 	 */
-	public static HttpResponse updateWebSocketProtocol(HttpRequest request, ChannelContext channelContext) {
+	public static HttpResponse updateWebSocketProtocol(HttpRequest request, ImChannelContext imChannelContext) {
 		Map<String, String> headers = request.getHeaders();
 
-		String Sec_WebSocket_Key = headers.get(HttpConst.RequestHeaderKey.Sec_WebSocket_Key);
+		String Sec_WebSocket_Key = headers.get(Http.RequestHeaderKey.Sec_WebSocket_Key);
 
 		if (StringUtils.isNotBlank(Sec_WebSocket_Key)) {
 			String Sec_WebSocket_Key_Magic = Sec_WebSocket_Key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -191,9 +191,9 @@ public class WsServerDecoder {
 			httpResponse.setStatus(HttpResponseStatus.C101);
 
 			Map<String, String> respHeaders = new HashMap<>();
-			respHeaders.put(HttpConst.ResponseHeaderKey.Connection, HttpConst.ResponseHeaderValue.Connection.Upgrade);
-			respHeaders.put(HttpConst.ResponseHeaderKey.Upgrade, "WebSocket");
-			respHeaders.put(HttpConst.ResponseHeaderKey.Sec_WebSocket_Accept, acceptKey);
+			respHeaders.put(Http.ResponseHeaderKey.Connection, Http.ResponseHeaderValue.Connection.Upgrade);
+			respHeaders.put(Http.ResponseHeaderKey.Upgrade, "WebSocket");
+			respHeaders.put(Http.ResponseHeaderKey.Sec_WebSocket_Accept, acceptKey);
 			httpResponse.setHeaders(respHeaders);
 			return httpResponse;
 		}

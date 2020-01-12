@@ -3,36 +3,34 @@
  */
 package org.jim.server.http;
 
-import org.jim.common.ImConfig;
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImConst;
-import org.jim.common.http.GroupContextKey;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpProtocol;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.http.HttpRequestDecoder;
-import org.jim.common.http.HttpResponse;
-import org.jim.common.http.HttpResponseEncoder;
+import org.jim.common.ImPacket;
+import org.jim.common.Jim;
+import org.jim.common.config.ImConfig;
+import org.jim.common.exception.ImDecodeException;
+import org.jim.common.exception.ImException;
+import org.jim.common.http.*;
 import org.jim.common.http.handler.IHttpRequestHandler;
+import org.jim.common.protocol.AbstractProtocol;
 import org.jim.common.protocol.IProtocol;
 import org.jim.common.session.id.impl.UUIDSessionIdGenerator;
 import org.jim.server.ImServerStarter;
+import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.AbstractProtocolHandler;
 import org.jim.server.http.mvc.Routes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.Aio;
-import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
-import org.tio.core.exception.AioDecodeException;
-import org.tio.core.intf.Packet;
 import org.tio.utils.SystemTimer;
 import org.tio.utils.cache.guava.GuavaCache;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
- * 作者: WChao 创建时间: 2017年8月3日 下午3:07:54
+ * @author : WChao 创建时间: 2017年8月3日 下午3:07:54
  */
 public class HttpProtocolHandler extends AbstractProtocolHandler {
 	
@@ -41,27 +39,28 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 	private HttpConfig httpConfig;
 	
 	private IHttpRequestHandler httpRequestHandler;
-	
-	public HttpProtocolHandler() {}
-	
-	public HttpProtocolHandler(HttpConfig httpServerConfig){
-		this.httpConfig = httpServerConfig;
+
+	public HttpProtocolHandler(){
+		this(null, new HttpProtocol(new HttpConvertPacket()));
+	};
+
+	public HttpProtocolHandler(HttpConfig httpConfig, AbstractProtocol protocol){
+		super(protocol);
+		this.httpConfig = httpConfig;
 	}
+
 	@Override
-	public void init(ImConfig imConfig)throws Exception{
+	public void init(ImServerConfig imConfig)throws ImException {
 		long start = SystemTimer.currentTimeMillis();
 		this.httpConfig = imConfig.getHttpConfig();
-		if (httpConfig.getSessionStore() == null) {
+		if (Objects.isNull(httpConfig.getSessionStore())) {
 			GuavaCache guavaCache = GuavaCache.register(httpConfig.getSessionCacheName(), null, httpConfig.getSessionTimeout());
 			httpConfig.setSessionStore(guavaCache);
 		}
-		if (httpConfig.getPageRoot() == null) {
-			httpConfig.setPageRoot("page");
-		}
-		if (httpConfig.getSessionIdGenerator() == null) {
+		if (Objects.isNull(httpConfig.getSessionIdGenerator())) {
 			httpConfig.setSessionIdGenerator(UUIDSessionIdGenerator.instance);
 		}
-		if(httpConfig.getScanPackages() == null){
+		if(Objects.isNull(httpConfig.getScanPackages())){
 			//J-IM MVC需要扫描的根目录包
 			String[] scanPackages = new String[] { ImServerStarter.class.getPackage().getName() };
 			httpConfig.setScanPackages(scanPackages);
@@ -74,30 +73,29 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 		Routes routes = new Routes(httpConfig.getScanPackages());
 		httpRequestHandler = new DefaultHttpRequestHandler(httpConfig, routes);
 		httpConfig.setHttpRequestHandler(httpRequestHandler);
-		imConfig.getGroupContext().setAttribute(GroupContextKey.HTTP_SERVER_CONFIG, httpConfig);
 		long end = SystemTimer.currentTimeMillis();
 		long iv = end - start;
-		log.info("J-IM Http Server初始化完毕,耗时:{}ms", iv);
+		log.info("J-IM Http协议初始化完毕,耗时:{}ms", iv);
 	}
 	
 	@Override
-	public ByteBuffer encode(Packet packet, GroupContext groupContext,ChannelContext channelContext) {
-		HttpResponse httpResponsePacket = (HttpResponse) packet;
-		ByteBuffer byteBuffer = HttpResponseEncoder.encode(httpResponsePacket, groupContext, channelContext,false);
+	public ByteBuffer encode(ImPacket imPacket, ImConfig imConfig, ImChannelContext imChannelContext) {
+		HttpResponse httpResponsePacket = (HttpResponse) imPacket;
+		ByteBuffer byteBuffer = HttpResponseEncoder.encode(httpResponsePacket, imChannelContext,false);
 		return byteBuffer;
 	}
 
 	@Override
-	public void handler(Packet packet, ChannelContext channelContext)throws Exception {
-		HttpRequest httpRequestPacket = (HttpRequest) packet;
+	public void handler(ImPacket imPacket, ImChannelContext imChannelContext)throws ImException {
+		HttpRequest httpRequestPacket = (HttpRequest) imPacket;
 		HttpResponse httpResponsePacket = httpRequestHandler.handler(httpRequestPacket, httpRequestPacket.getRequestLine());
-		Aio.send(channelContext, httpResponsePacket);
+		Jim.send(imChannelContext, httpResponsePacket);
 	}
 
 	@Override
-	public Packet decode(ByteBuffer buffer, ChannelContext channelContext)throws AioDecodeException {
-		HttpRequest request = HttpRequestDecoder.decode(buffer, channelContext,true);
-		channelContext.setAttribute(ImConst.HTTP_REQUEST,request);
+	public ImPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext)throws ImDecodeException {
+		HttpRequest request = HttpRequestDecoder.decode(buffer, imChannelContext,true);
+		imChannelContext.setAttribute(ImConst.HTTP_REQUEST,request);
 		return request;
 	}
 	
@@ -117,8 +115,4 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 		this.httpConfig = httpConfig;
 	}
 
-	@Override
-	public IProtocol protocol() {
-		return new HttpProtocol();
-	}
 }

@@ -1,35 +1,30 @@
 package org.jim.server.listener;
 
-import org.apache.log4j.Logger;
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImConst;
-import org.jim.common.ImConfig;
-import org.jim.common.ImSessionContext;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.packets.Client;
-import org.jim.common.packets.User;
+import org.jim.common.ImPacket;
+import org.jim.server.ImServerChannelContext;
+import org.jim.server.command.handler.processor.chat.MsgQueueRunnable;
+import org.jim.server.config.ImServerConfig;
 import org.tio.core.ChannelContext;
 import org.tio.core.intf.Packet;
 import org.tio.server.intf.ServerAioListener;
-
 /**
- * 
- * @author WChao 
+ *
+ * @author WChao
  *
  */
-public class ImServerAioListener implements ServerAioListener {
+public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 
-	Logger logger = Logger.getLogger(ImServerAioListener.class);
-	
-	private ImConfig imConfig;
-	
+	private ImServerListener imServerListener;
+
 	/**
 	 * @author: WChao
 	 * 2016年12月16日 下午5:52:06
 	 * 
 	 */
-	public ImServerAioListener() {}
-	public ImServerAioListener(ImConfig imConfig) {
-		this.imConfig = imConfig;
+	public ImServerListenerAdapter(ImServerListener imServerListener) {
+		this.imServerListener = imServerListener == null ? new DefaultImServerListener(): imServerListener;
 	}
 	/**
 	 * 
@@ -41,8 +36,11 @@ public class ImServerAioListener implements ServerAioListener {
 	 * @author: WChao
 	 */
 	@Override
-	public void onAfterConnected(ChannelContext channelContext, boolean isConnected, boolean isReconnect) {
-		return;
+	public void onAfterConnected(ChannelContext channelContext, boolean isConnected, boolean isReconnect)throws Exception{
+		ImServerChannelContext imChannelContext = new ImServerChannelContext(ImServerConfig.Global.get(),channelContext);
+		channelContext.set(Key.IM_CHANNEL_CONTEXT_KEY, imChannelContext);
+		imChannelContext.setMsgQue(new MsgQueueRunnable(imChannelContext, imChannelContext.getImConfig().getJimExecutor()));
+		imServerListener.onAfterConnected(imChannelContext, isConnected, isReconnect);
 	}
 
 	/**
@@ -54,11 +52,12 @@ public class ImServerAioListener implements ServerAioListener {
 	 * @author WChao
 	 */
 	@Override
-	public void onAfterSent(ChannelContext channelContext, Packet packet, boolean isSentSuccess) {
+	public void onAfterSent(ChannelContext channelContext, Packet packet, boolean isSentSuccess)throws Exception{
+		imServerListener.onAfterSent((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), (ImPacket)packet, isSentSuccess);
 	}
 	/**
 	 * 连接关闭前触发本方法
-	 * @param channelContext the channelcontext
+	 * @param channelContext the channelContext
 	 * @param throwable the throwable 有可能为空
 	 * @param remark the remark 有可能为空
 	 * @param isRemove
@@ -66,8 +65,9 @@ public class ImServerAioListener implements ServerAioListener {
 	 * @throws Exception 
 	 */
 	@Override
-	public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String remark, boolean isRemove) {
-		if (imConfig == null) {
+	public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String remark, boolean isRemove)throws Exception{
+		imServerListener.onBeforeClose((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), throwable, remark, isRemove);
+		/*if (imConfig == null) {
 			return;
 		}
 		MessageHelper messageHelper = imConfig.getMessageHelper();
@@ -85,7 +85,7 @@ public class ImServerAioListener implements ServerAioListener {
 				return;
 			}
 			messageHelper.getBindListener().initUserTerminal(channelContext, onlineUser.getTerminal(), ImConst.OFFLINE);
-		}
+		}*/
 	}
 	/**
 	 * 解码成功后触发本方法
@@ -97,7 +97,7 @@ public class ImServerAioListener implements ServerAioListener {
 	 */
 	@Override
 	public void onAfterDecoded(ChannelContext channelContext, Packet packet,int packetSize) throws Exception {
-		
+		imServerListener.onAfterDecoded((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), (ImPacket)packet, packetSize);
 	}
 	/**
 	 * 接收到TCP层传过来的数据后
@@ -107,7 +107,7 @@ public class ImServerAioListener implements ServerAioListener {
 	 */
 	@Override
 	public void onAfterReceivedBytes(ChannelContext channelContext,int receivedBytes) throws Exception {
-		
+		imServerListener.onAfterReceivedBytes((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), receivedBytes);
 	}
 	/**
 	 * 处理一个消息包后
@@ -118,7 +118,11 @@ public class ImServerAioListener implements ServerAioListener {
 	 */
 	@Override
 	public void onAfterHandled(ChannelContext channelContext, Packet packet,long cost) throws Exception {
-		
+		imServerListener.onAfterHandled((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), (ImPacket)packet, cost);
 	}
 
+	@Override
+	public boolean onHeartbeatTimeout(ChannelContext channelContext, Long aLong, int i) {
+		return imServerListener.onHeartbeatTimeout((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), aLong, i);
+	}
 }

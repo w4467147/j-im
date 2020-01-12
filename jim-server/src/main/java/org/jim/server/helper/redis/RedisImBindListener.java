@@ -1,17 +1,18 @@
 package org.jim.server.helper.redis;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConfig;
+import org.jim.common.ImChannelContext;
+import org.jim.common.config.ImConfig;
 import org.jim.common.ImSessionContext;
 import org.jim.common.cache.redis.RedisCache;
 import org.jim.common.cache.redis.RedisCacheManager;
+import org.jim.common.exception.ImException;
 import org.jim.common.listener.AbstractImBindListener;
 import org.jim.common.packets.Client;
 import org.jim.common.packets.Group;
 import org.jim.common.packets.User;
 import org.jim.common.utils.ImKit;
-import org.tio.core.ChannelContext;
-
+import org.jim.server.config.ImServerConfig;
 import java.io.Serializable;
 import java.util.List;
 /**
@@ -21,9 +22,9 @@ import java.util.List;
  */
 public class RedisImBindListener extends AbstractImBindListener{
 	
-	private RedisCache groupCache = null;
-	private RedisCache userCache = null;
-	private final String SUBFIX = ":";
+	private RedisCache groupCache;
+	private RedisCache userCache;
+	private final String SUFFIX = ":";
 	
 	public RedisImBindListener(){
 		this(null);
@@ -40,49 +41,48 @@ public class RedisImBindListener extends AbstractImBindListener{
 		RedisCacheManager.register(GROUP, Integer.MAX_VALUE, Integer.MAX_VALUE);
 		RedisCacheManager.register(STORE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 		RedisCacheManager.register(PUSH, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		
 	}
 	
 	@Override
-	public void onAfterGroupBind(ChannelContext channelContext, String group) throws Exception {
+	public void onAfterGroupBind(ImChannelContext imChannelContext, String group) throws ImException {
 		if(!isStore()) {
 			return;
 		}
-		initGroupUsers(group,channelContext);
+		initGroupUsers(group, imChannelContext);
 	}
 
 	@Override
-	public void onAfterGroupUnbind(ChannelContext channelContext, String group) throws Exception {
+	public void onAfterGroupUnbind(ImChannelContext imChannelContext, String group) throws ImException {
 		if(!isStore()) {
 			return;
 		}
-		String userid = channelContext.getUserid();
+		String userId = imChannelContext.getUserId();
 		//移除群组成员;
-		groupCache.listRemove(group+SUBFIX+USER, userid);
+		groupCache.listRemove(group+SUFFIX+USER, userId);
 		//移除成员群组;
-		userCache.listRemove(userid+SUBFIX+GROUP, group);
-		RedisCacheManager.getCache(PUSH).remove(GROUP+SUBFIX+group+SUBFIX+userid);
+		userCache.listRemove(userId+SUFFIX+GROUP, group);
+		RedisCacheManager.getCache(PUSH).remove(GROUP+SUFFIX+group+SUFFIX+userId);
 	}
 
 	@Override
-	public void onAfterUserBind(ChannelContext channelContext, String userid) throws Exception {
+	public void onAfterUserBind(ImChannelContext imChannelContext, String userId) throws ImException {
 		if(!isStore()) {
 			return;
 		}
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		Client client = imSessionContext.getClient();
 		if(client == null) {
 			return;
 		}
 		User onlineUser = client.getUser();
 		if(onlineUser != null){
-			initUserTerminal(channelContext,onlineUser.getTerminal(),ONLINE);
+			initUserTerminal(imChannelContext,onlineUser.getTerminal(),ONLINE);
 			initUserInfo(onlineUser);
 		}
 	}
 
 	@Override
-	public void onAfterUserUnbind(ChannelContext channelContext, String userid) throws Exception {
+	public void onAfterUserUnbind(ImChannelContext imChannelContext, String userId) throws ImException {
 		if(!isStore()) {
 			return;
 		}
@@ -91,24 +91,24 @@ public class RedisImBindListener extends AbstractImBindListener{
 	/**
 	 * 初始化群组用户;
 	 * @param groupId
-	 * @param channelContext
+	 * @param imChannelContext
 	 */
-	public void initGroupUsers(String groupId ,ChannelContext channelContext){
+	public void initGroupUsers(String groupId ,ImChannelContext imChannelContext){
 		if(!isStore()) {
 			return;
 		}
-		String userId = channelContext.getUserid();
+		String userId = imChannelContext.getUserId();
 		if(StringUtils.isEmpty(groupId) || StringUtils.isEmpty(userId)) {
 			return;
 		}
-		String group_user_key = groupId+SUBFIX+USER;
+		String group_user_key = groupId+SUFFIX+USER;
 		List<String> users = groupCache.listGetAll(group_user_key);
 		if(!users.contains(userId)){
 			groupCache.listPushTail(group_user_key, userId);
 		}
 		initUserGroups(userId, groupId);
 		
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		Client client = imSessionContext.getClient();
 		if(client == null) {
 			return;
@@ -123,44 +123,44 @@ public class RedisImBindListener extends AbstractImBindListener{
 		}
 		for(Group group : groups){
 			if(groupId.equals(group.getGroup_id())){
-				groupCache.put(groupId+SUBFIX+INFO, group);
+				groupCache.put(groupId+SUFFIX+INFO, group);
 				break;
 			}
 		}
 	}
 	/**
 	 * 初始化用户拥有哪些群组;
-	 * @param userid
+	 * @param userId
 	 * @param group
 	 */
-	public void initUserGroups(String userid, String group){
+	public void initUserGroups(String userId, String group){
 		if(!isStore()) {
 			return;
 		}
-		if(StringUtils.isEmpty(group) || StringUtils.isEmpty(userid)) {
+		if(StringUtils.isEmpty(group) || StringUtils.isEmpty(userId)) {
 			return;
 		}
-		List<String> groups = userCache.listGetAll(userid+SUBFIX+GROUP);
+		List<String> groups = userCache.listGetAll(userId+SUFFIX+GROUP);
 		if(!groups.contains(group)){
-			userCache.listPushTail(userid+SUBFIX+GROUP, group);
+			userCache.listPushTail(userId+SUFFIX+GROUP, group);
 		}
 	}
 	/**
 	 * 初始化用户终端协议类型;
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @param terminal
 	 * @param status(online、offline)
 	 */
 	@Override
-	public void initUserTerminal(ChannelContext channelContext , String terminal , String status){
+	public void initUserTerminal(ImChannelContext imChannelContext , String terminal , String status){
 		if(!isStore()) {
 			return;
 		}
-		String userId = channelContext.getUserid();
+		String userId = imChannelContext.getUserId();
 		if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(terminal)) {
 			return;
 		}
-		userCache.put(userId+SUBFIX+TERMINAL+SUBFIX+terminal, status);
+		userCache.put(userId+SUFFIX+TERMINAL+SUFFIX+terminal, status);
 	}
 	/**
 	 * 初始化用户终端协议类型;
@@ -175,10 +175,10 @@ public class RedisImBindListener extends AbstractImBindListener{
 			return;
 		}
 		User userCopy = ImKit.copyUserWithoutFriendsGroups(user);
-		userCache.put(userId+SUBFIX+INFO, userCopy);
+		userCache.put(userId+SUFFIX+INFO, userCopy);
 		List<Group> friends = user.getFriends();
 		if(friends != null){
-			userCache.put(userId+SUBFIX+FRIENDS, (Serializable) friends);
+			userCache.put(userId+SUFFIX+FRIENDS, (Serializable) friends);
 		}
 	}
 	/**
@@ -186,6 +186,7 @@ public class RedisImBindListener extends AbstractImBindListener{
 	 * @return
 	 */
 	public boolean isStore(){
-		return ON.equals(imConfig.getIsStore());
+		ImServerConfig imServerConfig = (ImServerConfig)imConfig;
+		return ImConfig.Const.ON.equals(imServerConfig.getIsStore());
 	}
 }

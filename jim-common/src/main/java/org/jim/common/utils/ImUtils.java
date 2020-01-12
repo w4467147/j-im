@@ -3,6 +3,7 @@ package org.jim.common.utils;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImSessionContext;
 import org.tio.core.ChannelContext;
 import org.jim.common.packets.Client;
@@ -16,10 +17,10 @@ public class ImUtils {
 	 * 设置Client对象到ImSessionContext中
 	 * @param channelContext
 	 * @return
-	 * @author: wchao
+	 * @author: WChao
 	 */
-	public static Client setClient(ChannelContext channelContext) {
-		ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
+	public static Client setClient(ImChannelContext channelContext) {
+		ImSessionContext imSessionContext = channelContext.getSessionContext();
 		Client client = imSessionContext.getClient();
 		if (client == null) {
 			client = new Client();
@@ -28,7 +29,6 @@ public class ImUtils {
 			client.setPort(channelContext.getClientNode().getPort());
 			imSessionContext.setClient(client);
 		}
-
 		return client;
 	}
 

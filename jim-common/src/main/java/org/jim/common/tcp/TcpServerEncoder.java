@@ -6,18 +6,18 @@ package org.jim.common.tcp;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
 import org.jim.common.ImPacket;
-import org.jim.common.Protocol;
-import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
+import org.jim.common.config.ImConfig;
 /**
  * 版本: [1.0]
  * 功能说明: 
  * @author : WChao 创建时间: 2017年8月21日 下午4:00:31
  */
-public class TcpServerEncoder {
+public class TcpServerEncoder implements ImConst {
 
-	public static ByteBuffer encode(TcpPacket tcpPacket, GroupContext groupContext, ChannelContext channelContext){
+	public static ByteBuffer encode(TcpPacket tcpPacket, ImConfig imConfig, ImChannelContext imChannelContext){
 		int bodyLen = 0;
 		byte[] body = tcpPacket.getBody();
 		if (body != null)
@@ -53,7 +53,7 @@ public class TcpServerEncoder {
 		allLen += 1+4+bodyLen;
 		ByteBuffer buffer = ByteBuffer.allocate(allLen);
 		//设置字节序
-		ByteOrder byteOrder = groupContext == null ? ByteOrder.BIG_ENDIAN : groupContext.getByteOrder();
+		ByteOrder byteOrder = imConfig == null ? ByteOrder.BIG_ENDIAN : imConfig.getTioConfig().getByteOrder();
 		buffer.order(byteOrder);
 		buffer.put(tcpPacket.getVersion());
 		buffer.put(tcpPacket.getMask());

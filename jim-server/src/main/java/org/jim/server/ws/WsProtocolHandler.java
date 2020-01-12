@@ -3,10 +3,13 @@
  */
 package org.jim.server.ws;
 
-import org.jim.common.ImAio;
-import org.jim.common.ImConfig;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.ImStatus;
+import org.jim.common.config.ImConfig;
+import org.jim.common.exception.ImDecodeException;
+import org.jim.common.exception.ImException;
 import org.jim.common.http.HttpRequest;
 import org.jim.common.http.HttpRequestDecoder;
 import org.jim.common.http.HttpResponse;
@@ -14,108 +17,101 @@ import org.jim.common.http.HttpResponseEncoder;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.Message;
 import org.jim.common.packets.RespBody;
-import org.jim.common.protocol.IProtocol;
+import org.jim.common.protocol.AbstractProtocol;
 import org.jim.common.utils.JsonKit;
-import org.jim.common.ws.IWsMsgHandler;
-import org.jim.common.ws.Opcode;
-import org.jim.common.ws.WsProtocol;
-import org.jim.common.ws.WsRequestPacket;
-import org.jim.common.ws.WsResponsePacket;
-import org.jim.common.ws.WsServerConfig;
-import org.jim.common.ws.WsServerDecoder;
-import org.jim.common.ws.WsServerEncoder;
-import org.jim.common.ws.WsSessionContext;
+import org.jim.common.ws.*;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
+import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.AbstractProtocolHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
-import org.tio.core.exception.AioDecodeException;
-import org.tio.core.intf.Packet;
 
 import java.nio.ByteBuffer;
+import java.util.Objects;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
- * 作者: WChao 创建时间: 2017年8月3日 下午6:38:36
+ * @author : WChao 创建时间: 2017年8月3日 下午6:38:36
  */
 public class WsProtocolHandler extends AbstractProtocolHandler {
 	
 	private Logger logger = LoggerFactory.getLogger(WsProtocolHandler.class);
 	
-	private WsServerConfig wsServerConfig;
+	private WsConfig wsServerConfig;
 
 	private IWsMsgHandler wsMsgHandler;
 	
-	public WsProtocolHandler() {}
+	public WsProtocolHandler() {
+		this.protocol = new WsProtocol(new WsConvertPacket());
+	}
 	
-	public WsProtocolHandler(WsServerConfig wsServerConfig, IWsMsgHandler wsMsgHandler) {
+	public WsProtocolHandler(WsConfig wsServerConfig, AbstractProtocol protocol) {
+		super(protocol);
 		this.wsServerConfig = wsServerConfig;
-		this.wsMsgHandler = wsMsgHandler;
 	}
 	@Override
-	public void init(ImConfig imConfig) {
-		WsServerConfig wsServerConfig = imConfig.getWsServerConfig();
-		if(wsServerConfig == null){
-			wsServerConfig = new WsServerConfig();
-			imConfig.setWsServerConfig(wsServerConfig);
+	public void init(ImServerConfig imServerConfig) {
+		WsConfig wsConfig = imServerConfig.getWsConfig();
+		if(Objects.isNull(wsConfig)){
+			wsConfig = WsConfig.newBuilder().build();
+			imServerConfig.setWsConfig(wsConfig);
 		}
-		IWsMsgHandler wsMsgHandler = wsServerConfig.getWsMsgHandler();
-		if(wsMsgHandler == null){
-			wsServerConfig.setWsMsgHandler(new WsMsgHandler());
+		IWsMsgHandler wsMsgHandler = wsConfig.getWsMsgHandler();
+		if(Objects.isNull(wsMsgHandler)){
+			wsConfig.setWsMsgHandler(new WsMsgHandler());
 		}
-		this.wsServerConfig = wsServerConfig;
+		this.wsServerConfig = wsConfig;
 		this.wsMsgHandler = wsServerConfig.getWsMsgHandler();
-		logger.info("wsServerHandler 初始化完毕...");
+		logger.info("J-IM WebSocket协议初始化完毕...");
 	}
 
 	@Override
-	public ByteBuffer encode(Packet packet, GroupContext groupContext, ChannelContext channelContext) {
-		WsSessionContext wsSessionContext = (WsSessionContext)channelContext.getAttribute();
-		WsResponsePacket wsResponsePacket = (WsResponsePacket)packet;
+	public ByteBuffer encode(ImPacket imPacket, ImConfig imConfig, ImChannelContext imChannelContext) {
+		WsSessionContext wsSessionContext = (WsSessionContext)imChannelContext.getSessionContext();
+		WsResponsePacket wsResponsePacket = (WsResponsePacket)imPacket;
 		if (wsResponsePacket.getCommand() == Command.COMMAND_HANDSHAKE_RESP) {
 			//握手包
 			HttpResponse handshakeResponsePacket = wsSessionContext.getHandshakeResponsePacket();
-			return HttpResponseEncoder.encode(handshakeResponsePacket, groupContext, channelContext,true);
+			return HttpResponseEncoder.encode(handshakeResponsePacket, imChannelContext,true);
 		}else{
-			return WsServerEncoder.encode(wsResponsePacket , groupContext, channelContext);
+			return WsServerEncoder.encode(wsResponsePacket , imChannelContext);
 		}
 	}
 
 	@Override
-	public void handler(Packet packet, ChannelContext channelContext) throws Exception {
-		WsRequestPacket wsRequestPacket = (WsRequestPacket) packet;
+	public void handler(ImPacket imPacket, ImChannelContext imChannelContext) throws ImException {
+		WsRequestPacket wsRequestPacket = (WsRequestPacket) imPacket;
 		AbstractCmdHandler cmdHandler = CommandManager.getCommand(wsRequestPacket.getCommand());
 		if(cmdHandler == null){
 			//是否ws分片发包尾帧包
 			if(!wsRequestPacket.isWsEof()) {
 				return;
 			}
-			ImPacket imPacket = new ImPacket(Command.COMMAND_UNKNOW, new RespBody(Command.COMMAND_UNKNOW,ImStatus.C10017).toByte());
-			ImAio.send(channelContext, imPacket);
+			ImPacket wsPacket = new ImPacket(Command.COMMAND_UNKNOW, new RespBody(Command.COMMAND_UNKNOW,ImStatus.C10017).toByte());
+			Jim.send(imChannelContext, wsPacket);
 			return;
 		}
-		ImPacket response = cmdHandler.handler(wsRequestPacket, channelContext);
+		ImPacket response = cmdHandler.handler(wsRequestPacket, imChannelContext);
 		if(response != null){
-			ImAio.send(channelContext, response);
+			Jim.send(imChannelContext, response);
 		}
 	}
 
 	@Override
-	public ImPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws AioDecodeException {
-		WsSessionContext wsSessionContext = (WsSessionContext)channelContext.getAttribute();
+	public ImPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext) throws ImDecodeException {
+		WsSessionContext wsSessionContext = (WsSessionContext)imChannelContext.getSessionContext();
 		//握手
 		if(!wsSessionContext.isHandshaked()){
-			HttpRequest  httpRequest = HttpRequestDecoder.decode(buffer,channelContext,true);
+			HttpRequest  httpRequest = HttpRequestDecoder.decode(buffer,imChannelContext,true);
 			if(httpRequest == null) {
 				return null;
 			}
 			//升级到WebSocket协议处理
-			HttpResponse httpResponse = WsServerDecoder.updateWebSocketProtocol(httpRequest,channelContext);
+			HttpResponse httpResponse = WsServerDecoder.updateWebSocketProtocol(httpRequest, imChannelContext);
 			if (httpResponse == null) {
-				throw new AioDecodeException("http协议升级到websocket协议失败");
+				throw new ImDecodeException("http协议升级到webSocket协议失败");
 			}
 			wsSessionContext.setHandshakeRequestPacket(httpRequest);
 			wsSessionContext.setHandshakeResponsePacket(httpResponse);
@@ -125,7 +121,7 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 			wsRequestPacket.setCommand(Command.COMMAND_HANDSHAKE_REQ);
 			return wsRequestPacket;
 		}else{
-			WsRequestPacket wsRequestPacket = WsServerDecoder.decode(buffer, channelContext);
+			WsRequestPacket wsRequestPacket = WsServerDecoder.decode(buffer, imChannelContext);
 			if(wsRequestPacket == null) {
 				return null;
 			}
@@ -144,11 +140,11 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 			return wsRequestPacket;
 		}
 	}
-	public WsServerConfig getWsServerConfig() {
+	public WsConfig getWsServerConfig() {
 		return wsServerConfig;
 	}
 
-	public void setWsServerConfig(WsServerConfig wsServerConfig) {
+	public void setWsServerConfig(WsConfig wsServerConfig) {
 		this.wsServerConfig = wsServerConfig;
 	}
 
@@ -160,8 +156,4 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 		this.wsMsgHandler = wsMsgHandler;
 	}
 
-	@Override
-	public IProtocol protocol() {
-		return new WsProtocol();
-	}
 }

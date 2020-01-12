@@ -5,10 +5,8 @@ package org.jim.common;
 
 import java.nio.ByteBuffer;
 
+import org.jim.common.exception.ImDecodeException;
 import org.tio.core.ChannelContext;
-import org.tio.core.exception.AioDecodeException;
-
-
 /**
  * 版本: [1.0]
  * 功能说明: 
@@ -16,5 +14,5 @@ import org.tio.core.exception.AioDecodeException;
  */
 public interface ImDecoder {
 	
-	public ImPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws AioDecodeException;
+	public ImPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws ImDecodeException;
 }

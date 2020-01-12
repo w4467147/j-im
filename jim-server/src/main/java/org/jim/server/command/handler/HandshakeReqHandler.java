@@ -1,16 +1,15 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImAio;
+import org.jim.common.ImChannelContext;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
+import org.jim.common.exception.ImException;
 import org.jim.common.http.HttpRequest;
 import org.jim.common.packets.Command;
 import org.jim.common.ws.WsSessionContext;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.handler.processor.handshake.HandshakeCmdProcessor;
-import org.tio.core.Aio;
-import org.tio.core.ChannelContext;
-
 import java.util.List;
 
 /**
@@ -21,22 +20,22 @@ import java.util.List;
 public class HandshakeReqHandler extends AbstractCmdHandler {
 	
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception {
+	public ImPacket handler(ImPacket packet, ImChannelContext channelContext) throws ImException {
 		List<HandshakeCmdProcessor> handshakeProcessors = this.getProcessor(channelContext,HandshakeCmdProcessor.class);
 		if(CollectionUtils.isEmpty(handshakeProcessors)){
-			Aio.remove(channelContext, "没有对应的握手协议处理器HandshakeProCmd...");
+			Jim.remove(channelContext, "没有对应的握手协议处理器HandshakeProCmd...");
 			return null;
 		}
 		HandshakeCmdProcessor handShakeProCmdHandler = handshakeProcessors.get(0);
 		ImPacket handShakePacket = handShakeProCmdHandler.handshake(packet, channelContext);
 		if (handShakePacket == null) {
-			Aio.remove(channelContext, "业务层不同意握手");
+			Jim.remove(channelContext, "业务层不同意握手");
 			return null;
 		}
-		ImAio.send(channelContext, handShakePacket);
-		WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getAttribute();
+		Jim.send(channelContext, handShakePacket);
+		WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getSessionContext();
 		HttpRequest request = wsSessionContext.getHandshakeRequestPacket();
-		handShakeProCmdHandler.onAfterHandshaked(request, channelContext);
+		handShakeProCmdHandler.onAfterHandshake(request, channelContext);
 		return null;
 	}
 

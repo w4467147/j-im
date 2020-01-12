@@ -7,7 +7,8 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImAio;
+import org.jim.common.ImConst;
+import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.cluster.ImClusterConfig;
 import org.jim.common.cluster.ImClusterVo;
@@ -16,8 +17,7 @@ import org.redisson.api.RedissonClient;
 import org.redisson.api.listener.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.Aio;
-import org.tio.core.GroupContext;
+import org.tio.core.Tio;
 import org.tio.utils.json.Json;
 
 /**
@@ -25,12 +25,10 @@ import org.tio.utils.json.Json;
  * @author WChao
  *
  */
-public class RedisClusterConfig extends ImClusterConfig {
+public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 	
 	private static Logger log = LoggerFactory.getLogger(RedisClusterConfig.class);
 	
-	public static final String IM_CLUSTER_TOPIC = "JIM_CLUSTER";
-
 	private String topicSuffix;
 
 	private String topic;
@@ -48,19 +46,15 @@ public class RedisClusterConfig extends ImClusterConfig {
 	 * J-IM内置的集群是用redis的topic来实现的，所以不同groupContext就要有一个不同的topicSuffix
 	 * @param topicSuffix 不同类型的groupContext就要有一个不同的topicSuffix
 	 * @param redisson
-	 * @param groupContext
 	 * @return
 	 * @author: WChao
 	 */
-	public static RedisClusterConfig newInstance(String topicSuffix, RedissonClient redisson, GroupContext groupContext) {
+	public static RedisClusterConfig newInstance(String topicSuffix, RedissonClient redisson) {
 		if (redisson == null) {
 			throw new RuntimeException(RedissonClient.class.getSimpleName() + "不允许为空");
 		}
-		if (groupContext == null) {
-			throw new RuntimeException("GroupContext不允许为空");
-		}
 
-		RedisClusterConfig me = new RedisClusterConfig(topicSuffix, redisson, groupContext);
+		RedisClusterConfig me = new RedisClusterConfig(topicSuffix, redisson);
 		me.rtopic = redisson.getTopic(me.topic);
 		me.rtopic.addListener(new MessageListener<ImClusterVo>() {
 			@Override
@@ -86,53 +80,40 @@ public class RedisClusterConfig extends ImClusterConfig {
 				//发送给所有
 				boolean isToAll = imClusterVo.isToAll();
 				if (isToAll) {
-					//								for (GroupContext groupContext : me.groupContext) {
-					Aio.sendToAll(groupContext, packet);
-					//								}
-					//return;
+					Tio.sendToAll(null, packet);
 				}
 
 				//发送给指定组
 				String group = imClusterVo.getGroup();
 				if (StringUtils.isNotBlank(group)) {
-					ImAio.sendToGroup(group, packet);
-					//return;
+					Jim.sendToGroup(group, packet);
 				}
 
 				//发送给指定用户
 				String userid = imClusterVo.getUserid();
 				if (StringUtils.isNotBlank(userid)) {
-					//								for (GroupContext groupContext : me.groupContext) {
-					ImAio.sendToUser(userid, packet);
-					//								}
-					//return;
+					Jim.sendToUser(userid, packet);
 				}
 				
 				//发送给指定token
 				String token = imClusterVo.getToken();
 				if (StringUtils.isNotBlank(token)) {
-					//								for (GroupContext groupContext : me.groupContext) {
-					Aio.sendToToken(me.groupContext, token, packet);
-					//								}
-					//return;
+					//Tio.sendToToken(me.groupContext, token, packet);
 				}
 
 				//发送给指定ip
 				String ip = imClusterVo.getIp();
 				if (StringUtils.isNotBlank(ip)) {
-					//								for (GroupContext groupContext : me.groupContext) {
-					ImAio.sendToIp(me.groupContext, ip, packet);
-					//								}
-					//return;
+					//Jim.sendToIp(me.groupContext, ip, packet);
 				}
 			}
 		});
 		return me;
 	}
-	private RedisClusterConfig(String topicSuffix, RedissonClient redisson, GroupContext groupContext) {
+	private RedisClusterConfig(String topicSuffix, RedissonClient redisson) {
 		this.setTopicSuffix(topicSuffix);
 		this.setRedisson(redisson);
-		this.groupContext = groupContext;
+		//this.groupContext = groupContext;
 	}
 	public String getTopicSuffix() {
 		return topicSuffix;
@@ -140,8 +121,7 @@ public class RedisClusterConfig extends ImClusterConfig {
 
 	public void setTopicSuffix(String topicSuffix) {
 		this.topicSuffix = topicSuffix;
-		this.topic = topicSuffix + IM_CLUSTER_TOPIC;
-
+		this.topic = topicSuffix + Topic.JIM_CLUSTER_TOPIC;
 	}
 
 	public String getTopic() {

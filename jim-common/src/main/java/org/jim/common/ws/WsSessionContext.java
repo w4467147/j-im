@@ -2,6 +2,7 @@ package org.jim.common.ws;
 
 import java.util.List;
 
+import org.jim.common.ImChannelContext;
 import org.jim.common.ImSessionContext;
 import org.jim.common.http.HttpRequest;
 import org.jim.common.http.HttpResponse;
@@ -18,12 +19,12 @@ public class WsSessionContext extends ImSessionContext {
 	private boolean isHandshaked = false;
 
 	/**
-	 * websocket 握手请求包
+	 * webSocket 握手请求包
 	 */
 	private HttpRequest handshakeRequestPacket = null;
 
 	/**
-	 * websocket 握手响应包
+	 * webSocket 握手响应包
 	 */
 	private HttpResponse handshakeResponsePacket = null;
 	/**
@@ -33,20 +34,21 @@ public class WsSessionContext extends ImSessionContext {
 	/**
 	 * ws响应状态包;
 	 */
-	private WsResponsePacket wsResponsPacket = null;
+	private WsResponsePacket wsResponsePacket = null;
 
-	//websocket 协议用到的，有时候数据包是分几个到的，注意那个fin字段，本im暂时不支持
+	/**
+	 * webSocket 协议用到的，有时候数据包是分几个到的，注意那个fin字段，本im暂时不支持
+	 */
 	private List<byte[]> lastParts = null;
 
 	/**
-	 *
 	 *
 	 * @author wchao
 	 * 2017年2月21日 上午10:27:54
 	 *
 	 */
-	public WsSessionContext() {
-
+	public WsSessionContext(ImChannelContext imChannelContext) {
+		super(imChannelContext);
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class WsSessionContext extends ImSessionContext {
 	}
 
 	/**
-	 * @param httpHandshakePacket the httpHandshakePacket to set
+	 * @param  handshakeRequestPacket the httpHandshakePacket to set
 	 */
 	public void setHandshakeRequestPacket(HttpRequest handshakeRequestPacket) {
 		this.handshakeRequestPacket = handshakeRequestPacket;
@@ -113,11 +115,11 @@ public class WsSessionContext extends ImSessionContext {
 		this.wsRequestPacket = wsRequestPacket;
 	}
 
-	public WsResponsePacket getWsResponsPacket() {
-		return wsResponsPacket;
+	public WsResponsePacket getWsResponsePacket() {
+		return wsResponsePacket;
 	}
 
-	public void setWsResponsPacket(WsResponsePacket wsResponsPacket) {
-		this.wsResponsPacket = wsResponsPacket;
+	public void setWsResponsePacket(WsResponsePacket wsResponsePacket) {
+		this.wsResponsePacket = wsResponsePacket;
 	}
 }
