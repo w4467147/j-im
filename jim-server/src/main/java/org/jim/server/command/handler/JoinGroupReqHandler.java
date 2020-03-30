@@ -1,6 +1,5 @@
 package org.jim.server.command.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.common.*;
 import org.jim.common.exception.ImException;
@@ -17,7 +16,7 @@ import org.jim.common.packets.RespBody;
 import org.jim.common.packets.User;
 import org.jim.common.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * 
@@ -75,12 +74,11 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 			return null;
 		}
 		//实际绑定之前执行处理器动作
-		List<GroupCmdProcessor> groupCmdProcessors = this.getProcessor(imChannelContext, GroupCmdProcessor.class);
+		GroupCmdProcessor groupCmdProcessor = (GroupCmdProcessor)this.getSingleProcessor();
 
 		JoinGroupRespBody joinGroupRespBody = new JoinGroupRespBody(Command.COMMAND_JOIN_GROUP_RESP,ImStatus.C10011);
 		//当有群组处理器时候才会去处理
-		if(CollectionUtils.isNotEmpty(groupCmdProcessors)){
-			GroupCmdProcessor groupCmdProcessor = groupCmdProcessors.get(0);
+		if(Objects.nonNull(groupCmdProcessor)){
 			joinGroupRespBody = groupCmdProcessor.join(joinGroup, imChannelContext);
 			if (joinGroupRespBody == null || JoinGroupResult.JOIN_GROUP_RESULT_OK.getNumber() != joinGroupRespBody.getResult().getNumber()) {
 				RespBody joinRespBody = new RespBody(Command.COMMAND_JOIN_GROUP_RESP, ImStatus.C10012).setData(joinGroupRespBody);

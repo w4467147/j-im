@@ -38,6 +38,7 @@ public class TcpHandshakeProcessor implements HandshakeCmdProcessor {
 	public void onAfterHandshake(ImPacket packet, ImChannelContext channelContext)throws ImException {
 		
 	}
+
 	@Override
 	public boolean isProtocol(ImChannelContext channelContext){
 		ImSessionContext sessionContext = channelContext.getSessionContext();
@@ -47,13 +48,6 @@ public class TcpHandshakeProcessor implements HandshakeCmdProcessor {
 			return true;
 		}
 		return false;
-	}
-
-
-	@Override
-	public String name() {
-		
-		return Protocol.TCP;
 	}
 	
 }

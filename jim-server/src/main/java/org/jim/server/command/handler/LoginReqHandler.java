@@ -1,6 +1,5 @@
 package org.jim.server.command.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.jim.common.*;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImException;
@@ -11,7 +10,6 @@ import org.jim.common.packets.LoginReqBody;
 import org.jim.common.packets.LoginRespBody;
 import org.jim.common.packets.User;
 import org.jim.common.protocol.IProtocol;
-import org.jim.common.utils.ImKit;
 import org.jim.common.utils.JsonKit;
 import org.jim.server.ImServerChannelContext;
 import org.jim.server.command.AbstractCmdHandler;
@@ -20,10 +18,8 @@ import org.jim.server.command.handler.processor.login.LoginCmdProcessor;
 import org.jim.server.handler.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
-import org.tio.core.Tio;
-
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 登录消息命令处理器
@@ -31,6 +27,7 @@ import java.util.List;
  * @date 2018年4月10日 下午2:40:07
  */
 public class LoginReqHandler extends AbstractCmdHandler {
+
 	private static Logger log = LoggerFactory.getLogger(LoginReqHandler.class);
 
 	@Override
@@ -40,17 +37,16 @@ public class LoginReqHandler extends AbstractCmdHandler {
 			Jim.remove(imChannelContext, "body is null");
 			return null;
 		}
-		List<LoginCmdProcessor> loginProcessors = this.getProcessor(imChannelContext, LoginCmdProcessor.class);
-		if(CollectionUtils.isEmpty(loginProcessors)){
+		LoginCmdProcessor loginProcessor = this.getSingleProcessor(LoginCmdProcessor.class);
+		if(Objects.isNull(loginProcessor)){
 			log.info("登录失败,没有登录命令业务处理器!");
 			Jim.remove(imChannelContext, "no login serviceHandler processor!");
 			return null;
 		}
-		LoginCmdProcessor loginServiceHandler = loginProcessors.get(0);
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(),LoginReqBody.class);
 		
-		LoginRespBody loginRespBody = loginServiceHandler.doLogin(loginReqBody, imChannelContext);
+		LoginRespBody loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
 		if (loginRespBody == null || loginRespBody.getUser() == null) {
 			log.info("登录失败, loginName:{}, password:{}", loginReqBody.getLoginname(), loginReqBody.getPassword());
 			if(loginRespBody == null){
@@ -70,7 +66,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		Jim.bindUser(imServerChannelContext, user.getId());
 		//初始化绑定或者解绑群组;
 		bindUnbindGroup(imChannelContext, user);
-		loginServiceHandler.onSuccess(imChannelContext);
+		loginProcessor.onSuccess(imChannelContext);
 		loginRespBody.clear();
 		return ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext);
 	}
@@ -81,11 +77,11 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		String userId = user.getId();
 		List<Group> groups = user.getGroups();
 		if( groups != null){
-			boolean isStore = ImConfig.Const.ON.equals(imConfig.getIsStore());
+			boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
 			MessageHelper messageHelper = null;
 			List<String> groupIds = null;
 			if(isStore){
-				messageHelper = imConfig.getMessageHelper();
+				messageHelper = getImConfig().getMessageHelper();
 				groupIds = messageHelper.getGroups(userId);
 			}
 			//绑定群组

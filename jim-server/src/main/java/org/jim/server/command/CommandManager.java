@@ -4,15 +4,14 @@
 package org.jim.server.command;
 
 import org.jim.common.packets.Command;
-import org.jim.server.command.handler.processor.CmdProcessor;
-import org.jim.server.config.ImServerConfig;
+import org.jim.server.command.handler.processor.MultiProtocolCmdProcessor;
+import org.jim.server.command.handler.processor.SingleProtocolCmdProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 /**
  * 版本: [1.0]
  * 功能说明: 命令执行管理器;
@@ -38,19 +37,22 @@ public class CommandManager{
 	
 	private static void init(List<CommandConfiguration> configurations) throws Exception{
 		for(CommandConfiguration configuration : configurations){
-			Class<AbstractCmdHandler> cmdHandlerClazz = (Class<AbstractCmdHandler>)Class.forName(configuration.getCmdHandler());
-			AbstractCmdHandler cmdHandler = cmdHandlerClazz.newInstance();
-			List<String> proCmdHandlerList = configuration.getProCmdHandlers();
-			if(!proCmdHandlerList.isEmpty()){
-				for(String proCmdHandlerClass : proCmdHandlerList){
-					Class<CmdProcessor> proCmdHandlerClazz = (Class<CmdProcessor>)Class.forName(proCmdHandlerClass);
-					CmdProcessor proCmdHandler = proCmdHandlerClazz.newInstance();
-					cmdHandler.addProcessor(proCmdHandler);
+			AbstractCmdHandler cmdHandler = ((Class<AbstractCmdHandler>)Class.forName(configuration.getCmdHandler())).newInstance();
+			List<String> cmdProcessors = configuration.getCmdProcessors();
+			if(!cmdProcessors.isEmpty()){
+				for(String cmdProcessor : cmdProcessors){
+					Object cmdProcessorObj = Class.forName(cmdProcessor).newInstance();
+					if(cmdProcessorObj instanceof MultiProtocolCmdProcessor){
+						cmdHandler.addMultiProtocolProcessor((MultiProtocolCmdProcessor)cmdProcessorObj);
+					}else if(cmdProcessorObj instanceof SingleProtocolCmdProcessor){
+						cmdHandler.setSingleProcessor((SingleProtocolCmdProcessor)cmdProcessorObj);
+					}
 				}
 			}
 			registerCommand(cmdHandler);
 		}
 	}
+
 	public static AbstractCmdHandler registerCommand(AbstractCmdHandler imCommandHandler) throws Exception{
 		if(imCommandHandler == null || imCommandHandler.command() == null) {
 			return null;

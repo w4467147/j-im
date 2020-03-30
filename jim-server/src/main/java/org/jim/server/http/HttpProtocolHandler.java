@@ -13,7 +13,6 @@ import org.jim.common.exception.ImException;
 import org.jim.common.http.*;
 import org.jim.common.http.handler.IHttpRequestHandler;
 import org.jim.common.protocol.AbstractProtocol;
-import org.jim.common.protocol.IProtocol;
 import org.jim.common.session.id.impl.UUIDSessionIdGenerator;
 import org.jim.server.ImServerStarter;
 import org.jim.server.config.ImServerConfig;

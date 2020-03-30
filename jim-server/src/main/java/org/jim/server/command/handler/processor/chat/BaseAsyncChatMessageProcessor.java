@@ -24,16 +24,6 @@ public abstract class BaseAsyncChatMessageProcessor implements AsyncChatMessageP
     protected abstract void doHandler(ChatBody chatBody, ImChannelContext imChannelContext);
 
 	@Override
-	public boolean isProtocol(ImChannelContext imChannelContext) {
-		return true;
-	}
-
-	@Override
-	public String name() {
-		return BASE_ASYNC_CHAT_MESSAGE_PROCESSOR;
-	}
-
-	@Override
 	public void handler(ChatBody chatBody, ImChannelContext imChannelContext){
 		//开启持久化
 		if(ImServerConfig.Const.ON.equals(imServerConfig.getIsStore())){

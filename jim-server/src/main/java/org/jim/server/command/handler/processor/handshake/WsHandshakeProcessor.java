@@ -11,6 +11,7 @@ import org.jim.common.packets.Command;
 import org.jim.common.ws.WsRequestPacket;
 import org.jim.common.ws.WsResponsePacket;
 import org.jim.common.ws.WsSessionContext;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
@@ -67,18 +68,6 @@ public class WsHandshakeProcessor implements HandshakeCmdProcessor {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * @Author WChao
-	 * @Description 协议名称
-	 * @param
-	 * @return java.lang.String
-	 **/
-	@Override
-	public String name() {
-		
-		return Protocol.WEB_SOCKET;
 	}
 
 }

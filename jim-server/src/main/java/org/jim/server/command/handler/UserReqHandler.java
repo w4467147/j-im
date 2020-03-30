@@ -72,9 +72,9 @@ public class UserReqHandler extends AbstractCmdHandler {
     public User getUserInfo(String userId , Integer type){
     	User user = null;
 		//是否开启持久化;
-    	boolean isStore = ImConfig.Const.ON.equals(imConfig.getIsStore());
+    	boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
 		//消息持久化助手;
-    	MessageHelper messageHelper = imConfig.getMessageHelper();
+    	MessageHelper messageHelper = getImConfig().getMessageHelper();
     	if(isStore){
     		user = messageHelper.getUserByType(userId, 2);
     		if(user == null) {

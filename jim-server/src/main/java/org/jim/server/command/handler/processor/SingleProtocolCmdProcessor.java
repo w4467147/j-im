@@ -10,6 +10,7 @@ import org.jim.common.ImConst;
  * @author WChao
  *
  */
-public interface CmdProcessor extends ImConst {
-	
+public interface SingleProtocolCmdProcessor extends ImConst {
+
+
 }

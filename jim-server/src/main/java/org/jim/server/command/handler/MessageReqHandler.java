@@ -40,7 +40,7 @@ public class MessageReqHandler extends AbstractCmdHandler {
 			return getMessageFailedPacket(imChannelContext);
 		}
 		UserMessageData messageData = null;
-		MessageHelper messageHelper = imConfig.getMessageHelper();
+		MessageHelper messageHelper = getImConfig().getMessageHelper();
 		//群组ID;
 		String groupId = messageReqBody.getGroupId();
 		//当前用户ID;
@@ -58,7 +58,7 @@ public class MessageReqHandler extends AbstractCmdHandler {
 		//消息类型;
 		int type = messageReqBody.getType();
 		//如果用户ID为空或者type格式不正确，获取消息失败;
-		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImServerConfig.Const.ON.equals(imConfig.getIsStore())){
+		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImServerConfig.Const.ON.equals(getImConfig().getIsStore())){
 			return getMessageFailedPacket(imChannelContext);
 		}
 		if(type == 0){

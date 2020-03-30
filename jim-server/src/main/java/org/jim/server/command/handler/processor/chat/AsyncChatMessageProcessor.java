@@ -12,7 +12,7 @@ package org.jim.server.command.handler.processor.chat;
 
 import org.jim.common.ImChannelContext;
 import org.jim.common.packets.ChatBody;
-import org.jim.server.command.handler.processor.CmdProcessor;
+import org.jim.server.command.handler.processor.SingleProtocolCmdProcessor;
 /**
  *
  * 聊天消息异步业务处理器
@@ -21,7 +21,7 @@ import org.jim.server.command.handler.processor.CmdProcessor;
  * @date 2018/11/18 上午1:36
  *
  */
-public interface AsyncChatMessageProcessor extends CmdProcessor{
+public interface AsyncChatMessageProcessor extends SingleProtocolCmdProcessor {
     /**
      * 聊天消息异步业务处理器执行方法;
      * @param chatBody

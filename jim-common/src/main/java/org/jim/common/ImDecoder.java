@@ -14,5 +14,5 @@ import org.tio.core.ChannelContext;
  */
 public interface ImDecoder {
 	
-	public ImPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws ImDecodeException;
+	 ImPacket decode(ByteBuffer buffer, ChannelContext channelContext) throws ImDecodeException;
 }

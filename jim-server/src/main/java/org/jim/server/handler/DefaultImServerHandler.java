@@ -64,11 +64,9 @@ public class DefaultImServerHandler implements ImServerHandler{
     @Override
     public ImPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext) throws ImDecodeException {
         ImServerChannelContext imServerChannelContext = (ImServerChannelContext)imChannelContext;
-        AbstractProtocolHandler handler;
+        AbstractProtocolHandler handler = imServerChannelContext.getProtocolHandler();
         if(Objects.isNull(imServerChannelContext.getSessionContext())){
             handler = ProtocolManager.initProtocolHandler(buffer, imServerChannelContext);
-        }else{
-            handler = imServerChannelContext.getProtocolHandler();
         }
         if(handler != null){
             return handler.decode(buffer, limit, position, readableLength, imServerChannelContext);

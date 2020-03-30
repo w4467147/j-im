@@ -50,7 +50,7 @@ public class ChatReqHandler extends AbstractCmdHandler {
 		//私聊
 		if(ChatType.CHAT_TYPE_PRIVATE.getNumber() == chatBody.getChatType()){
 			String toId = chatBody.getTo();
-			if(ChatKit.isOnline(toId,imConfig)){
+			if(ChatKit.isOnline(toId, getImConfig())){
 				Jim.sendToUser(toId, chatPacket);
 				//发送成功响应包
 				return ProtocolManager.Packet.success(channelContext);

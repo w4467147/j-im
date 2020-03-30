@@ -159,16 +159,4 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 			}
 		}
 	}
-
-	@Override
-	public boolean isProtocol(ImChannelContext channelContext) {
-		 
-		return true;
-	}
-
-	@Override
-	public String name() {
-		
-		return "default";
-	}
 }
