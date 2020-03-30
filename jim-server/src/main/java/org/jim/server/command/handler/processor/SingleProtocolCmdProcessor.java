@@ -11,16 +11,5 @@ import org.jim.common.ImConst;
  *
  */
 public interface CmdProcessor extends ImConst {
-	/**
-	 * 不同协议判断方法
-	 * @param imChannelContext
-	 * @return
-	 */
-	boolean isProtocol(ImChannelContext imChannelContext);
-	/**
-	 * 该proCmd处理器名称(自定义)
-	 * @return
-	 */
-	String name();
 	
 }
