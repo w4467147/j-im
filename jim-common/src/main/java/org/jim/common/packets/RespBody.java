@@ -32,22 +32,32 @@ public class RespBody implements Serializable{
 	 */
 	private Object data;
 
+	public RespBody(){}
+
 	public RespBody(Command command){
 		this.command = command;
 	}
+
 	public RespBody(Command command,Object data){
 		this(command);
 		this.data = data;
 	}
+
 	public RespBody(Command command , Status status){
 		this(command);
 		this.code = status.getCode();
 		this.msg = status.getMsg();
 	}
+
 	public RespBody(Status status){
-		this.code = status.getCode();
-		this.msg = status.getMsg();
+		this(status.getCode(), status.getMsg());
 	}
+
+	public RespBody(Integer code, String msg){
+		this.code = code;
+		this.msg = msg;
+	}
+
 	public Integer getCode() {
 		return code;
 	}
@@ -74,13 +84,16 @@ public class RespBody implements Serializable{
 		this.command = command;
 		return this;
 	}
+
 	public Object getData() {
 		return data;
 	}
+
 	public RespBody setData(Object data) {
 		this.data = data;
 		return this;
 	}
+
 	@Override
 	public String toString() {
 		return JsonKit.toJSONEnumNoUsingName(this);
@@ -89,6 +102,5 @@ public class RespBody implements Serializable{
 	public byte[] toByte(){
 		return JsonKit.toJSONBytesEnumNoUsingName(this);
 	}
-	
-	public void clear(){};
+
 }

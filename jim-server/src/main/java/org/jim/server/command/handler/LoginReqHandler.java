@@ -32,49 +32,45 @@ public class LoginReqHandler extends AbstractCmdHandler {
 
 	@Override
 	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
+		if(Objects.isNull(packet.getBody())){
+			Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(LoginRespBody.failed("body must not null!"),imChannelContext));
+			Jim.remove(imChannelContext, "body is null!");
+			return null;
+		}
 		ImServerChannelContext imServerChannelContext = (ImServerChannelContext)imChannelContext;
-		if (packet.getBody() == null) {
-			Jim.remove(imChannelContext, "body is null");
-			return null;
-		}
-		LoginCmdProcessor loginProcessor = this.getSingleProcessor(LoginCmdProcessor.class);
-		if(Objects.isNull(loginProcessor)){
-			log.info("登录失败,没有登录命令业务处理器!");
-			Jim.remove(imChannelContext, "no login serviceHandler processor!");
-			return null;
-		}
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(),LoginReqBody.class);
-		
-		LoginRespBody loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
-		if (loginRespBody == null || loginRespBody.getUser() == null) {
-			log.info("登录失败, loginName:{}, password:{}", loginReqBody.getLoginname(), loginReqBody.getPassword());
-			if(loginRespBody == null){
-				loginRespBody = new LoginRespBody(Command.COMMAND_LOGIN_RESP, ImStatus.C10008);
+		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(), LoginReqBody.class);
+		LoginCmdProcessor loginProcessor = this.getSingleProcessor(LoginCmdProcessor.class);
+		LoginRespBody loginRespBody = null;
+		User user = null;
+		if(Objects.nonNull(loginProcessor)){
+			loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
+			if (Objects.isNull(loginRespBody) || loginRespBody.getCode() != ImStatus.C10007.getCode()) {
+				log.warn("login failed, userId:{}, password:{}", loginReqBody.getUserId(), loginReqBody.getPassword());
+				Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext));
+				Jim.remove(imChannelContext, "userId or token is incorrect");
+				return null;
 			}
-			loginRespBody.clear();
-			ImPacket loginRespPacket = new ImPacket(Command.COMMAND_LOGIN_RESP, loginRespBody.toByte());
-			Jim.bSend(imChannelContext, loginRespPacket);
-			Jim.remove(imChannelContext, "loginName and token is incorrect");
-			return null;
+			user = loginProcessor.getUser(loginReqBody, imChannelContext);
 		}
-		User user = loginRespBody.getUser();
+		if(Objects.isNull(user)){
+			user = new User(loginReqBody.getUserId(),loginReqBody.getUserId());
+		}
 		IProtocol protocol = imServerChannelContext.getProtocolHandler().getProtocol();
-		String terminal = protocol == null ? "" : protocol.name();
-		user.setTerminal(terminal);
+		user.setTerminal(Objects.isNull(protocol) ? Protocol.UNKNOWN : protocol.name());
 		imSessionContext.getClient().setUser(user);
-		Jim.bindUser(imServerChannelContext, user.getId());
+		Jim.bindUser(imServerChannelContext, user.getUserId());
 		//初始化绑定或者解绑群组;
 		bindUnbindGroup(imChannelContext, user);
-		loginProcessor.onSuccess(imChannelContext);
-		loginRespBody.clear();
+		loginProcessor.onSuccess(user, imChannelContext);
 		return ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext);
 	}
+
 	/**
 	 * 初始化绑定或者解绑群组;
 	 */
 	public void bindUnbindGroup(ImChannelContext imChannelContext , User user)throws ImException{
-		String userId = user.getId();
+		String userId = user.getUserId();
 		List<Group> groups = user.getGroups();
 		if( groups != null){
 			boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());

@@ -85,6 +85,7 @@ public class UserReqHandler extends AbstractCmdHandler {
 			return user;
 		}else{
 			//user = Jim.getUser(userId);
+
 		   	if(user == null) {
 				return null;
 			}

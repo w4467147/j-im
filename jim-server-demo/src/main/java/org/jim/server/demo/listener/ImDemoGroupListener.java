@@ -42,7 +42,7 @@ public class ImDemoGroupListener implements ImGroupListener {
 		if(clientUser == null) {
 			return;
 		}
-		User notifyUser = new User(clientUser.getId(),clientUser.getNick());
+		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
 		exitGroupNotifyRespBody.setUser(notifyUser);
 		
 		RespBody respBody = new RespBody(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP,exitGroupNotifyRespBody);

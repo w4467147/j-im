@@ -19,7 +19,7 @@ public class User implements Serializable{
 	/**
 	 * 用户id;
 	 */
-	private String id;
+	private String userId;
 	/**
 	 * user nick
 	 */
@@ -54,8 +54,9 @@ public class User implements Serializable{
 	private JSONObject extras;
 	
 	public User(){}
-	public User(String id , String nick){
-		this.id = id;
+
+	public User(String userId , String nick){
+		this.userId = userId;
 		this.nick = nick;
 	}
 	public String getNick() {
@@ -76,12 +77,6 @@ public class User implements Serializable{
 	}
 	public void setGroups(List<Group> groups) {
 		this.groups = groups;
-	}
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
 	}
 	public String getStatus() {
 		return status;
@@ -113,5 +108,12 @@ public class User implements Serializable{
 	public void setExtras(JSONObject extras) {
 		this.extras = extras;
 	}
-	
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
 }

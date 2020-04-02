@@ -170,7 +170,7 @@ public class RedisImBindListener extends AbstractImBindListener{
 		if(!isStore() || user == null) {
 			return;
 		}
-		String userId = user.getId();
+		String userId = user.getUserId();
 		if(StringUtils.isEmpty(userId)) {
 			return;
 		}

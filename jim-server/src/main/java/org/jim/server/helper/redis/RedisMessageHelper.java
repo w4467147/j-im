@@ -400,7 +400,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 		if(user == null) {
 			return;
 		}
-		String userId = user.getId();
+		String userId = user.getUserId();
 		boolean isOnline = this.isOnline(userId);
 		if(isOnline){
 			user.setStatus(ONLINE);

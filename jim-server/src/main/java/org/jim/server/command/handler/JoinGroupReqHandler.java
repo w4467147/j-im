@@ -45,7 +45,7 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		
 		User clientUser = imSessionContext.getClient().getUser();
-		User notifyUser = new User(clientUser.getId(),clientUser.getNick());
+		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
 		
 		Group joinGroup = JsonKit.toBean(packet.getBody(),Group.class);
 		String groupId = joinGroup.getGroup_id();

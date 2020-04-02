@@ -44,6 +44,8 @@ public interface ImConst
 
 		String TCP = "tcp";
 
+		String UNKNOWN = "unknown";
+
 		String COOKIE_NAME_FOR_SESSION = "jim-s";
 		/**
 		 * 消息体最多为多少,只支持多少M数据

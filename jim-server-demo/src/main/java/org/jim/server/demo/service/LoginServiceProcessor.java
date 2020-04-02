@@ -22,11 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.ChannelContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author WChao
@@ -48,17 +44,17 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	
 	/**
 	 * 根据用户名和密码获取用户
-	 * @param loginName
-	 * @param password
+	 * @param loginReqBody
+	 * @param imChannelContext
 	 * @return
 	 * @author: WChao
 	 */
-	public User getUser(String loginName, String password) {
-		String text = loginName+password;
+	public User getUser(LoginReqBody loginReqBody, ImChannelContext imChannelContext) {
+		String text = loginReqBody.getUserId()+loginReqBody.getPassword();
 		String key = ImConst.AUTH_KEY;
 		String token = Md5.sign(text, key, CHARSET);
 		User user = getUser(token);
-		user.setId(loginName);
+		user.setUserId(loginReqBody.getUserId());
 		return user;
 	}
 	/**
@@ -72,7 +68,7 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 		User user = tokenMap.get(token);
 		if (user == null) {
 			user = new User();
-			user.setId(UUIDSessionIdGenerator.instance.sessionId(null));
+			user.setUserId(UUIDSessionIdGenerator.instance.sessionId(null));
 			user.setNick(familyName[RandomUtil.randomInt(0, familyName.length - 1)] + secondName[RandomUtil.randomInt(0, secondName.length - 1)]);
 			
 			user.setGroups(initGroups(user));
@@ -98,7 +94,7 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 		Group myFriend = new Group("1","我的好友");
 		List<User> myFriendGroupUsers = new ArrayList<User>();
 		User user1 = new User();
-		user1.setId(UUIDSessionIdGenerator.instance.sessionId(null));
+		user1.setUserId(UUIDSessionIdGenerator.instance.sessionId(null));
 		user1.setNick(familyName[RandomUtil.randomInt(0, familyName.length - 1)] + secondName[RandomUtil.randomInt(0, secondName.length - 1)]);
 		user1.setAvatar(nextImg());
 		myFriendGroupUsers.add(user1);
@@ -121,31 +117,18 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	 * 当登陆失败时设置user属性需要为空，相反登陆成功user属性是必须非空的;
 	 */
 	@Override
-	public LoginRespBody doLogin(LoginReqBody loginReqBody , ImChannelContext channelContext) {
-		String loginName = loginReqBody.getLoginname();
-		String password = loginReqBody.getPassword();
-		ImSessionContext imSessionContext = channelContext.getSessionContext();
-		String handshakeToken = imSessionContext.getToken();
-		User user;
-		LoginRespBody loginRespBody;
-		if (!StringUtils.isBlank(handshakeToken)) {
-			user = this.getUser(handshakeToken);
-		}else{
-			user = this.getUser(loginName, password);
+	public LoginRespBody doLogin(LoginReqBody loginReqBody, ImChannelContext imChannelContext) {
+		if(Objects.nonNull(loginReqBody.getUserId()) && Objects.nonNull(loginReqBody.getPassword())){
+			return LoginRespBody.success();
+		}else {
+			return LoginRespBody.failed();
 		}
-		if(user == null){
-			loginRespBody = new LoginRespBody(Command.COMMAND_LOGIN_RESP,ImStatus.C10008);
-		}else{
-			loginRespBody = new LoginRespBody(Command.COMMAND_LOGIN_RESP,ImStatus.C10007,user);
-		}
-		return loginRespBody;
 	}
 
 	@Override
-	public void onSuccess(ImChannelContext channelContext) {
+	public void onSuccess(User user, ImChannelContext channelContext) {
 		logger.info("登录成功回调方法");
 		ImSessionContext imSessionContext = channelContext.getSessionContext();
-		User user = imSessionContext.getClient().getUser();
 		if(user.getGroups() != null){
 			//发送加入群组通知
 			for(Group group : user.getGroups()){
@@ -158,5 +141,10 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onFailed(ImChannelContext imChannelContext) {
+
 	}
 }
