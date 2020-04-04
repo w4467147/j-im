@@ -28,7 +28,7 @@ public interface LoginCmdProcessor extends SingleProtocolCmdProcessor {
 	 */
 	User getUser(LoginReqBody loginReqBody, ImChannelContext imChannelContext);
 	/**
-	 * 登录成功回调方法
+	 * 登录成功(指的是J-IM会在用户校验完登陆逻辑后进行J-IM内部绑定)回调方法
 	 * @param imChannelContext
 	 */
 	 void onSuccess(User user, ImChannelContext imChannelContext);

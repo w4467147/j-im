@@ -7,21 +7,37 @@ import java.util.List;
 
 /**
  * 版本: [1.0]
- * 功能说明: 
+ * 功能说明: 用户群组
  * 作者: WChao 创建时间: 2017年9月21日 下午1:54:04
  */
 public class Group extends Message{
 	
 	private static final long serialVersionUID = -3817755433171220952L;
-	private String group_id;
-	private String name;//群组名称;
-	private String avatar;//群组头像;
-	private Integer online;//在线人数;
-	private List<User> users;//组用户;
+	/**
+	 * 群组ID
+	 */
+	private String groupId;
+	/**
+	 * 群组名称
+	 */
+	private String name;
+	/**
+	 * 群组头像
+	 */
+	private String avatar;
+	/**
+	 * 在线人数
+	 */
+	private Integer online;
+	/**
+	 * 组用户
+	 */
+	private List<User> users;
 
 	public Group(){}
-	public Group(String group_id , String name){
-		this.group_id = group_id;
+
+	public Group(String groupId , String name){
+		this.groupId = groupId;
 		this.name = name;
 	}
 	public String getName() {
@@ -49,10 +65,11 @@ public class Group extends Message{
 	public void setUsers(List<User> users) {
 		this.users = users;
 	}
-	public String getGroup_id() {
-		return group_id;
+	public String getGroupId() {
+		return groupId;
 	}
-	public void setGroup_id(String group_id) {
-		this.group_id = group_id;
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
 }

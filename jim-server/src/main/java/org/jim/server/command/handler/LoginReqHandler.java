@@ -41,12 +41,13 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(), LoginReqBody.class);
 		LoginCmdProcessor loginProcessor = this.getSingleProcessor(LoginCmdProcessor.class);
-		LoginRespBody loginRespBody = null;
+		LoginRespBody loginRespBody = LoginRespBody.success();
 		User user = null;
 		if(Objects.nonNull(loginProcessor)){
 			loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
 			if (Objects.isNull(loginRespBody) || loginRespBody.getCode() != ImStatus.C10007.getCode()) {
 				log.warn("login failed, userId:{}, password:{}", loginReqBody.getUserId(), loginReqBody.getPassword());
+				loginProcessor.onFailed(imChannelContext);
 				Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext));
 				Jim.remove(imChannelContext, "userId or token is incorrect");
 				return null;
@@ -61,7 +62,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		imSessionContext.getClient().setUser(user);
 		Jim.bindUser(imServerChannelContext, user.getUserId());
 		//初始化绑定或者解绑群组;
-		bindUnbindGroup(imChannelContext, user);
+		//bindUnbindGroup(imChannelContext, user);
 		loginProcessor.onSuccess(user, imChannelContext);
 		return ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext);
 	}
@@ -83,7 +84,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 			//绑定群组
 			for(Group group : groups){
 				if(isStore && groupIds != null){
-					groupIds.remove(group.getGroup_id());
+					groupIds.remove(group.getGroupId());
 				}
 				ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
 				try {

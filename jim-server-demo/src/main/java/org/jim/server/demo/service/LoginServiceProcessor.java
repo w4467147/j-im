@@ -107,10 +107,6 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 		return ImgMnService.nextImg();
 	}
 
-	public String newToken() {
-		return UUID.randomUUID().toString();
-	}
-	
 	/**
 	 * doLogin方法注意：J-IM登陆命令是根据user是否为空判断是否登陆成功,
 	 * 
@@ -128,7 +124,6 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	@Override
 	public void onSuccess(User user, ImChannelContext channelContext) {
 		logger.info("登录成功回调方法");
-		ImSessionContext imSessionContext = channelContext.getSessionContext();
 		if(user.getGroups() != null){
 			//发送加入群组通知
 			for(Group group : user.getGroups()){
