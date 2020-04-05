@@ -369,7 +369,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 			return null;
 		}
 		for(Group group : friends){
-			if(friend_group_id.equals(group.getGroup_id())){
+			if(friend_group_id.equals(group.getGroupId())){
 				List<User> users = group.getUsers();
 				if(CollectionUtils.isEmpty(users)) {
 					return null;
