@@ -1,7 +1,7 @@
 [![输开源协议](https://img.shields.io/badge/License-Apache--2.0-brightgreen.svg "Apache")](https://www.apache.org/licenses/LICENSE-2.0)
 
 [![maven最新版本](https://maven-badges.herokuapp.com/maven-central/org.j-im/jim-server/badge.svg "maven最新版本")](https://maven-badges.herokuapp.com/maven-central/org.j-im/jim-server)
-## J-IM简介（3.0.0版本大重构中）
+## J-IM简介（3.0.0版本大重构中,目前基本跑通,细节需要再处理，可以前往3.0.0-dev分支体验）
 
  J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十万至百万在线用户IM，主要目标降低即时通讯门槛，快速打造低成本接入在线IM系统，通过极简洁的消息格式就可以实现多端不同协议间的消息发送如内置(Http、Websocket、Tcp自定义IM协议)等，并提供通过http协议的api接口进行消息发送无需关心接收端属于什么协议，一个消息格式搞定一切！                                                                        
 JavaDoc https://apidoc.gitee.com/xchao/j-im/
@@ -28,7 +28,7 @@ JavaDoc https://apidoc.gitee.com/xchao/j-im/
     "createTime": "消息创建时间long类型",
     "msgType": "消息类型int类型(0:text、1:image、2:voice、3:vedio、4:music、5:news)",
     "chatType":"聊天类型int类型(0:未知,1:公聊,2:私聊)",
-    "group_id":"群组id仅在chatType为(1)时需要,String类型",
+    "groupId":"群组id仅在chatType为(1)时需要,String类型",
     "content": "内容",
     "extras" : "扩展字段,JSON对象格式如：{'扩展字段名称':'扩展字段value'}"
 }
@@ -77,7 +77,7 @@ JavaDoc https://apidoc.gitee.com/xchao/j-im/
 ```
 {
     "cmd":"命令码(14)int类型",
-    "userid":"用户id"
+    "userId":"用户id"
 }
 ```
 请求:COMMAND_CLOSE_REQ(14) 响应:无
@@ -86,7 +86,7 @@ JavaDoc https://apidoc.gitee.com/xchao/j-im/
 ```
 {
      "cmd":"命令码(17)int类型",
-     "userid":"用户id(必填项)",
+     "userId":"用户id(必填项)",
      "type":"获取类型(0:所有在线用户,1:所有离线线用户,2:所有用户[在线+离线])"
 }
 ```
