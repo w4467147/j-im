@@ -69,10 +69,6 @@
 			<artifactId>jedis</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.jfinal</groupId>
-			<artifactId>jfinal</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.oschina.j2cache</groupId>
 			<artifactId>j2cache-core</artifactId>
 		</dependency>

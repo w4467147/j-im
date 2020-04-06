@@ -4,19 +4,18 @@ import org.jim.common.ImChannelContext;
 import org.jim.common.ImConst;
 import org.jim.common.Jim;
 import org.jim.common.ImPacket;
-import org.jim.common.http.HttpConst;
+import org.jim.common.config.ImConfig;
 import org.jim.common.packets.ChatBody;
-import org.jim.common.utils.ChatKit;
 import org.jim.common.ws.IWsMsgHandler;
 import org.jim.common.ws.Opcode;
 import org.jim.common.ws.WsRequestPacket;
 import org.jim.common.ws.WsResponsePacket;
 import org.jim.common.ws.WsConfig;
+import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.ProtocolManager;
+import org.jim.server.util.ChatKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
-import org.tio.core.Tio;
 
 import java.nio.ByteBuffer;
 /**
@@ -38,8 +37,11 @@ public class WsMsgHandler implements IWsMsgHandler{
 	@Override
 	public Object onText(WsRequestPacket wsRequestPacket, String text, ImChannelContext imChannelContext) throws Exception {
 		ChatBody chatBody = ChatKit.toChatBody(wsRequestPacket.getBody(), imChannelContext);
+		ImServerConfig imServerConfig = ImServerConfig.Global.get();
+		//是否开启持久化
+		boolean isStore = ImConfig.ON.equals(imServerConfig.getIsStore());
 		String toId = chatBody.getTo();
-		if(ChatKit.isOnline(toId,null)){
+		if(ChatKit.isOnline(toId,isStore)){
 			Jim.sendToUser(toId, wsRequestPacket);
 			ImPacket sendSuccessPacket = ProtocolManager.Packet.success(imChannelContext);
 			text = new String(sendSuccessPacket.getBody(), ImConst.Http.CHARSET_NAME);

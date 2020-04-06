@@ -224,7 +224,7 @@ public class Jim implements ImConst{
 	 * @param userId
 	 * @param remark
 	 */
-	public static void remove(String userId,String remark){
+	public static void remove(String userId, String remark){
 		SetWithLock<ChannelContext> userChannelContexts = Tio.getByUserid(imConfig.getTioConfig(), userId);
 		Set<ChannelContext> channels = userChannelContexts.getObj();
 		if(channels.isEmpty()){

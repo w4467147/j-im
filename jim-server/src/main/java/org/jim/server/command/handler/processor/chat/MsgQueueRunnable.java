@@ -4,16 +4,15 @@ import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
 import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.Command;
-import org.jim.common.utils.ChatKit;
 import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.ChatReqHandler;
+import org.jim.server.util.ChatKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.utils.queue.FullWaitQueue;
 import org.tio.utils.queue.TioFullWaitQueue;
 import org.tio.utils.thread.pool.AbstractQueueRunnable;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 
 /**

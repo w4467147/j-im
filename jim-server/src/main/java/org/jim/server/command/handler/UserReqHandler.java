@@ -54,7 +54,7 @@ public class UserReqHandler extends AbstractCmdHandler {
 		}
 		RespBody resPacket = new RespBody(Command.COMMAND_GET_USER_RESP);
 		//是否开启持久化;
-		boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
+		boolean isStore = ImConfig.ON.equals(getImConfig().getIsStore());
 		if(isStore){
 			resPacket.setData(persistentUserInfo.getUserInfo(userReqBody, imChannelContext));
 		}else {

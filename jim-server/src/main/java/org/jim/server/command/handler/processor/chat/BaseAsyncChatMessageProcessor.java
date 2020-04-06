@@ -6,8 +6,9 @@ import org.jim.common.config.ImConfig;
 import org.jim.common.message.MessageHelper;
 import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.ChatType;
-import org.jim.common.utils.ChatKit;
 import org.jim.server.config.ImServerConfig;
+import org.jim.server.util.ChatKit;
+
 import java.util.List;
 /**
  * @author WChao
@@ -26,16 +27,17 @@ public abstract class BaseAsyncChatMessageProcessor implements AsyncChatMessageP
 	@Override
 	public void handler(ChatBody chatBody, ImChannelContext imChannelContext){
 		//开启持久化
-		if(ImServerConfig.Const.ON.equals(imServerConfig.getIsStore())){
+		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore());
+		if(isStore){
 			//存储群聊消息;
 			if(ChatType.CHAT_TYPE_PUBLIC.getNumber() == chatBody.getChatType()){
-				pushGroupMessages(PUSH,STORE, chatBody);
+				pushGroupMessages(PUSH, STORE, chatBody, isStore);
 			}else{
 				String from = chatBody.getFrom();
 				String to = chatBody.getTo();
 				String sessionId = ChatKit.sessionId(from,to);
 				writeMessage(STORE,USER+":"+sessionId,chatBody);
-				boolean isOnline = ChatKit.isOnline(to,imServerConfig);
+				boolean isOnline = ChatKit.isOnline(to, isStore);
 				if(!isOnline){
 					writeMessage(PUSH,USER+":"+to+":"+from,chatBody);
 				}
@@ -49,7 +51,7 @@ public abstract class BaseAsyncChatMessageProcessor implements AsyncChatMessageP
 	 * @param storeTable
 	 * @param chatBody
 	 */
-	private void pushGroupMessages(String pushTable, String storeTable , ChatBody chatBody){
+	private void pushGroupMessages(String pushTable, String storeTable , ChatBody chatBody, boolean isStore){
 		MessageHelper messageHelper = imServerConfig.getMessageHelper();
 		String group_id = chatBody.getGroup_id();
 		//先将群消息持久化到存储Timeline;
@@ -58,10 +60,10 @@ public abstract class BaseAsyncChatMessageProcessor implements AsyncChatMessageP
 		//通过写扩散模式将群消息同步到所有的群成员
 		for(String userId : userIds){
 			boolean isOnline = false;
-			if(ImServerConfig.Const.ON.equals(imServerConfig.getIsStore()) && ImServerConfig.Const.ON.equals(imServerConfig.getIsCluster())){
+			if(isStore && ImServerConfig.ON.equals(imServerConfig.getIsCluster())){
 				isOnline = messageHelper.isOnline(userId);
 			}else{
-				isOnline = ChatKit.isOnline(userId,imServerConfig);
+				isOnline = ChatKit.isOnline(userId, isStore);
 			}
 			if(!isOnline){
 				writeMessage(pushTable, GROUP+":"+group_id+":"+userId, chatBody);

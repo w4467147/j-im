@@ -269,8 +269,6 @@ public interface ImConst
 	
 	String CHANNEL = "channel";
 	
-	String PACKET = "packet";
-	
 	String STATUS = "status";
 	
 	String HTTP_REQUEST = "httpRequest";
@@ -278,8 +276,6 @@ public interface ImConst
 	String STORE = "store";
 	
 	String PUSH = "push";
-	
-	String CHAT = "chat";
 	
 	String GROUP = "group";
 	
@@ -296,9 +292,9 @@ public interface ImConst
 	String OFFLINE = "offline";
 	
 	String JIM = "JIM";
-	
-	String CONVERTER = "converter";
 
-	String BASE_ASYNC_CHAT_MESSAGE_PROCESSOR = "base_async_chat_message_processor";
-	
+	String ON = "on";
+
+	String OFF = "off";
+
 }

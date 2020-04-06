@@ -71,7 +71,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		List<Group> groups = user.getGroups();
 		if(CollectionUtils.isEmpty(groups))
 			return;
-		boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
+		boolean isStore = ImConfig.ON.equals(getImConfig().getIsStore());
 		MessageHelper messageHelper = getImConfig().getMessageHelper();
 		List<String> groupIds = null;
 		if(isStore){

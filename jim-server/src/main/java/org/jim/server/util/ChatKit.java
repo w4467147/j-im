@@ -1,20 +1,22 @@
 /**
  * 
  */
-package org.jim.common.utils;
+package org.jim.server.util;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.jim.common.*;
+import org.jim.common.ImChannelContext;
+import org.jim.common.ImConst;
+import org.jim.common.ImSessionContext;
+import org.jim.common.Jim;
 import org.jim.common.config.ImConfig;
-import org.jim.common.exception.ImException;
-import org.jim.common.http.HttpConst;
 import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
 import org.jim.common.packets.User;
 import org.jim.common.session.id.impl.UUIDSessionIdGenerator;
-import org.tio.core.ChannelContext;
+import org.jim.common.utils.JsonKit;
+import org.jim.server.config.ImServerConfig;
+import java.util.List;
 
 /**
  * IM聊天命令工具类
@@ -95,19 +97,19 @@ public class ChatKit {
 
      /**
       * 判断用户是否在线
-      * @param userId
-	  * @param imConfig
+      * @param userId 用户ID
+	  * @param isStore 是否开启持久化(true:开启,false:未开启)
       * @return
       */
-     public static boolean isOnline(String userId , ImConfig imConfig){
-    	/* boolean isStore = ImConst.ON.equals(imConfig.getIsStore());
+     public static boolean isOnline(String userId , boolean isStore){
 		 if(isStore){
-			return imConfig.getMessageHelper().isOnline(userId);
+			ImServerConfig imServerConfig = ImConfig.Global.get();
+			return imServerConfig.getMessageHelper().isOnline(userId);
 		 }
-    	 SetWithLock<ChannelContext> toChannelContexts = Jim.getChannelContextsByUserId(userId);
-    	 if(toChannelContexts != null && toChannelContexts.size() > 0){
+    	 List<ImChannelContext> imChannelContexts = Jim.getByUserId(userId);
+    	 if(CollectionUtils.isNotEmpty(imChannelContexts)){
     		 return true;
-    	 }*/
+    	 }
     	 return false;
      }
 

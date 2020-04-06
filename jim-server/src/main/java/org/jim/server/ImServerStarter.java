@@ -39,8 +39,8 @@ public class ImServerStarter {
 		if(imServerConfig.getMessageHelper() == null){
 			imServerConfig.setMessageHelper(new RedisMessageHelper());
 		}
-		if(ImConfig.Const.ON.equals(imServerConfig.getIsCluster())){
-			imServerConfig.setIsStore(ImConfig.Const.ON);
+		if(ImConfig.ON.equals(imServerConfig.getIsCluster())){
+			imServerConfig.setIsStore(ImConfig.ON);
 			if(imServerConfig.getCluster() == null){
 				try{
 					imServerConfig.setCluster(new RedisCluster(RedisClusterConfig.newInstance(ImConst.Topic.REDIS_CLUSTER_TOPIC_SUFFIX, RedissonTemplate.me().getRedissonClient())));

@@ -21,7 +21,7 @@ public interface IWsMsgHandler
 	 * 2016年11月18日 下午1:08:45
 	 *
 	 */
-	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext)  throws Exception;
+	ImPacket handler(ImPacket packet, ImChannelContext imChannelContext)  throws Exception;
 	/**
 	 * @param wsPacket
 	 * @param text

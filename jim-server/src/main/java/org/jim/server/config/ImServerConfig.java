@@ -46,15 +46,15 @@ public class ImServerConfig extends ImConfig {
     /**
      * 是否开启持久化;
      */
-    private String isStore = Const.OFF;
+    private String isStore = OFF;
     /**
      * 是否开启集群;
      */
-    private String isCluster = Const.OFF;
+    private String isCluster = OFF;
     /**
      * 是否开启SSL加密
      */
-    private String isSSL = Const.OFF;
+    private String isSSL = OFF;
     /**
      * SSL配置
      */
@@ -100,11 +100,11 @@ public class ImServerConfig extends ImConfig {
 
         private MessageHelper messageHelper;
 
-        private String isStore = Const.OFF;
+        private String isStore = OFF;
 
-        private String isCluster = Const.OFF;
+        private String isCluster = OFF;
 
-        private String isSSL = Const.OFF;
+        private String isSSL =  OFF;
 
         private SslConfig sslConfig;
 

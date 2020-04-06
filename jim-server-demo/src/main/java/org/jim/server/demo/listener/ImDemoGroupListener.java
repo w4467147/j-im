@@ -43,29 +43,24 @@ public class ImDemoGroupListener implements ImGroupListener {
 	 */
 	@Override
 	public void onAfterUnbind(ImChannelContext channelContext, Group group) throws ImException {
+
+	}
+
+	@Override
+	public void onAfterUnbind(ImChannelContext imChannelContext, String groupId) throws ImException {
 		//发退出房间通知  COMMAND_EXIT_GROUP_NOTIFY_RESP
 		ExitGroupNotifyRespBody exitGroupNotifyRespBody = new ExitGroupNotifyRespBody();
-		exitGroupNotifyRespBody.setGroup(group.getGroupId());
-		Client client = channelContext.getSessionContext().getClient();
-		if(client == null){
-			return;
-		}
-		User clientUser = client.getUser();
+		exitGroupNotifyRespBody.setGroup(groupId);
+		User clientUser = imChannelContext.getSessionContext().getClient().getUser();
 		if(clientUser == null) {
 			return;
 		}
 		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
 		exitGroupNotifyRespBody.setUser(notifyUser);
-		
+
 		RespBody respBody = new RespBody(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP,exitGroupNotifyRespBody);
 		ImPacket imPacket = new ImPacket(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP, respBody.toByte());
-		Jim.sendToGroup(group.getGroupId(), imPacket);
-		
-	}
-
-	@Override
-	public void onAfterUnbind(ImChannelContext imChannelContext, String groupId) throws ImException {
-
+		Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(imPacket, imChannelContext));
 	}
 
 	/**

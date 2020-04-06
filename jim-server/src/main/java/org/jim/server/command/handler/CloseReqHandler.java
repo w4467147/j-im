@@ -23,7 +23,7 @@ public class CloseReqHandler extends AbstractCmdHandler
 	@Override
 	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException
 	{
-		CloseReqBody closeReqBody = null;
+		CloseReqBody closeReqBody;
 		try{
 			closeReqBody = JsonKit.toBean(packet.getBody(),CloseReqBody.class);
 		}catch (Exception e) {
@@ -31,10 +31,10 @@ public class CloseReqHandler extends AbstractCmdHandler
 			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10020), imChannelContext);
 		}
 		Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10021), imChannelContext));
-		if(closeReqBody == null || closeReqBody.getUserid() == null){
+		if(closeReqBody == null || closeReqBody.getUserId() == null){
 			Jim.remove(imChannelContext, "收到关闭请求");
 		}else{
-			String userId = closeReqBody.getUserid();
+			String userId = closeReqBody.getUserId();
 			Jim.remove(userId, "收到关闭请求!");
 		}
 		return null;

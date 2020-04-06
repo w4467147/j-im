@@ -3,7 +3,6 @@ package org.jim.server.helper.redis;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.config.ImConfig;
 import org.jim.common.cache.redis.JedisTemplate;
 import org.jim.common.cache.redis.RedisCache;
 import org.jim.common.cache.redis.RedisCacheManager;
@@ -13,8 +12,8 @@ import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.Group;
 import org.jim.common.packets.User;
 import org.jim.common.packets.UserMessageData;
-import org.jim.common.utils.ChatKit;
 import org.jim.common.utils.JsonKit;
+import org.jim.server.util.ChatKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

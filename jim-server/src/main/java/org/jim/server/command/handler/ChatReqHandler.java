@@ -3,17 +3,16 @@ package org.jim.server.command.handler;
 import org.jim.common.ImChannelContext;
 import org.jim.common.Jim;
 import org.jim.common.ImPacket;
+import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImException;
 import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.ChatType;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.RespBody;
-import org.jim.common.utils.ChatKit;
 import org.jim.server.ImServerChannelContext;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.command.handler.processor.chat.AsyncChatMessageProcessor;
-import org.jim.server.command.handler.processor.chat.ChatCmdProcessor;
 import org.jim.server.handler.ProtocolManager;
+import org.jim.server.util.ChatKit;
 import org.tio.utils.thread.pool.AbstractQueueRunnable;
 
 /**
@@ -43,10 +42,11 @@ public class ChatReqHandler extends AbstractCmdHandler {
 		ImPacket chatPacket = new ImPacket(Command.COMMAND_CHAT_REQ,new RespBody(Command.COMMAND_CHAT_REQ,chatBody).toByte());
 		//设置同步序列号;
 		chatPacket.setSynSeq(packet.getSynSeq());
+		boolean isStore = ImConfig.ON.equals(getImConfig().getIsStore());
 		//私聊
 		if(ChatType.CHAT_TYPE_PRIVATE.getNumber() == chatBody.getChatType()){
 			String toId = chatBody.getTo();
-			if(ChatKit.isOnline(toId, getImConfig())){
+			if(ChatKit.isOnline(toId, isStore)){
 				Jim.sendToUser(toId, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));
 				//发送成功响应包
 				return ProtocolManager.Packet.success(channelContext);

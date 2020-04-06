@@ -58,7 +58,7 @@ public class MessageReqHandler extends AbstractCmdHandler {
 		//消息类型;
 		int type = messageReqBody.getType();
 		//如果用户ID为空或者type格式不正确，获取消息失败;
-		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImServerConfig.Const.ON.equals(getImConfig().getIsStore())){
+		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImServerConfig.ON.equals(getImConfig().getIsStore())){
 			return getMessageFailedPacket(imChannelContext);
 		}
 		if(type == 0){

@@ -76,13 +76,6 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
         }
     }
 
-    public static class Const{
-
-        public static final String ON = "on";
-
-        public static final String OFF = "off";
-
-    }
     /**
      * 获取ImHandler对象
      * @return

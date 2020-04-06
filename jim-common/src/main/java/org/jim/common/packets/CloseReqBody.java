@@ -1,21 +1,30 @@
 package org.jim.common.packets;
 
 /**
+ * 退出指定用户请求体
  * @author WChao
  * @date 2018年4月13日 下午4:20:40
  */
 public class CloseReqBody extends Message {
 
 	private static final long serialVersionUID = 771895783302296339L;
+
 	public CloseReqBody(){};
-	public CloseReqBody(String userid){
-		this.userid = userid;
+
+	public CloseReqBody(String userId){
+		this.userId = userId;
 	}
-	private String userid;//用户id;
-	public String getUserid() {
-		return userid;
+
+	/**
+	 * 用户ID
+	 */
+	private String userId;
+
+	public String getUserId() {
+		return userId;
 	}
-	public void setUserid(String userid) {
-		this.userid = userid;
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }

@@ -29,6 +29,6 @@ public class ImGroupListenerAdapter implements GroupListener, ImConst {
     @Override
     public void onAfterUnbind(ChannelContext channelContext, String group) throws Exception {
         ImChannelContext imChannelContext = (ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY);
-        imGroupListener.onAfterBind(imChannelContext, group);
+        imGroupListener.onAfterUnbind(imChannelContext, group);
     }
 }

@@ -186,6 +186,6 @@ public class RedisImBindListener extends AbstractImBindListener{
 	 */
 	public boolean isStore(){
 		ImServerConfig imServerConfig = (ImServerConfig)imConfig;
-		return ImConfig.Const.ON.equals(imServerConfig.getIsStore());
+		return ImConfig.ON.equals(imServerConfig.getIsStore());
 	}
 }
