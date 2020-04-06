@@ -2,6 +2,7 @@ package org.jim.common.listener;
 
 import org.jim.common.ImChannelContext;
 import org.jim.common.exception.ImException;
+import org.jim.common.packets.Group;
 import org.tio.core.ChannelContext;
 
 /**
@@ -14,19 +15,37 @@ import org.tio.core.ChannelContext;
 public interface ImGroupListener {
     /**
      * 绑定群组后回调该方法
-     * @param imChannelContext
-     * @param group
+     * @param imChannelContext IM通道上下文
+     * @param group 绑定群组对象
      * @throws ImException
      * @author WChao
      */
-    void onAfterBind(ImChannelContext imChannelContext, String group) throws ImException;
+    void onAfterBind(ImChannelContext imChannelContext, Group group) throws ImException;
+
+    /**
+     * 绑定群组后回调该方法
+     * @param imChannelContext IM通道上下文
+     * @param groupId 群组ID
+     * @throws ImException
+     * @author WChao
+     */
+    void onAfterBind(ImChannelContext imChannelContext, String groupId) throws ImException;
 
     /**
      * 解绑群组后回调该方法
-     * @param imChannelContext
-     * @param group
+     * @param imChannelContext IM通道上下文
+     * @param group 绑定群组对象
      * @throws ImException
      * @author WChao
      */
-    void onAfterUnbind(ImChannelContext imChannelContext, String group) throws ImException;
+    void onAfterUnbind(ImChannelContext imChannelContext, Group group) throws ImException;
+
+    /**
+     * 解绑群组后回调该方法
+     * @param imChannelContext IM通道上下文
+     * @param groupId 群组ID
+     * @throws ImException
+     * @author WChao
+     */
+    void onAfterUnbind(ImChannelContext imChannelContext, String groupId) throws ImException;
 }

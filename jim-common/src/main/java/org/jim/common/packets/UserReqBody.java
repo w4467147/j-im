@@ -14,7 +14,7 @@ public class UserReqBody extends Message{
 	/**
 	 * 用户id;
 	 */
-	private String userid;
+	private String userId;
 	/**
 	 * 0:单个,1:所有在线用户,2:所有用户(在线+离线);
 	 */
@@ -22,35 +22,41 @@ public class UserReqBody extends Message{
 	/**
 	 * 好友分组id;
 	 */
-	private String friend_group_id;
+	private String friendGroupId;
 	/**
 	 * 群组id;
 	 */
-	private String group_id;
-	
-	public String getUserid() {
-		return userid;
+	private String groupId;
+
+	public String getUserId() {
+		return userId;
 	}
-	public void setUserid(String userid) {
-		this.userid = userid;
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
+
 	public Integer getType() {
 		return type;
 	}
+
 	public void setType(Integer type) {
 		this.type = type;
 	}
-	public String getFriend_group_id() {
-		return friend_group_id;
+
+	public String getFriendGroupId() {
+		return friendGroupId;
 	}
-	public void setFriend_group_id(String friend_group_id) {
-		this.friend_group_id = friend_group_id;
+
+	public void setFriendGroupId(String friendGroupId) {
+		this.friendGroupId = friendGroupId;
 	}
-	public String getGroup_id() {
-		return group_id;
+
+	public String getGroupId() {
+		return groupId;
 	}
-	public void setGroup_id(String group_id) {
-		this.group_id = group_id;
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
-	
 }

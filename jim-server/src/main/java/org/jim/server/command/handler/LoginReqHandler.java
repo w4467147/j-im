@@ -1,5 +1,6 @@
 package org.jim.server.command.handler;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.jim.common.*;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImException;
@@ -32,11 +33,6 @@ public class LoginReqHandler extends AbstractCmdHandler {
 
 	@Override
 	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
-		if(Objects.isNull(packet.getBody())){
-			Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(LoginRespBody.failed("body must not null!"),imChannelContext));
-			Jim.remove(imChannelContext, "body is null!");
-			return null;
-		}
 		ImServerChannelContext imServerChannelContext = (ImServerChannelContext)imChannelContext;
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		LoginReqBody loginReqBody = JsonKit.toBean(packet.getBody(), LoginReqBody.class);
@@ -46,7 +42,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		if(Objects.nonNull(loginProcessor)){
 			loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
 			if (Objects.isNull(loginRespBody) || loginRespBody.getCode() != ImStatus.C10007.getCode()) {
-				log.warn("login failed, userId:{}, password:{}", loginReqBody.getUserId(), loginReqBody.getPassword());
+				log.error("login failed, userId:{}, password:{}", loginReqBody.getUserId(), loginReqBody.getPassword());
 				loginProcessor.onFailed(imChannelContext);
 				Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext));
 				Jim.remove(imChannelContext, "userId or token is incorrect");
@@ -62,7 +58,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		imSessionContext.getClient().setUser(user);
 		Jim.bindUser(imServerChannelContext, user.getUserId());
 		//初始化绑定或者解绑群组;
-		//bindUnbindGroup(imChannelContext, user);
+		initGroup(imChannelContext, user);
 		loginProcessor.onSuccess(user, imChannelContext);
 		return ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext);
 	}
@@ -70,34 +66,33 @@ public class LoginReqHandler extends AbstractCmdHandler {
 	/**
 	 * 初始化绑定或者解绑群组;
 	 */
-	public void bindUnbindGroup(ImChannelContext imChannelContext , User user)throws ImException{
+	public void initGroup(ImChannelContext imChannelContext , User user)throws ImException{
 		String userId = user.getUserId();
 		List<Group> groups = user.getGroups();
-		if( groups != null){
-			boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
-			MessageHelper messageHelper = null;
-			List<String> groupIds = null;
-			if(isStore){
-				messageHelper = getImConfig().getMessageHelper();
-				groupIds = messageHelper.getGroups(userId);
-			}
-			//绑定群组
-			for(Group group : groups){
-				if(isStore && groupIds != null){
-					groupIds.remove(group.getGroupId());
-				}
-				ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
-				try {
-					JoinGroupReqHandler joinGroupReqHandler = CommandManager.getCommand(Command.COMMAND_JOIN_GROUP_REQ, JoinGroupReqHandler.class);
-					joinGroupReqHandler.bindGroup(groupPacket, imChannelContext);
-				} catch (Exception e) {
-					log.error(e.toString(),e);
-				}
-			}
+		if(CollectionUtils.isEmpty(groups))
+			return;
+		boolean isStore = ImConfig.Const.ON.equals(getImConfig().getIsStore());
+		MessageHelper messageHelper = getImConfig().getMessageHelper();
+		List<String> groupIds = null;
+		if(isStore){
+			groupIds = messageHelper.getGroups(userId);
+		}
+		//绑定群组
+		for(Group group : groups){
 			if(isStore && groupIds != null){
-				for(String groupId : groupIds){
-					messageHelper.getBindListener().onAfterGroupUnbind(imChannelContext, groupId);
-				}
+				groupIds.remove(group.getGroupId());
+			}
+			ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
+			try {
+				JoinGroupReqHandler joinGroupReqHandler = CommandManager.getCommand(Command.COMMAND_JOIN_GROUP_REQ, JoinGroupReqHandler.class);
+				joinGroupReqHandler.handler(groupPacket, imChannelContext);
+			} catch (Exception e) {
+				log.error(e.toString(),e);
+			}
+		}
+		if(isStore && groupIds != null){
+			for(String groupId : groupIds){
+				messageHelper.getBindListener().onAfterGroupUnbind(imChannelContext, groupId);
 			}
 		}
 	}

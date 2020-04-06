@@ -9,8 +9,10 @@ import org.jim.common.packets.Command;
 import org.jim.common.utils.PropUtil;
 import org.jim.server.ImServerStarter;
 import org.jim.server.command.CommandManager;
+import org.jim.server.command.handler.ChatReqHandler;
 import org.jim.server.command.handler.HandshakeReqHandler;
 import org.jim.server.command.handler.LoginReqHandler;
+import org.jim.server.command.handler.processor.chat.DefaultAsyncChatMessageProcessor;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.config.PropertyImServerConfigBuilder;
 import org.jim.server.demo.command.DemoWsHandshakeProcessor;
@@ -38,6 +40,9 @@ public class ImServerDemoStart {
 		LoginReqHandler loginReqHandler = CommandManager.getCommand(Command.COMMAND_LOGIN_REQ,LoginReqHandler.class);
 		//添加登录业务处理器;
 		loginReqHandler.setSingleProcessor(new LoginServiceProcessor());
+		//添加用户业务聊天记录处理继承抽象类BaseAsyncChatMessageProcessor即可，以下为默认的处理器！
+		ChatReqHandler chatReqHandler = CommandManager.getCommand(Command.COMMAND_CHAT_REQ, ChatReqHandler.class);
+		chatReqHandler.setSingleProcessor(new DefaultAsyncChatMessageProcessor());
 		/*****************end *******************************************************************************************/
 		imServerStarter.start();
 	}

@@ -86,12 +86,13 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	public List<Group> initGroups(User user){
 		//模拟的群组;正式根据业务去查数据库或者缓存;
 		List<Group> groups = new ArrayList<Group>();
-		groups.add(new Group("100","J-IM朋友圈"));
+		groups.add(Group.newBuilder().groupId("100").name("J-IM朋友圈").build());
 		return groups;
 	}
+
 	public List<Group> initFriends(User user){
 		List<Group> friends = new ArrayList<Group>();
-		Group myFriend = new Group("1","我的好友");
+		Group myFriend = Group.newBuilder().groupId("1").name("我的好友").build();
 		List<User> myFriendGroupUsers = new ArrayList<User>();
 		User user1 = new User();
 		user1.setUserId(UUIDSessionIdGenerator.instance.sessionId(null));
@@ -124,22 +125,10 @@ public class LoginServiceProcessor implements LoginCmdProcessor {
 	@Override
 	public void onSuccess(User user, ImChannelContext channelContext) {
 		logger.info("登录成功回调方法");
-		if(user.getGroups() != null){
-			//发送加入群组通知
-			for(Group group : user.getGroups()){
-				ImPacket groupPacket = new ImPacket(Command.COMMAND_JOIN_GROUP_REQ,JsonKit.toJsonBytes(group));
-				try {
-					JoinGroupReqHandler joinGroupReqHandler = CommandManager.getCommand(Command.COMMAND_JOIN_GROUP_REQ, JoinGroupReqHandler.class);
-					joinGroupReqHandler.joinGroupNotify(groupPacket, channelContext);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	@Override
 	public void onFailed(ImChannelContext imChannelContext) {
-
+		logger.info("登录失败回调方法");
 	}
 }

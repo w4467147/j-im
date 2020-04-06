@@ -20,6 +20,7 @@ import org.jim.server.command.CommandManager;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.AbstractProtocolHandler;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 /**
  * 版本: [1.0]
@@ -58,7 +59,7 @@ public class TcpProtocolHandler extends AbstractProtocolHandler {
 			return;
 		}
 		ImPacket response = cmdHandler.handler(tcpPacket, imChannelContext);
-		if(response != null && tcpPacket.getSynSeq() < 1){
+		if(Objects.nonNull(response) && tcpPacket.getSynSeq() < 1){
 			Jim.send(imChannelContext, response);
 		}
 	}

@@ -3,6 +3,7 @@
  */
 package org.jim.common.packets;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.Serializable;
@@ -59,55 +60,6 @@ public class User implements Serializable{
 		this.userId = userId;
 		this.nick = nick;
 	}
-	public String getNick() {
-		return nick;
-	}
-	public void setNick(String nick) {
-		this.nick = nick;
-	}
-	public String getAvatar() {
-		return avatar;
-	}
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
-	}
-	
-	public List<Group> getGroups() {
-		return groups;
-	}
-	public void setGroups(List<Group> groups) {
-		this.groups = groups;
-	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
-	public String getSign() {
-		return sign;
-	}
-	public void setSign(String sign) {
-		this.sign = sign;
-	}
-	public List<Group> getFriends() {
-		return friends;
-	}
-	public void setFriends(List<Group> friends) {
-		this.friends = friends;
-	}
-	public String getTerminal() {
-		return terminal;
-	}
-	public void setTerminal(String terminal) {
-		this.terminal = terminal;
-	}
-	public JSONObject getExtras() {
-		return extras;
-	}
-	public void setExtras(JSONObject extras) {
-		this.extras = extras;
-	}
 
 	public String getUserId() {
 		return userId;
@@ -116,4 +68,75 @@ public class User implements Serializable{
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
+
+	public String getNick() {
+		return nick;
+	}
+
+	public void setNick(String nick) {
+		this.nick = nick;
+	}
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getSign() {
+		return sign;
+	}
+
+	public void setSign(String sign) {
+		this.sign = sign;
+	}
+
+	public String getTerminal() {
+		return terminal;
+	}
+
+	public void setTerminal(String terminal) {
+		this.terminal = terminal;
+	}
+
+	public List<Group> getFriends() {
+		return friends;
+	}
+
+	public void setFriends(List<Group> friends) {
+		this.friends = friends;
+	}
+
+	public List<Group> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(List<Group> groups) {
+		this.groups = groups;
+	}
+
+	public JSONObject getExtras() {
+		return extras;
+	}
+
+	public void setExtras(JSONObject extras) {
+		this.extras = extras;
+	}
+
+	public User clone(){
+		User cloneUser = new User();
+		BeanUtil.copyProperties(this, cloneUser,"friends","groups");
+		return cloneUser;
+	}
+
 }

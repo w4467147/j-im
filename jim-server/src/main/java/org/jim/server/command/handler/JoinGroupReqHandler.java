@@ -31,41 +31,6 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 	@Override
 	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
 		//绑定群组;
-		ImPacket joinGroupRespPacket = bindGroup(packet, imChannelContext);
-		//发送进房间通知;
-		joinGroupNotify(packet,imChannelContext);
-		return joinGroupRespPacket;
-	}
-	/**
-	 * 发送进房间通知;
-	 * @param packet
-	 * @param imChannelContext
-	 */
-	public void joinGroupNotify(ImPacket packet, ImChannelContext imChannelContext)throws ImException{
-		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-		
-		User clientUser = imSessionContext.getClient().getUser();
-		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
-		
-		Group joinGroup = JsonKit.toBean(packet.getBody(),Group.class);
-		String groupId = joinGroup.getGroupId();
-		//发进房间通知  COMMAND_JOIN_GROUP_NOTIFY_RESP
-		JoinGroupNotifyRespBody joinGroupNotifyRespBody = new JoinGroupNotifyRespBody(Command.COMMAND_JOIN_GROUP_NOTIFY_RESP, ImStatus.C10011)
-				.setGroup(groupId)
-				.setUser(notifyUser);
-		Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(joinGroupNotifyRespBody,imChannelContext));
-	}
-	/**
-	 * 绑定群组
-	 * @param packet
-	 * @param imChannelContext
-	 * @return
-	 * @throws ImException
-	 */
-	public ImPacket bindGroup(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
-		if (packet.getBody() == null) {
-			throw new ImException("body is null");
-		}
 		Group joinGroup = JsonKit.toBean(packet.getBody(),Group.class);
 		String groupId = joinGroup.getGroupId();
 		if (StringUtils.isBlank(groupId)) {
@@ -74,28 +39,20 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 			return null;
 		}
 		//实际绑定之前执行处理器动作
-		GroupCmdProcessor groupCmdProcessor = (GroupCmdProcessor)this.getSingleProcessor();
-
-		JoinGroupRespBody joinGroupRespBody = new JoinGroupRespBody(Command.COMMAND_JOIN_GROUP_RESP,ImStatus.C10011);
+		GroupCmdProcessor groupProcessor = (GroupCmdProcessor)this.getSingleProcessor();
 		//当有群组处理器时候才会去处理
-		if(Objects.nonNull(groupCmdProcessor)){
-			joinGroupRespBody = groupCmdProcessor.join(joinGroup, imChannelContext);
-			if (joinGroupRespBody == null || JoinGroupResult.JOIN_GROUP_RESULT_OK.getNumber() != joinGroupRespBody.getResult().getNumber()) {
-				RespBody joinRespBody = new RespBody(Command.COMMAND_JOIN_GROUP_RESP, ImStatus.C10012).setData(joinGroupRespBody);
-				ImPacket respPacket = ProtocolManager.Converter.respPacket(joinRespBody, imChannelContext);
+		if(Objects.nonNull(groupProcessor)){
+			JoinGroupRespBody joinGroupRespBody = groupProcessor.join(joinGroup, imChannelContext);
+			boolean joinGroupIsTrue = Objects.isNull(joinGroupRespBody) || JoinGroupResult.JOIN_GROUP_RESULT_OK.getNumber() != joinGroupRespBody.getResult().getNumber();
+			if (joinGroupIsTrue) {
+				joinGroupRespBody = JoinGroupRespBody.failed().setData(joinGroupRespBody);
+				ImPacket respPacket = ProtocolManager.Converter.respPacket(joinGroupRespBody, imChannelContext);
 				return respPacket;
 			}
 		}
 		//处理完处理器内容后
-		Jim.bindGroup(imChannelContext, groupId);
-
-		//回一条消息，告诉对方进群结果
-		joinGroupRespBody.setGroup(groupId);
-		//先定义为操作成功
-		joinGroupRespBody.setResult(JoinGroupResult.JOIN_GROUP_RESULT_OK);
-		joinGroupRespBody.setData(joinGroupRespBody);
-		ImPacket respPacket = ProtocolManager.Converter.respPacket(joinGroupRespBody, imChannelContext);
-		return respPacket;
+		Jim.bindGroup(imChannelContext, joinGroup);
+		return null;
 	}
 	@Override
 	public Command command() {

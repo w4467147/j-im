@@ -94,7 +94,7 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 			return;
 		}
 		ImPacket response = cmdHandler.handler(wsRequestPacket, imChannelContext);
-		if(response != null){
+		if(Objects.nonNull(response)){
 			Jim.send(imChannelContext, response);
 		}
 	}

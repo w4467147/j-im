@@ -157,6 +157,7 @@ public class ChatBody extends Message {
 		protected Builder getThis() {
 			return this;
 		}
+
 		@Override
 		public ChatBody build(){
 			return new ChatBody(this.id , this.from , this.to , this.msgType , this.chatType , this.content , this.group_id ,this.cmd , this.createTime , this.extras);

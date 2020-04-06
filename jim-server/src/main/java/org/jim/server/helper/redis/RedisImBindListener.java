@@ -174,8 +174,7 @@ public class RedisImBindListener extends AbstractImBindListener{
 		if(StringUtils.isEmpty(userId)) {
 			return;
 		}
-		User userCopy = ImKit.copyUserWithoutFriendsGroups(user);
-		userCache.put(userId+SUFFIX+INFO, userCopy);
+		userCache.put(userId+SUFFIX+INFO, user.clone());
 		List<Group> friends = user.getFriends();
 		if(friends != null){
 			userCache.put(userId+SUFFIX+FRIENDS, (Serializable) friends);

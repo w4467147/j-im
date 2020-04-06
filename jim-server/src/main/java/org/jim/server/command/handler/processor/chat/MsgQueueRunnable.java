@@ -1,7 +1,6 @@
 package org.jim.server.command.handler.processor.chat;
 
 import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
 import org.jim.common.ImPacket;
 import org.jim.common.packets.ChatBody;
 import org.jim.common.packets.Command;
@@ -10,11 +9,11 @@ import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.ChatReqHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
 import org.tio.utils.queue.FullWaitQueue;
 import org.tio.utils.queue.TioFullWaitQueue;
 import org.tio.utils.thread.pool.AbstractQueueRunnable;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 
 /**
@@ -28,10 +27,20 @@ public class MsgQueueRunnable extends AbstractQueueRunnable<ImPacket> {
 	private ImChannelContext imChannelContext;
 	
 	private AsyncChatMessageProcessor chatMessageProcessor;
+
+	/** The msg queue. */
+	private FullWaitQueue<ImPacket> msgQueue = null;
 	
 	@Override
 	public FullWaitQueue<ImPacket> getMsgQueue() {
-		return new TioFullWaitQueue(Integer.MAX_VALUE,true);
+		if (msgQueue == null) {
+			synchronized (this) {
+				if (msgQueue == null) {
+					msgQueue = new TioFullWaitQueue<ImPacket>(Integer.MAX_VALUE, true);
+				}
+			}
+		}
+		return msgQueue;
 	}
 
 	public MsgQueueRunnable(ImChannelContext imChannelContext, Executor executor) {
@@ -43,7 +52,7 @@ public class MsgQueueRunnable extends AbstractQueueRunnable<ImPacket> {
 
 	@Override
 	public void runTask() {
-		ImPacket packet = null;
+		ImPacket packet;
 		while ((packet = this.getMsgQueue().poll()) != null) {
 			if(chatMessageProcessor != null){
 				try {
@@ -55,4 +64,5 @@ public class MsgQueueRunnable extends AbstractQueueRunnable<ImPacket> {
 			}
 		}
 	}
+
 }

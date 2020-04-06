@@ -13,9 +13,9 @@ public enum JoinGroupResult{
    *不允许进入，原因为其它
    * </pre>
    *
-   * <code>JOIN_GROUP_RESULT_UNKNOW = 0;</code>
+   * <code>JOIN_GROUP_RESULT_UNKNOWN = 0;</code>
    */
-  JOIN_GROUP_RESULT_UNKNOW(0),
+  JOIN_GROUP_RESULT_UNKNOWN(0),
   /**
    * <pre>
    *允许进入
@@ -53,9 +53,9 @@ public enum JoinGroupResult{
    *被踢
    * </pre>
    *
-   * <code>JOIN_GROUP_RESULT_TAKEOUTED = 5;</code>
+   * <code>JOIN_GROUP_RESULT_KICKED = 5;</code>
    */
-  JOIN_GROUP_RESULT_TAKEOUTED(5),
+  JOIN_GROUP_RESULT_KICKED(5),
   ;
 
   public final int getNumber() {
@@ -68,12 +68,12 @@ public enum JoinGroupResult{
 
   public static JoinGroupResult forNumber(int value) {
     switch (value) {
-      case 0: return JOIN_GROUP_RESULT_UNKNOW;
+      case 0: return JOIN_GROUP_RESULT_UNKNOWN;
       case 1: return JOIN_GROUP_RESULT_OK;
       case 2: return JOIN_GROUP_RESULT_NOT_EXIST;
       case 3: return JOIN_GROUP_RESULT_GROUP_FULL;
       case 4: return JOIN_GROUP_RESULT_IN_BACKLIST;
-      case 5: return JOIN_GROUP_RESULT_TAKEOUTED;
+      case 5: return JOIN_GROUP_RESULT_KICKED;
       default: return null;
     }
   }

@@ -91,6 +91,7 @@ public class Message implements Serializable{
 		 * 扩展字段;
 		 */
 		protected JSONObject extras;
+
 		private B theBuilder = this.getThis();
 
 		/**

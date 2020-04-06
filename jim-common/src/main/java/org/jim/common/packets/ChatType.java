@@ -12,9 +12,9 @@ public enum ChatType{
    *未知
    * </pre>
    *
-   * <code>CHAT_TYPE_UNKNOW = 0;</code>
+   * <code>CHAT_TYPE_UNKNOWN = 0;</code>
    */
-  CHAT_TYPE_UNKNOW(0),
+  CHAT_TYPE_UNKNOWN(0),
   /**
    * <pre>
    *公聊
@@ -43,7 +43,7 @@ public enum ChatType{
 
   public static ChatType forNumber(int value) {
     switch (value) {
-      case 0: return CHAT_TYPE_UNKNOW;
+      case 0: return CHAT_TYPE_UNKNOWN;
       case 1: return CHAT_TYPE_PUBLIC;
       case 2: return CHAT_TYPE_PRIVATE;
       default: return null;
@@ -52,7 +52,7 @@ public enum ChatType{
 
   private final int value;
 
-  private ChatType(int value) {
+  ChatType(int value) {
     this.value = value;
   }
 }

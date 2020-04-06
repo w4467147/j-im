@@ -70,9 +70,10 @@ public enum MsgType {
       default: return null;
     }
   }
+
   private final int value;
 
-  private MsgType(int value) {
+  MsgType(int value) {
     this.value = value;
   }
 }

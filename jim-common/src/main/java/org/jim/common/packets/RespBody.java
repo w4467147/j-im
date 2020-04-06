@@ -4,6 +4,7 @@
 package org.jim.common.packets;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.jim.common.Status;
 import org.jim.common.utils.JsonKit;
@@ -14,23 +15,23 @@ import org.jim.common.utils.JsonKit;
  */
 public class RespBody implements Serializable{
 	
-	private static final long serialVersionUID = 1L;
+	protected static final long serialVersionUID = 1L;
 	/**
 	 * 响应状态码;
 	 */
-	private Integer code;
+	protected Integer code;
 	/**
 	 * 响应状态信息提示;
 	 */
-	private String msg;
+	protected String msg;
 	/**
 	 * 响应cmd命令码;
 	 */
-	private Command command;
+	protected Command command;
 	/**
 	 * 响应数据;
 	 */
-	private Object data;
+	protected Object data;
 
 	public RespBody(){}
 
@@ -44,13 +45,15 @@ public class RespBody implements Serializable{
 	}
 
 	public RespBody(Command command , Status status){
-		this(command);
-		this.code = status.getCode();
-		this.msg = status.getMsg();
+		this(status);
+		this.command = command;
 	}
 
 	public RespBody(Status status){
-		this(status.getCode(), status.getMsg());
+		if(Objects.nonNull(status)){
+			this.code = status.getCode();
+			this.msg = status.getMsg();
+		}
 	}
 
 	public RespBody(Integer code, String msg){
