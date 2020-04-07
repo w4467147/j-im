@@ -2,11 +2,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.j-im</groupId>
-    <artifactId>jim-parent</artifactId>
+    <artifactId>jim</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <version>3.0.0.v20200101-RELEASE</version>
-    <description>Jim-parent is the dependent parent project of J-IM communication establishment.</description>
+    <description>jim is the dependent parent project of J-IM communication establishment.</description>
     <url>http://www.j-im.org/</url>
     <licenses>
         <license>
