@@ -31,6 +31,7 @@
         <module>jim-common</module>
         <module>jim-server</module>
         <module>jim-server-demo</module>
+        <!--<module>jim-client</module>-->
     </modules>
     <properties>
         <jim.version>3.0.0.v20200101-RELEASE</jim.version>
