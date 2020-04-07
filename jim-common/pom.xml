@@ -8,10 +8,8 @@
 		<groupId>org.j-im</groupId>
 		<artifactId>jim-parent</artifactId>
 		<version>3.0.0.v20200101-RELEASE</version>
-		<relativePath>../jim-parent/pom.xml</relativePath>
   </parent>
   <dependencies>
-  		
    		<dependency>
 			<groupId>org.t-io</groupId>
 			<artifactId>tio-core</artifactId>
