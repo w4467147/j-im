@@ -150,5 +150,5 @@ JavaDoc https://apidoc.gitee.com/xchao/j-im/
    个人Email:wchaojava@163.com
 
    官方QQ群号：245513673 <a target="_blank"  href="//shang.qq.com/wpa/qunwpa?idkey=c876012ca4131bfdb6a32c9e5b4cde730b686fa1d20cc2ebd795a0fe2760b5d8"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="J-IM朋友圈" title="J-IM朋友圈"></a>
-申请进群时提供码云star显示的名字如：![输入图片说明](https://images.gitee.com/uploads/images/2020/0408/155440_461100b9_410355.png "屏幕截图.png")
+ **重点说明： 申请进群时提供码云star显示的名字如：** ![输入图片说明](https://images.gitee.com/uploads/images/2020/0408/155440_461100b9_410355.png "屏幕截图.png")
 ![群二维码](https://gitee.com/uploads/images/2018/0415/131601_e2cf7bde_410355.png "1523769300727.png")
