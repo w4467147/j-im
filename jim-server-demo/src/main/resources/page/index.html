@@ -100,6 +100,7 @@ function COMMAND_LOGIN_RESP(dataObj,data){
 }
 function COMMAND_EXIT_GROUP_NOTIFY_RESP(data){
 	var exitGroupNotify = data.data;
+	alert(curUser.userId);
 	var onlineUserCmd = "{\"cmd\":17,\"type\":\"0\",\"userId\":\""+curUser.userId+"\"}";
 	logDiv.innerHTML+="<font color='#A3A3A3' size='1'>"+exitGroupNotify.user.nick+"("+exitGroupNotify.user.userId+")退出群聊...</font><br>";
 	socket.send(onlineUserCmd);//获取在线用户列表;
