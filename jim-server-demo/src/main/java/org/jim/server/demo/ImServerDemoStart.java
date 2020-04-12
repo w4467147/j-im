@@ -27,7 +27,7 @@ import org.tio.core.ssl.SslConfig;
 public class ImServerDemoStart {
 
 	public static void main(String[] args)throws Exception{
-		ImServerConfig imServerConfig = new PropertyImServerConfigBuilder("jim.properties").build();
+		ImServerConfig imServerConfig = new PropertyImServerConfigBuilder("config/jim.properties").build();
 		//初始化SSL;(开启SSL之前,你要保证你有SSL证书哦...)
 		initSsl(imServerConfig);
 		//设置群组监听器，非必须，根据需要自己选择性实现;
