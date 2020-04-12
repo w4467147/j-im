@@ -124,7 +124,16 @@ http://www.j-im.cn
 </dependency>
 ```
 
-## J-IM一些截图
+## J-IM新版官网截图
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041753_1561ab18_410355.png "屏幕截图.png")
+
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041959_f9d41209_410355.png "屏幕截图.png")
+
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041930_9b8ee6dc_410355.png "屏幕截图.png")
+
+![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041841_e7a8a173_410355.png "屏幕截图.png")
+
+## J-IM老版一些截图
 
   Web访问地址:http://localhost:8888
 
