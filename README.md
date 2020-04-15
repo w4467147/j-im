@@ -111,8 +111,6 @@
 ```
 请求:COMMAND_GET_MESSAGE_REQ(19) 响应:COMMAND_GET_MESSAGE_RESP(20)
 
-## 性能
-&nbsp;&nbsp;&nbsp;极其震撼的性能，那个每秒发送500万条聊天消息，单机支持几十万人同时在线的测试当年引起了极大争议,看看t-io用户的一则测试报告吧：[ t-io 30W长连接并发压力测试报告](https://my.oschina.net/u/2369298/blog/915435)
 
 ## 使用
 - 引入j-im(快速开发自己的高性能IM服务器),在你的pom.xml中加入如下代码片段
@@ -148,9 +146,6 @@
 - 支持J-PUSH消息推送
 - 支持图片、语音、视频发送等
 - 官网开发
-
-## 更多
-更多相关信息持续关注这家伙：**[t-io不仅仅百万并发框架](http://gitee.com/tywo45/t-io)** 
 
 ## 鸣谢
 [t-io不仅仅百万并发框架](https://gitee.com/tywo45/t-io)
