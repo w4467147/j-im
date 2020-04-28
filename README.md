@@ -118,7 +118,7 @@
 <dependency>
     <groupId>org.j-im</groupId>
     <artifactId>jim-server</artifactId>
-    <version>2.6.0.v20190114-RELEASE</version>
+    <version>2.5.0.v20181115-RELEASE</version>
 </dependency>
 ```
 ## J-IM新版官网截图
