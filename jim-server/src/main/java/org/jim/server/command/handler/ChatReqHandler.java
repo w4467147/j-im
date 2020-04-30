@@ -54,7 +54,7 @@ public class ChatReqHandler extends AbstractCmdHandler {
 				//用户不在线响应包
 				return ProtocolManager.Packet.offline(channelContext);
 			}
-			//群聊
+		//群聊
 		}else if(ChatType.CHAT_TYPE_PUBLIC.getNumber() == chatBody.getChatType()){
 			String group_id = chatBody.getGroup_id();
 			Jim.sendToGroup(group_id, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));

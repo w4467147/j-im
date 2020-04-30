@@ -1,4 +1,5 @@
 package org.jim.server.command.handler.userInfo;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jim.common.ImChannelContext;
 import org.jim.common.packets.Group;
@@ -54,17 +55,17 @@ public class NonPersistentUserInfo implements IUserInfo {
 
     /**
      * 处理在线用户好友及群组用户;
-     * @param groups
+     * @param groups 用户群组集合
      * @param flag(0：好友,1:群组)
      * @return
      */
     private static List<Group> initOnlineUserFriendsGroups(List<Group> groups, Integer type, Integer flag){
-        if(groups.isEmpty()) {
-            return null;
+        if(CollectionUtils.isEmpty(groups)) {
+            return Lists.newArrayList();
         }
         //处理好友分组在线用户相关信息;
         List<Group> resultGroups = new ArrayList<Group>();
-        for(Group group : groups){
+        groups.forEach(group -> {
             Group cloneGroup = group.clone();
             List<User> users = null;
             if(FRIEND_GROUP_FLAG == flag){
@@ -73,21 +74,20 @@ public class NonPersistentUserInfo implements IUserInfo {
                 users = ImKit.getUsersByGroup(group.getGroupId());
             }
             resultGroups.add(cloneGroup);
-            if(CollectionUtils.isEmpty(users))
-                continue;
+            if(CollectionUtils.isEmpty(users))return;
             List<User> cloneUsers = new ArrayList<User>();
-            for(User user : users){
-                 User onlineUser = ImKit.getUser(user.getUserId());
-                 //在线
-                 if(onlineUser != null && UserStatusType.ONLINE.getNumber() == type){
-                     cloneUsers.add(onlineUser.clone());
-                 //离线
-                 }else if(onlineUser == null && UserStatusType.OFFLINE.getNumber() == type){
-                     cloneUsers.add(onlineUser.clone());
-                 }
-            }
+            users.forEach(user -> {
+                User onlineUser = ImKit.getUser(user.getUserId());
+                //在线
+                if(onlineUser != null && UserStatusType.ONLINE.getNumber() == type){
+                    cloneUsers.add(onlineUser.clone());
+                //离线
+                }else if(onlineUser == null && UserStatusType.OFFLINE.getNumber() == type){
+                    cloneUsers.add(onlineUser.clone());
+                }
+            });
             cloneGroup.setUsers(cloneUsers);
-        }
+        });
         return resultGroups;
     }
 

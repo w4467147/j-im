@@ -9,11 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.jim.common.packets.Command;
 import org.jim.common.packets.Group;
-import org.jim.common.packets.JoinGroupNotifyRespBody;
 import org.jim.common.packets.JoinGroupRespBody;
 import org.jim.common.packets.JoinGroupResult;
-import org.jim.common.packets.RespBody;
-import org.jim.common.packets.User;
 import org.jim.common.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
 import java.util.Objects;
@@ -39,7 +36,7 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 			return null;
 		}
 		//实际绑定之前执行处理器动作
-		GroupCmdProcessor groupProcessor = (GroupCmdProcessor)this.getSingleProcessor();
+		GroupCmdProcessor groupProcessor = this.getSingleProcessor(GroupCmdProcessor.class);
 		//当有群组处理器时候才会去处理
 		if(Objects.nonNull(groupProcessor)){
 			JoinGroupRespBody joinGroupRespBody = groupProcessor.join(joinGroup, imChannelContext);

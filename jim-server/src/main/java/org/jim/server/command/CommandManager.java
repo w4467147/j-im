@@ -3,6 +3,7 @@
  */
 package org.jim.server.command;
 
+import org.jim.common.exception.ImException;
 import org.jim.common.packets.Command;
 import org.jim.server.command.handler.processor.MultiProtocolCmdProcessor;
 import org.jim.server.command.handler.processor.SingleProtocolCmdProcessor;
@@ -12,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 /**
  * 版本: [1.0]
  * 功能说明: 命令执行管理器;
@@ -58,14 +61,15 @@ public class CommandManager{
 			return null;
 		}
 		int cmd_number = imCommandHandler.command().getNumber();
-		if(Command.forNumber(cmd_number) == null) {
-			throw new Exception("注册cmd处理器失败,不合法的cmd命令码:" + cmd_number + ",请在Command枚举类中添加!");
+		if(Objects.isNull(Command.forNumber(cmd_number))) {
+			throw new ImException("failed to register cmd handler, illegal cmd code:" + cmd_number + ",use Command.addAndGet () to add in the enumerated Command class!");
 		}
-		if(handlerMap.get(cmd_number) == null)
+		if(Objects.isNull(handlerMap.get(cmd_number)))
 		{
 			return handlerMap.put(cmd_number,imCommandHandler);
+		}else{
+			throw new ImException("cmd code:"+cmd_number+",has been registered, please correct!");
 		}
-		return null;
 	}
 	
 	public static AbstractCmdHandler removeCommand(Command command){
