@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 /**
  * 版本: [1.0]
- * 功能说明: 
+ * 功能说明: JIM
  * @author : WChao 创建时间: 2017年9月22日 上午9:07:18
  */
 public class Jim implements ImConst{
@@ -52,7 +52,6 @@ public class Jim implements ImConst{
 
 	/**
 	 * 功能描述：[发送到群组(所有不同协议端)]
-	 * @author：WChao 创建时间: 2017年9月21日 下午3:26:57
 	 * @param groupId 群组ID
 	 * @param packet 消息包
 	 */
