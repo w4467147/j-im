@@ -4,34 +4,60 @@ import java.util.UUID;
 
 import org.jim.common.ImPacket;
 /**
- * 成员变量group, userid, ip谁有值就发给谁，toAll为true则发给所有<br>
+ * 成员变量group, userId, ip谁有值就发给谁，toAll为true则发给所有<br>
  * packet是不允许为null的
  * @author WChao 
  * 2018年05月20日 下午3:10:29
  */
-public class ImClusterVo implements java.io.Serializable {
+public class ImClusterVO implements java.io.Serializable {
+
 	private static final long serialVersionUID = 6978027913776155664L;
-	
-	public static final String CLIENTID = UUID.randomUUID().toString();
-
-	private ImPacket packet;
-
-	private String clientId = CLIENTID;
-	
-	private String group;
-
-	private String userid;
-	
-	private String token;
-	
-	private String ip;
-	
 	/**
-	 * ChannelContext'id
+	 * 集群各个机器唯一标识常量(用于判断是否属于自己机器发送的消息)
+	 */
+	public static final String CLIENT_ID = UUID.randomUUID().toString();
+	/**
+	 * 消息包
+	 */
+	private ImPacket packet;
+	/**
+	 * 集群各个机器唯一标识(用于判断是否属于自己机器发送的消息)
+	 */
+	private String clientId = CLIENT_ID;
+	/**
+	 * 目标群组ID
+	 */
+	private String group;
+	/**
+	 * 目标用户ID
+	 */
+	private String userId;
+	/**
+	 * 目标token票据
+	 */
+	private String token;
+	/**
+	 * 目标IP
+	 */
+	private String ip;
+	/**
+	 * 目标通道ID
 	 */
 	private String channelId;
-	
+	/**
+	 * 发送到集群所有通道
+	 */
 	private boolean toAll = false;
+
+	/**
+	 * 默认构造器
+	 * @author: WChao
+	 */
+	public ImClusterVO() {}
+
+	public ImClusterVO(ImPacket packet) {
+		this.packet = packet;
+	}
 
 	public ImPacket getPacket() {
 		return packet;
@@ -49,39 +75,12 @@ public class ImClusterVo implements java.io.Serializable {
 		this.group = group;
 	}
 
-	public String getUserid() {
-		return userid;
-	}
-
-	public void setUserid(String userid) {
-		this.userid = userid;
-	}
-
 	public String getIp() {
 		return ip;
 	}
 
 	public void setIp(String ip) {
 		this.ip = ip;
-	}
-
-	/**
-	 * 
-	 * @author: WChao
-	 */
-	public ImClusterVo() {
-	}
-	
-	public ImClusterVo(ImPacket packet) {
-		this.packet = packet;
-	}
-
-	/**
-	 * @param args
-	 * @author: WChao
-	 */
-	public static void main(String[] args) {
-
 	}
 
 	public boolean isToAll() {
@@ -115,4 +114,13 @@ public class ImClusterVo implements java.io.Serializable {
 	public void setToken(String token) {
 		this.token = token;
 	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 }

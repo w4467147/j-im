@@ -11,31 +11,38 @@ import org.jim.common.ImConst;
 import org.jim.common.Jim;
 import org.jim.common.ImPacket;
 import org.jim.common.cluster.ImClusterConfig;
-import org.jim.common.cluster.ImClusterVo;
+import org.jim.common.cluster.ImClusterVO;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
-import org.redisson.api.listener.MessageListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.Tio;
 import org.tio.utils.json.Json;
 
 /**
- * 
+ * @desc Redis集群配置
  * @author WChao
- *
+ * @date 2020-05-01
  */
 public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 	
 	private static Logger log = LoggerFactory.getLogger(RedisClusterConfig.class);
-	
+	/**
+	 * 集群主题后缀
+	 */
 	private String topicSuffix;
-
+	/**
+	 * 集群订阅主题
+	 */
 	private String topic;
-
-	private RedissonClient redisson;
-
-	public RTopic<ImClusterVo> rtopic;
+	/**
+	 * 客户端
+	 */
+	private RedissonClient redissonClient;
+	/**
+	 * Redis发布/订阅Topic
+	 */
+	public RTopic<ImClusterVO> rTopic;
 	
 	/**
 	 * 收到了多少次topic
@@ -43,78 +50,77 @@ public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 	public static final AtomicLong RECEIVED_TOPIC_COUNT = new AtomicLong();
 	
 	/**
-	 * J-IM内置的集群是用redis的topic来实现的，所以不同groupContext就要有一个不同的topicSuffix
-	 * @param topicSuffix 不同类型的groupContext就要有一个不同的topicSuffix
-	 * @param redisson
+	 * J-IM内置的集群是用redis的topic来实现的，所以不同机器就要有一个不同的topicSuffix
+	 * @param topicSuffix 不同类型的就要有一个不同的topicSuffix
+	 * @param redissonClient redis客户端
 	 * @return
 	 * @author: WChao
 	 */
-	public static RedisClusterConfig newInstance(String topicSuffix, RedissonClient redisson) {
-		if (redisson == null) {
+	public static RedisClusterConfig newInstance(String topicSuffix, RedissonClient redissonClient) {
+		if (redissonClient == null) {
 			throw new RuntimeException(RedissonClient.class.getSimpleName() + "不允许为空");
 		}
-
-		RedisClusterConfig me = new RedisClusterConfig(topicSuffix, redisson);
-		me.rtopic = redisson.getTopic(me.topic);
-		me.rtopic.addListener(new MessageListener<ImClusterVo>() {
-			@Override
-			public void onMessage(String channel, ImClusterVo imClusterVo) {
-				log.info("收到topic:{}, count:{}, ImClusterVo:{}", channel, RECEIVED_TOPIC_COUNT.incrementAndGet(), Json.toJson(imClusterVo));
-				String clientid = imClusterVo.getClientId();
-				if (StringUtils.isBlank(clientid)) {
-					log.error("clientid is null");
-					return;
-				}
-				if (Objects.equals(ImClusterVo.CLIENTID, clientid)) {
-					log.info("自己发布的消息，忽略掉,{}", clientid);
-					return;
-				}
-
-				ImPacket packet = imClusterVo.getPacket();
-				if (packet == null) {
-					log.error("packet is null");
-					return;
-				}
-				packet.setFromCluster(true);
-				
-				//发送给所有
-				boolean isToAll = imClusterVo.isToAll();
-				if (isToAll) {
-					Tio.sendToAll(null, packet);
-				}
-
-				//发送给指定组
-				String group = imClusterVo.getGroup();
-				if (StringUtils.isNotBlank(group)) {
-					Jim.sendToGroup(group, packet);
-				}
-
-				//发送给指定用户
-				String userid = imClusterVo.getUserid();
-				if (StringUtils.isNotBlank(userid)) {
-					Jim.sendToUser(userid, packet);
-				}
-				
-				//发送给指定token
-				String token = imClusterVo.getToken();
-				if (StringUtils.isNotBlank(token)) {
-					//Tio.sendToToken(me.groupContext, token, packet);
-				}
-
-				//发送给指定ip
-				String ip = imClusterVo.getIp();
-				if (StringUtils.isNotBlank(ip)) {
-					//Jim.sendToIp(me.groupContext, ip, packet);
-				}
+		RedisClusterConfig me = new RedisClusterConfig(topicSuffix, redissonClient);
+		me.rTopic = redissonClient.getTopic(me.topic);
+		me.rTopic.addListener((String channel, ImClusterVO imClusterVo) -> {
+			log.info("收到topic:{}, count:{}, ImClusterVo:{}", channel, RECEIVED_TOPIC_COUNT.incrementAndGet(), Json.toJson(imClusterVo));
+			String clientId = imClusterVo.getClientId();
+			if (StringUtils.isBlank(clientId)) {
+				log.error("clientId is null");
+				return;
+			}
+			if (Objects.equals(ImClusterVO.CLIENT_ID, clientId)) {
+				log.info("messages posted by this machine are ignored,{}", clientId);
+				return;
+			}
+			ImPacket packet = imClusterVo.getPacket();
+			if (packet == null) {
+				log.error("packet is null");
+				return;
+			}
+			packet.setFromCluster(true);
+			//发送给所有
+			boolean isToAll = imClusterVo.isToAll();
+			if (isToAll) {
+				Tio.sendToAll(null, packet);
+			}
+			//发送给指定组
+			String group = imClusterVo.getGroup();
+			if (StringUtils.isNotBlank(group)) {
+				Jim.sendToGroup(group, packet);
+			}
+			//发送给指定用户
+			String userId = imClusterVo.getUserId();
+			if (StringUtils.isNotBlank(userId)) {
+				Jim.sendToUser(userId, packet);
+			}
+			//发送给指定token
+			String token = imClusterVo.getToken();
+			if (StringUtils.isNotBlank(token)) {
+				//Tio.sendToToken(me.groupContext, token, packet);
+			}
+			//发送给指定ip
+			String ip = imClusterVo.getIp();
+			if (StringUtils.isNotBlank(ip)) {
+				//Jim.sendToIp(me.groupContext, ip, packet);
 			}
 		});
 		return me;
 	}
-	private RedisClusterConfig(String topicSuffix, RedissonClient redisson) {
+	private RedisClusterConfig(String topicSuffix, RedissonClient redissonClient) {
 		this.setTopicSuffix(topicSuffix);
-		this.setRedisson(redisson);
-		//this.groupContext = groupContext;
+		this.setRedissonClient(redissonClient);
 	}
+
+	@Override
+	public void send(ImClusterVO imClusterVo) {
+		rTopic.publish(imClusterVo);
+	}
+	@Override
+	public void sendAsync(ImClusterVO imClusterVo) {
+		rTopic.publishAsync(imClusterVo);
+	}
+
 	public String getTopicSuffix() {
 		return topicSuffix;
 	}
@@ -127,28 +133,24 @@ public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 	public String getTopic() {
 		return topic;
 	}
-	
-	public void publishAsyn(ImClusterVo imClusterVo) {
-		rtopic.publishAsync(imClusterVo);
-	}
-	
-	public void publish(ImClusterVo imClusterVo) {
-		rtopic.publish(imClusterVo);
+
+	public void setTopic(String topic) {
+		this.topic = topic;
 	}
 
-	public RedissonClient getRedisson() {
-		return redisson;
+	public RedissonClient getRedissonClient() {
+		return redissonClient;
 	}
 
-	public void setRedisson(RedissonClient redisson) {
-		this.redisson = redisson;
+	public void setRedissonClient(RedissonClient redissonClient) {
+		this.redissonClient = redissonClient;
 	}
-	@Override
-	public void send(ImClusterVo imClusterVo) {
-		rtopic.publish(imClusterVo);
+
+	public RTopic<ImClusterVO> getRTopic() {
+		return rTopic;
 	}
-	@Override
-	public void sendAsyn(ImClusterVo imClusterVo) {
-		rtopic.publishAsync(imClusterVo);
+
+	public void setRTopic(RTopic<ImClusterVO> rTopic) {
+		this.rTopic = rTopic;
 	}
 }

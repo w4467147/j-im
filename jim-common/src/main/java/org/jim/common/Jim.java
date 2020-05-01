@@ -2,6 +2,7 @@ package org.jim.common;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jim.common.cluster.ImCluster;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImException;
 import org.jim.common.listener.ImGroupListener;
@@ -56,7 +57,14 @@ public class Jim implements ImConst{
 	 * @param packet 消息包
 	 */
 	public static void sendToGroup(String groupId, ImPacket packet){
-		Tio.sendToGroup(imConfig.getTioConfig(), groupId, packet);
+		try {
+			Tio.sendToGroup(imConfig.getTioConfig(), groupId, packet);
+		}finally {
+			ImCluster cluster = imConfig.getCluster();
+			if (Objects.nonNull(cluster) && !packet.isFromCluster()) {
+				cluster.clusterToGroup(groupId, packet);
+			}
+		}
 	}
 
 	/**
@@ -90,7 +98,14 @@ public class Jim implements ImConst{
 	 * @param packet 消息包
 	 */
 	public static void sendToUser(String userId,ImPacket packet){
-		Tio.sendToUser(imConfig.getTioConfig(), userId, packet);
+		try {
+			Tio.sendToUser(imConfig.getTioConfig(), userId, packet);
+		}finally {
+			ImCluster cluster = imConfig.getCluster();
+			if (Objects.nonNull(cluster) && !packet.isFromCluster()) {
+				cluster.clusterToUser(userId, packet);
+			}
+		}
 	}
 
 	/**
@@ -109,7 +124,14 @@ public class Jim implements ImConst{
 	 * @param channelContextFilter 通道过滤器
 	 */
 	public static void sendToIp(String ip, ImPacket packet, ChannelContextFilter channelContextFilter) {
-		Tio.sendToIp(imConfig.getTioConfig(), ip, packet, channelContextFilter);
+		try{
+			Tio.sendToIp(imConfig.getTioConfig(), ip, packet, channelContextFilter);
+		}finally {
+			ImCluster cluster = imConfig.getCluster();
+			if (Objects.nonNull(cluster) && !packet.isFromCluster()) {
+				cluster.clusterToIp(ip, packet);
+			}
+		}
 	}
 
 	/**

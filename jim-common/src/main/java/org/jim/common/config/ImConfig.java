@@ -5,6 +5,7 @@ package org.jim.common.config;
 
 import org.jim.common.ImConst;
 import org.jim.common.ImHandler;
+import org.jim.common.cluster.ImCluster;
 import org.jim.common.listener.ImGroupListener;
 import org.jim.common.listener.ImGroupListenerAdapter;
 import org.jim.common.listener.ImListener;
@@ -39,7 +40,11 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
      * 配置名称
      */
     protected String name = "j-im";
-
+    /**
+     * 集群配置
+     * 如果此值不为null，就表示要集群
+     */
+    private ImCluster cluster;
     /**
      * tio相关配置信息
      */
@@ -128,7 +133,11 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
          * 心跳包发送时长heartbeatTimeout/2
          */
         protected long heartbeatTimeout = 0;
-
+        /**
+         * 集群配置
+         * 如果此值不为null，就表示要集群
+         */
+        protected ImCluster cluster;
         /**
          * tio相关配置信息
          */
@@ -176,7 +185,10 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
             this.readBufferSize = readBufferSize;
             return theBuilder;
         }
-
+        public B cluster(ImCluster cluster){
+            this.cluster = cluster;
+            return theBuilder;
+        }
         public B tioConfig(TioConfig tioConfig){
             this.tioConfig = tioConfig;
             return  theBuilder;
@@ -267,5 +279,13 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
 
     public void setImUserListener(ImUserListener imUserListener) {
         this.imUserListener = imUserListener;
+    }
+
+    public ImCluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(ImCluster cluster) {
+        this.cluster = cluster;
     }
 }

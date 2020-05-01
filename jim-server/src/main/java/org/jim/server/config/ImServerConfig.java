@@ -60,12 +60,6 @@ public class ImServerConfig extends ImConfig {
      */
     private SslConfig sslConfig;
     /**
-     * 集群配置
-     * 如果此值不为null，就表示要集群
-     */
-    private ImCluster cluster;
-
-    /**
      * http相关配置;
      */
     private HttpConfig httpConfig;
@@ -108,8 +102,6 @@ public class ImServerConfig extends ImConfig {
 
         private SslConfig sslConfig;
 
-        private ImCluster cluster;
-
         private HttpConfig httpConfig;
 
         private WsConfig wsConfig;
@@ -146,11 +138,6 @@ public class ImServerConfig extends ImConfig {
 
         public Builder sslConfig(SslConfig sslConfig){
             this.sslConfig = sslConfig;
-            return getThis();
-        }
-
-        public Builder cluster(ImCluster cluster){
-            this.cluster = cluster;
             return getThis();
         }
 
@@ -246,15 +233,6 @@ public class ImServerConfig extends ImConfig {
     public void setSslConfig(SslConfig sslConfig) {
         this.sslConfig = sslConfig;
         this.tioConfig.setSslConfig(sslConfig);
-    }
-
-    public ImCluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(ImCluster cluster) {
-        this.cluster = cluster;
-
     }
 
     public HttpConfig getHttpConfig() {
