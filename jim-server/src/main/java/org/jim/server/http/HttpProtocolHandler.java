@@ -50,7 +50,6 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 
 	@Override
 	public void init(ImServerConfig imConfig)throws ImException {
-		long start = SystemTimer.currentTimeMillis();
 		this.httpConfig = imConfig.getHttpConfig();
 		if (Objects.isNull(httpConfig.getSessionStore())) {
 			GuavaCache guavaCache = GuavaCache.register(httpConfig.getSessionCacheName(), null, httpConfig.getSessionTimeout());
@@ -72,9 +71,7 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 		Routes routes = new Routes(httpConfig.getScanPackages());
 		httpRequestHandler = new DefaultHttpRequestHandler(httpConfig, routes);
 		httpConfig.setHttpRequestHandler(httpRequestHandler);
-		long end = SystemTimer.currentTimeMillis();
-		long iv = end - start;
-		log.info("J-IM Http协议初始化完毕,耗时:{}ms", iv);
+		log.info("Http Protocol Is Initialized");
 	}
 	
 	@Override

@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jim.common.ImChannelContext;
 import org.jim.common.ImConst;
 import org.jim.common.ImPacket;
@@ -23,6 +22,9 @@ import org.jim.common.protocol.IProtocolConverter;
 import org.jim.common.utils.ImKit;
 import org.jim.server.ImServerChannelContext;
 import org.jim.server.config.ImServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 版本: [1.0]
  * 功能说明: 
@@ -30,7 +32,7 @@ import org.jim.server.config.ImServerConfig;
  */
 public class ProtocolManager implements ImConst{
 	
-	private static Logger logger = Logger.getLogger(ProtocolManager.class);
+	private static Logger logger = LoggerFactory.getLogger(ProtocolManager.class);
 	
 	private static Map<String,AbstractProtocolHandler> serverHandlers = new HashMap<String,AbstractProtocolHandler>();
 	
@@ -75,7 +77,7 @@ public class ProtocolManager implements ImConst{
 					return protocolHandler;
 				}
 			} catch (Throwable e) {
-				logger.error(e);
+				logger.error(e.getMessage());
 			}
 		}
 		return null;
@@ -93,13 +95,15 @@ public class ProtocolManager implements ImConst{
 		init((ImServerConfig)ImServerConfig.Global.get());
 	}
 	public static void init(ImServerConfig imServerConfig){
+		logger.info("start init protocol [{}]", ImConst.JIM);
 		for(Entry<String,AbstractProtocolHandler> entry : serverHandlers.entrySet()){
 			try {
 				entry.getValue().init(imServerConfig);
 			} catch (Exception e) {
-				logger.error(e);
+				logger.error(e.getMessage());
 			}
 		}
+		logger.info("init protocol is completed [{}]", ImConst.JIM);
 	}
 
 	public static class Converter{

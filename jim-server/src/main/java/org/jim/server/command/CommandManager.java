@@ -3,6 +3,7 @@
  */
 package org.jim.server.command;
 
+import org.jim.common.exception.ImError;
 import org.jim.common.exception.ImException;
 import org.jim.common.packets.Command;
 import org.jim.server.command.handler.processor.MultiProtocolCmdProcessor;

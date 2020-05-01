@@ -3,10 +3,7 @@
  */
 package org.jim.server.ws;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.Jim;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
+import org.jim.common.*;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImDecodeException;
 import org.jim.common.exception.ImException;
@@ -64,7 +61,7 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 		}
 		this.wsServerConfig = wsConfig;
 		this.wsMsgHandler = wsServerConfig.getWsMsgHandler();
-		logger.info("J-IM WebSocket协议初始化完毕...");
+		logger.info("WebSocket Protocol Is Initialized");
 	}
 
 	@Override

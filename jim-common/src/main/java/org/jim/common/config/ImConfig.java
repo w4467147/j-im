@@ -5,6 +5,7 @@ package org.jim.common.config;
 
 import org.jim.common.ImConst;
 import org.jim.common.ImHandler;
+import org.jim.common.banner.JimBanner;
 import org.jim.common.cluster.ImCluster;
 import org.jim.common.listener.ImGroupListener;
 import org.jim.common.listener.ImGroupListenerAdapter;
@@ -16,6 +17,7 @@ import org.tio.utils.prop.MapWithLockPropSupport;
 import org.tio.utils.thread.pool.DefaultThreadFactory;
 import org.tio.utils.thread.pool.SynThreadPoolExecutor;
 
+import java.io.PrintStream;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -288,4 +290,34 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
     public void setCluster(ImCluster cluster) {
         this.cluster = cluster;
     }
+
+    static {
+        JimBanner banner = new JimBanner();
+        banner.printBanner(System.out);
+        PrintStream ps = new PrintStream(System.out){
+            @Override
+            public void println(String x) {
+                if(filterLog(x)){
+                    return;
+                }
+                super.println(x);
+            }
+            @Override
+            public void print(String s) {
+                if(filterLog(s)){
+                    return;
+                }
+                super.print(s);
+            }
+        };
+        System.setOut(ps);
+    }
+
+    private static boolean filterLog(String x){
+        if(x.contains("---------------------------------------------------------------------------------------")){
+            return true;
+        }
+        return false;
+    }
+
 }

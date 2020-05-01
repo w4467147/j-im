@@ -291,7 +291,7 @@ public interface ImConst
 	
 	String OFFLINE = "offline";
 	
-	String JIM = "JIM";
+	String JIM = "J-IM";
 
 	String ON = "on";
 

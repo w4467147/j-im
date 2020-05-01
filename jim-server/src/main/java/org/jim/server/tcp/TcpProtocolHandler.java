@@ -3,11 +3,7 @@
  */
 package org.jim.server.tcp;
 
-import org.apache.log4j.Logger;
-import org.jim.common.ImChannelContext;
-import org.jim.common.Jim;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
+import org.jim.common.*;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImDecodeException;
 import org.jim.common.exception.ImException;
@@ -19,6 +15,9 @@ import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.handler.AbstractProtocolHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
@@ -29,7 +28,7 @@ import java.util.Objects;
  */
 public class TcpProtocolHandler extends AbstractProtocolHandler {
 	
-	Logger logger = Logger.getLogger(TcpProtocolHandler.class);
+	Logger logger = LoggerFactory.getLogger(TcpProtocolHandler.class);
 
 	public TcpProtocolHandler(){
 		this.protocol = new TcpProtocol(new TcpConvertPacket());
@@ -41,7 +40,7 @@ public class TcpProtocolHandler extends AbstractProtocolHandler {
 
 	@Override
 	public void init(ImServerConfig imServerConfig) {
-		logger.info("J-IM TCP协议初始化完毕...");
+		logger.info("Socket Protocol Is Initialized");
 	}
 	@Override
 	public ByteBuffer encode(ImPacket imPacket, ImConfig imConfig, ImChannelContext imChannelContext) {

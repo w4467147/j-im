@@ -6,6 +6,7 @@ package org.jim.server.demo;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.common.ImChannelContext;
 import org.jim.common.ImPacket;
+import org.jim.common.banner.JimBanner;
 import org.jim.common.config.ImConfig;
 import org.jim.common.exception.ImException;
 import org.jim.common.packets.Command;
@@ -23,6 +24,9 @@ import org.jim.server.demo.command.DemoWsHandshakeProcessor;
 import org.jim.server.demo.listener.ImDemoGroupListener;
 import org.jim.server.demo.service.LoginServiceProcessor;
 import org.tio.core.ssl.SslConfig;
+
+import java.io.*;
+
 /**
  * IM服务端DEMO演示启动类;
  * @author WChao
@@ -49,19 +53,7 @@ public class ImServerDemoStart {
 		//添加用户业务聊天记录处理器，用户自己继承抽象类BaseAsyncChatMessageProcessor即可，以下为内置默认的处理器！
 		ChatReqHandler chatReqHandler = CommandManager.getCommand(Command.COMMAND_CHAT_REQ, ChatReqHandler.class);
 		chatReqHandler.setSingleProcessor(new DefaultAsyncChatMessageProcessor());
-		CommandManager.registerCommand(new AbstractCmdHandler() {
-			@Override
-			public Command command() {
-				return Command.addAndGet("你好",3);
-			}
-
-			@Override
-			public ImPacket handler(ImPacket imPacket, ImChannelContext imChannelContext) throws ImException {
-				return null;
-			}
-		});
 		/*****************end *******************************************************************************************/
-
 		imServerStarter.start();
 	}
 

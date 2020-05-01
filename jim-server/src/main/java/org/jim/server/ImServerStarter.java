@@ -3,6 +3,7 @@
  */
 package org.jim.server;
 
+import com.google.common.base.Stopwatch;
 import org.jim.common.ImConst;
 import org.jim.common.cache.redis.RedissonTemplate;
 import org.jim.common.cluster.redis.RedisCluster;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.tio.server.ServerTioConfig;
 import org.tio.server.TioServer;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * J-IM服务端启动类
@@ -30,7 +32,6 @@ public class ImServerStarter {
 
 	public ImServerStarter(ImServerConfig imServerConfig){
 		this.imServerConfig = imServerConfig;
-		init(imServerConfig);
 	}
 	
 	public void init(ImServerConfig imServerConfig){
@@ -54,7 +55,11 @@ public class ImServerStarter {
 	}
 	
 	public void start() throws IOException {
+		Stopwatch timeWatch = Stopwatch.createStarted();
+		log.warn("J-IM server start");
+		init(imServerConfig);
 		tioServer.start(this.imServerConfig.getBindIp(), this.imServerConfig.getBindPort());
+		log.warn("J-IM server started at address: {} time:{}ms", imServerConfig.getBindIp()+":"+imServerConfig.getBindPort(), timeWatch.elapsed(TimeUnit.MILLISECONDS));
 	}
 	
 	public void stop(){
