@@ -1,8 +1,8 @@
 package org.jim.server.command.handler.userInfo;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserReqBody;
+import org.jim.core.ImChannelContext;
+import org.jim.core.packets.User;
+import org.jim.core.packets.UserReqBody;
 
 public interface IUserInfo {
     /**

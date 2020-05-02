@@ -1,11 +1,10 @@
 package org.jim.server.handler;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
-import org.jim.common.config.ImConfig;
-import org.jim.common.exception.ImDecodeException;
-import org.jim.server.ImServerChannelContext;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.core.ImPacket;
+import org.jim.core.config.ImConfig;
+import org.jim.core.exception.ImDecodeException;
 import org.tio.core.ChannelContext;
 import org.tio.core.TioConfig;
 import org.tio.core.exception.AioDecodeException;

@@ -1,10 +1,10 @@
 package org.jim.server.command.handler.userInfo;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.config.ImConfig;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserReqBody;
+import org.jim.core.ImChannelContext;
+import org.jim.core.config.ImConfig;
+import org.jim.core.message.MessageHelper;
+import org.jim.core.packets.User;
+import org.jim.core.packets.UserReqBody;
 import org.jim.server.config.ImServerConfig;
 
 import java.util.Objects;

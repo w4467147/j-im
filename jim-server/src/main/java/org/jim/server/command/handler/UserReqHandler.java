@@ -4,21 +4,18 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.*;
-import org.jim.common.config.ImConfig;
-import org.jim.common.exception.ImException;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.packets.*;
-import org.jim.common.utils.ImKit;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.*;
+import org.jim.core.config.ImConfig;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.*;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.handler.userInfo.IUserInfo;
 import org.jim.server.command.handler.userInfo.NonPersistentUserInfo;
 import org.jim.server.command.handler.userInfo.PersistentUserInfo;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.server.config.ImServerConfig;
+import org.jim.server.protocol.ProtocolManager;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,8 +24,13 @@ import java.util.Objects;
  * @author : WChao 创建时间: 2017年9月18日 下午4:08:47
  */
 public class UserReqHandler extends AbstractCmdHandler {
-
+	/**
+	 * 非持久化用户信息接口
+	 */
 	private IUserInfo nonPersistentUserInfo;
+	/**
+	 * 持久化用户信息接口
+	 */
 	private IUserInfo persistentUserInfo;
 
 	public UserReqHandler(){
@@ -53,8 +55,9 @@ public class UserReqHandler extends AbstractCmdHandler {
 			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_GET_USER_RESP, ImStatus.C10004), imChannelContext);
 		}
 		RespBody resPacket = new RespBody(Command.COMMAND_GET_USER_RESP);
+		ImServerConfig imServerConfig = ImConfig.Global.get();
 		//是否开启持久化;
-		boolean isStore = ImConfig.ON.equals(getImConfig().getIsStore());
+		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore());
 		if(isStore){
 			resPacket.setData(persistentUserInfo.getUserInfo(userReqBody, imChannelContext));
 		}else {

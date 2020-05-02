@@ -1,12 +1,11 @@
 package org.jim.server.config;
 
-import org.jim.common.ImHandler;
-import org.jim.common.config.ImConfig;
-import org.jim.common.cluster.ImCluster;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.listener.ImListener;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.ws.WsConfig;
+import org.jim.core.ImHandler;
+import org.jim.core.config.ImConfig;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.listener.ImListener;
+import org.jim.core.message.MessageHelper;
+import org.jim.core.ws.WsConfig;
 import org.jim.server.handler.DefaultImServerHandler;
 import org.jim.server.handler.ImServerHandler;
 import org.jim.server.handler.ImServerHandlerAdapter;
@@ -44,18 +43,6 @@ public class ImServerConfig extends ImConfig {
      */
     private MessageHelper messageHelper;
     /**
-     * 是否开启持久化;
-     */
-    private String isStore = OFF;
-    /**
-     * 是否开启集群;
-     */
-    private String isCluster = OFF;
-    /**
-     * 是否开启SSL加密
-     */
-    private String isSSL = OFF;
-    /**
      * SSL配置
      */
     private SslConfig sslConfig;
@@ -67,15 +54,36 @@ public class ImServerConfig extends ImConfig {
      * WebSocket相关配置;
      */
     private WsConfig wsConfig;
+    /**
+     * 开启
+     */
+    public static String ON = "on";
+    /**
+     * 关闭
+     */
+    public static String OFF = "off";
+    /**
+     * 是否开启持久化;
+     */
+    private String isStore = OFF;
+    /**
+     * 是否开启集群;
+     */
+    private String isCluster = OFF;
+    /**
+     * 是否开启SSL加密
+     */
+    private String isSSL = OFF;
 
     private ImServerConfig(ImServerHandler imServerHandler, ImServerListener imServerListener){
         setImServerHandler(imServerHandler);
         setImServerListener(imServerListener);
         this.tioConfig  = new ServerTioConfig(this.getName(), new ImServerHandlerAdapter(this.imServerHandler),new ImServerListenerAdapter(this.imServerListener));
+        ImConfig.Global.set(this);
     }
 
     public static Builder newBuilder(){
-        return new ImServerConfig.Builder();
+        return new Builder();
     }
 
     @Override
@@ -88,7 +96,7 @@ public class ImServerConfig extends ImConfig {
         return getImServerListener();
     }
 
-    public static class Builder extends ImConfig.Builder<ImServerConfig,ImServerConfig.Builder>{
+    public static class Builder extends ImConfig.Builder<ImServerConfig, Builder>{
 
         private ImServerListener imServerListener;
 

@@ -1,6 +1,7 @@
 package org.jim.server.handler;
 
-import org.jim.common.ImHandler;
+import org.jim.core.ImHandler;
+
 /**
  * 
  * @author WChao 

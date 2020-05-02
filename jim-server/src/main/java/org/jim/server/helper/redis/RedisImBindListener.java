@@ -1,33 +1,40 @@
 package org.jim.server.helper.redis;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImChannelContext;
-import org.jim.common.config.ImConfig;
-import org.jim.common.ImSessionContext;
-import org.jim.common.cache.redis.RedisCache;
-import org.jim.common.cache.redis.RedisCacheManager;
-import org.jim.common.exception.ImException;
-import org.jim.common.listener.AbstractImBindListener;
-import org.jim.common.packets.Client;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.User;
-import org.jim.common.utils.ImKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.config.ImConfig;
+import org.jim.core.ImSessionContext;
+import org.jim.core.cache.redis.RedisCache;
+import org.jim.core.cache.redis.RedisCacheManager;
+import org.jim.core.exception.ImException;
+import org.jim.core.listener.AbstractImBindListener;
+import org.jim.core.packets.Client;
+import org.jim.core.packets.Group;
+import org.jim.core.packets.User;
+import org.jim.core.utils.ImKit;
 import org.jim.server.config.ImServerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
+
 /**
  * 消息持久化绑定监听器
  * @author WChao
  * @date 2018年4月8日 下午4:12:31
  */
 public class RedisImBindListener extends AbstractImBindListener{
-	
+
+	private static Logger logger = LoggerFactory.getLogger(RedisImBindListener.class);
+
 	private RedisCache groupCache;
 	private RedisCache userCache;
 	private final String SUFFIX = ":";
 	
 	public RedisImBindListener(){
-		this(null);
+		this(ImServerConfig.Global.get());
 	}
 	
 	public RedisImBindListener(ImConfig imConfig){
@@ -44,7 +51,7 @@ public class RedisImBindListener extends AbstractImBindListener{
 	}
 	
 	@Override
-	public void onAfterGroupBind(ImChannelContext imChannelContext, String group) throws ImException {
+	public void onAfterGroupBind(ImChannelContext imChannelContext, Group group) throws ImException {
 		if(!isStore()) {
 			return;
 		}
@@ -52,37 +59,30 @@ public class RedisImBindListener extends AbstractImBindListener{
 	}
 
 	@Override
-	public void onAfterGroupUnbind(ImChannelContext imChannelContext, String group) throws ImException {
+	public void onAfterGroupUnbind(ImChannelContext imChannelContext, Group group) throws ImException {
 		if(!isStore()) {
 			return;
 		}
 		String userId = imChannelContext.getUserId();
+		String groupId = group.getGroupId();
 		//移除群组成员;
-		groupCache.listRemove(group+SUFFIX+USER, userId);
+		groupCache.listRemove(groupId+SUFFIX+USER, userId);
 		//移除成员群组;
-		userCache.listRemove(userId+SUFFIX+GROUP, group);
+		userCache.listRemove(userId+SUFFIX+GROUP, groupId);
 		RedisCacheManager.getCache(PUSH).remove(GROUP+SUFFIX+group+SUFFIX+userId);
 	}
 
 	@Override
-	public void onAfterUserBind(ImChannelContext imChannelContext, String userId) throws ImException {
-		if(!isStore()) {
+	public void onAfterUserBind(ImChannelContext imChannelContext, User user) throws ImException {
+		if(!isStore() || Objects.isNull(user)) {
 			return;
 		}
-		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-		Client client = imSessionContext.getClient();
-		if(client == null) {
-			return;
-		}
-		User onlineUser = client.getUser();
-		if(onlineUser != null){
-			initUserTerminal(imChannelContext,onlineUser.getTerminal(),ONLINE);
-			initUserInfo(onlineUser);
-		}
+		updateUserTerminal(imChannelContext, user);
+		initUserInfo(user);
 	}
 
 	@Override
-	public void onAfterUserUnbind(ImChannelContext imChannelContext, String userId) throws ImException {
+	public void onAfterUserUnbind(ImChannelContext imChannelContext, User user) throws ImException {
 		if(!isStore()) {
 			return;
 		}
@@ -90,10 +90,11 @@ public class RedisImBindListener extends AbstractImBindListener{
 	}
 	/**
 	 * 初始化群组用户;
-	 * @param groupId
+	 * @param group
 	 * @param imChannelContext
 	 */
-	public void initGroupUsers(String groupId ,ImChannelContext imChannelContext){
+	public void initGroupUsers(Group group ,ImChannelContext imChannelContext){
+		String groupId = group.getGroupId();
 		if(!isStore()) {
 			return;
 		}
@@ -121,9 +122,9 @@ public class RedisImBindListener extends AbstractImBindListener{
 		if(groups == null) {
 			return;
 		}
-		for(Group group : groups){
-			if(groupId.equals(group.getGroupId())){
-				groupCache.put(groupId+SUFFIX+INFO, group);
+		for(Group storeGroup : groups){
+			if(groupId.equals(storeGroup.getGroupId())){
+				groupCache.put(groupId+SUFFIX+INFO, storeGroup);
 				break;
 			}
 		}
@@ -146,21 +147,17 @@ public class RedisImBindListener extends AbstractImBindListener{
 		}
 	}
 	/**
-	 * 初始化用户终端协议类型;
+	 * 更新用户终端协议类型及在线状态;
 	 * @param imChannelContext
-	 * @param terminal
-	 * @param status(online、offline)
+	 * @param user 更新用户信息
 	 */
-	@Override
-	public void initUserTerminal(ImChannelContext imChannelContext , String terminal , String status){
-		if(!isStore()) {
+	private void updateUserTerminal(ImChannelContext imChannelContext , User user){
+		String userId = user.getUserId();String terminal = user.getTerminal();String status = user.getStatus();
+		if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(terminal) || StringUtils.isEmpty(status)) {
+			logger.error("userId:{},terminal:{},status:{} must not null", userId, terminal, status);
 			return;
 		}
-		String userId = imChannelContext.getUserId();
-		if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(terminal)) {
-			return;
-		}
-		userCache.put(userId+SUFFIX+TERMINAL+SUFFIX+terminal, status);
+		userCache.put(userId+SUFFIX+TERMINAL+SUFFIX+terminal, user.getStatus());
 	}
 	/**
 	 * 初始化用户终端协议类型;
@@ -185,7 +182,8 @@ public class RedisImBindListener extends AbstractImBindListener{
 	 * @return
 	 */
 	public boolean isStore(){
-		ImServerConfig imServerConfig = (ImServerConfig)imConfig;
-		return ImConfig.ON.equals(imServerConfig.getIsStore());
+		ImServerConfig imServerConfig = ImServerConfig.Global.get();
+		return ImServerConfig.ON.equals(imServerConfig.getIsStore());
 	}
+
 }

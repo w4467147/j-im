@@ -1,10 +1,10 @@
 package org.jim.server.util;
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImSessionContext;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImSessionContext;
 import org.jim.server.config.ImServerConfig;
 import org.tio.core.ChannelContext;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpRequest;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.http.HttpRequest;
 /**
  * @author WChao
  * 2017年8月18日 下午5:47:00

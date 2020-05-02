@@ -8,15 +8,15 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConst;
+import org.jim.core.ImConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpConst;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.http.HttpResponse;
-import org.jim.common.http.HttpResponseStatus;
-import org.jim.common.http.MimeType;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.http.HttpConst;
+import org.jim.core.http.HttpRequest;
+import org.jim.core.http.HttpResponse;
+import org.jim.core.http.HttpResponseStatus;
+import org.jim.core.http.MimeType;
 import org.tio.utils.json.Json;
 
 import cn.hutool.core.io.FileUtil;

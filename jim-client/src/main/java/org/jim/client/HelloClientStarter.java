@@ -1,11 +1,11 @@
 package org.jim.client;
 
-import org.jim.common.ImConst;
-import org.jim.common.Jim;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.LoginReqBody;
-import org.jim.common.tcp.TcpPacket;
+import org.jim.core.ImConst;
+import org.jim.core.Jim;
+import org.jim.core.packets.ChatBody;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.LoginReqBody;
+import org.jim.core.tcp.TcpPacket;
 import org.tio.client.AioClient;
 import org.tio.client.ClientChannelContext;
 import org.tio.client.ClientGroupContext;

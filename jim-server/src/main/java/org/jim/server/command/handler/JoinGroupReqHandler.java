@@ -1,17 +1,17 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.*;
-import org.jim.common.exception.ImException;
-import org.jim.server.command.handler.processor.group.GroupCmdProcessor;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.core.*;
+import org.jim.core.exception.ImException;
+import org.jim.server.processor.group.GroupCmdProcessor;
+import org.jim.server.protocol.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.JoinGroupRespBody;
-import org.jim.common.packets.JoinGroupResult;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.Group;
+import org.jim.core.packets.JoinGroupRespBody;
+import org.jim.core.packets.JoinGroupResult;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
 import java.util.Objects;
 

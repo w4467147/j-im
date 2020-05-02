@@ -1,17 +1,14 @@
 package org.jim.server;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImHandler;
-import org.jim.common.config.ImConfig;
-import org.jim.common.protocol.AbstractProtocol;
-import org.jim.common.protocol.IProtocol;
-import org.jim.server.handler.AbstractProtocolHandler;
+import org.jim.core.ImChannelContext;
+import org.jim.core.config.ImConfig;
+import org.jim.server.protocol.AbstractProtocolHandler;
 import org.tio.core.ChannelContext;
 import org.tio.utils.thread.pool.AbstractQueueRunnable;
 
 /**
  * @ClassName ImServerChannelContext
- * @Description TODO
+ * @Description 服务端通道上下文
  * @Author WChao
  * @Date 2020/1/5 23:56
  * @Version 1.0

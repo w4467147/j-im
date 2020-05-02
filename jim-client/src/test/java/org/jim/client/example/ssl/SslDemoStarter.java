@@ -3,11 +3,11 @@ package org.jim.client.example.ssl;
 import java.nio.ByteBuffer;
 
 import org.jim.client.ssl.NioSslClient;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.LoginReqBody;
-import org.jim.common.tcp.TcpPacket;
-import org.jim.common.tcp.TcpServerEncoder;
+import org.jim.core.packets.ChatBody;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.LoginReqBody;
+import org.jim.core.tcp.TcpPacket;
+import org.jim.core.tcp.TcpServerEncoder;
 
 public class SslDemoStarter {
 	

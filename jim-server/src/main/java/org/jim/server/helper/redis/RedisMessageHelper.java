@@ -3,16 +3,16 @@ package org.jim.server.helper.redis;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.cache.redis.JedisTemplate;
-import org.jim.common.cache.redis.RedisCache;
-import org.jim.common.cache.redis.RedisCacheManager;
-import org.jim.common.listener.ImBindListener;
-import org.jim.common.message.AbstractMessageHelper;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserMessageData;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.cache.redis.JedisTemplate;
+import org.jim.core.cache.redis.RedisCache;
+import org.jim.core.cache.redis.RedisCacheManager;
+import org.jim.core.listener.ImStoreBindListener;
+import org.jim.core.message.AbstractMessageHelper;
+import org.jim.core.packets.ChatBody;
+import org.jim.core.packets.Group;
+import org.jim.core.packets.User;
+import org.jim.core.packets.UserMessageData;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.util.ChatKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 	}
 	
 	@Override
-	public ImBindListener getBindListener() {
+	public ImStoreBindListener getBindListener() {
 		
 		return new RedisImBindListener(imConfig);
 	}

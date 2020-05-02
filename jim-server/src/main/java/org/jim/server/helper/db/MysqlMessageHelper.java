@@ -2,12 +2,12 @@ package org.jim.server.helper.db;
 
 import java.util.List;
 
-import org.jim.common.listener.ImBindListener;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserMessageData;
+import org.jim.core.listener.ImStoreBindListener;
+import org.jim.core.message.MessageHelper;
+import org.jim.core.packets.ChatBody;
+import org.jim.core.packets.Group;
+import org.jim.core.packets.User;
+import org.jim.core.packets.UserMessageData;
 
 /**
  * Mysql获取持久化+同步消息助手;
@@ -17,7 +17,7 @@ import org.jim.common.packets.UserMessageData;
 public class MysqlMessageHelper implements MessageHelper {
 
 	@Override
-	public ImBindListener getBindListener() {
+	public ImStoreBindListener getBindListener() {
 		// TODO Auto-generated method stub
 		return null;
 	}

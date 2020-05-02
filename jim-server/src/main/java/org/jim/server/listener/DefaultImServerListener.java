@@ -1,16 +1,11 @@
 package org.jim.server.listener;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
-import org.jim.common.Jim;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
 
 /**
  * @ClassName DefaultImServerListener
- * @Description TODO
+ * @Description 默认IM服务端连接监听器
  * @Author WChao
  * @Date 2020/1/4 11:15
  * @Version 1.0

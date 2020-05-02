@@ -1,19 +1,21 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.Jim;
-import org.jim.common.ImPacket;
-import org.jim.common.config.ImConfig;
-import org.jim.common.exception.ImException;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.ChatType;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.Jim;
+import org.jim.core.config.ImConfig;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.ChatBody;
+import org.jim.core.packets.ChatType;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.RespBody;
 import org.jim.server.ImServerChannelContext;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.server.config.ImServerConfig;
+import org.jim.server.protocol.ProtocolManager;
+import org.jim.server.queue.MsgQueueRunnable;
 import org.jim.server.util.ChatKit;
-import org.tio.utils.thread.pool.AbstractQueueRunnable;
+import java.util.Objects;
 
 /**
  * 版本: [1.0]
@@ -35,14 +37,18 @@ public class ChatReqHandler extends AbstractCmdHandler {
 			ImPacket respChatPacket = ProtocolManager.Packet.dataInCorrect(channelContext);
 			return respChatPacket;
 		}
+		MsgQueueRunnable msgQueueRunnable = (MsgQueueRunnable)imServerChannelContext.getMsgQue();
+		if(Objects.isNull(msgQueueRunnable.getProtocolCmdProcessor())){
+			msgQueueRunnable.setProtocolCmdProcessor(this.getSingleProcessor());
+		}
 		//异步调用业务处理消息接口
-		AbstractQueueRunnable msgQueueRunnable = imServerChannelContext.getMsgQue();
-		msgQueueRunnable.addMsg(packet);
+		msgQueueRunnable.addMsg(chatBody);
 		msgQueueRunnable.executor.execute(msgQueueRunnable);
 		ImPacket chatPacket = new ImPacket(Command.COMMAND_CHAT_REQ,new RespBody(Command.COMMAND_CHAT_REQ,chatBody).toByte());
 		//设置同步序列号;
 		chatPacket.setSynSeq(packet.getSynSeq());
-		boolean isStore = ImConfig.ON.equals(getImConfig().getIsStore());
+		ImServerConfig imServerConfig = ImConfig.Global.get();
+		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore());
 		//私聊
 		if(ChatType.CHAT_TYPE_PRIVATE.getNumber() == chatBody.getChatType()){
 			String toId = chatBody.getTo();

@@ -1,17 +1,16 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
-import org.jim.common.exception.ImException;
-import org.jim.common.packets.AuthReqBody;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
-import org.jim.common.utils.ImKit;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.core.ImPacket;
+import org.jim.core.ImStatus;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.AuthReqBody;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.RespBody;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.server.protocol.ProtocolManager;
 
 /**
  * 

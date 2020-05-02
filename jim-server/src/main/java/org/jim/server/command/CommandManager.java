@@ -3,11 +3,10 @@
  */
 package org.jim.server.command;
 
-import org.jim.common.exception.ImError;
-import org.jim.common.exception.ImException;
-import org.jim.common.packets.Command;
-import org.jim.server.command.handler.processor.MultiProtocolCmdProcessor;
-import org.jim.server.command.handler.processor.SingleProtocolCmdProcessor;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.Command;
+import org.jim.server.processor.MultiProtocolCmdProcessor;
+import org.jim.server.processor.SingleProtocolCmdProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

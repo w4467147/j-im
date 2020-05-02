@@ -3,18 +3,18 @@
  */
 package org.jim.server.demo.command;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
-import org.jim.common.Jim;
-import org.jim.common.ImPacket;
-import org.jim.common.exception.ImException;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.LoginReqBody;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.core.Jim;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.http.HttpRequest;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.LoginReqBody;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.LoginReqHandler;
-import org.jim.server.command.handler.processor.handshake.WsHandshakeProcessor;
+import org.jim.server.processor.handshake.WsHandshakeProcessor;
 /**
  * @author WChao
  *

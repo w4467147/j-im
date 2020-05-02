@@ -1,11 +1,13 @@
 package org.jim.server.handler;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImPacket;
-import org.jim.common.config.ImConfig;
-import org.jim.common.exception.ImDecodeException;
-import org.jim.common.exception.ImException;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.config.ImConfig;
+import org.jim.core.exception.ImDecodeException;
+import org.jim.core.exception.ImException;
 import org.jim.server.ImServerChannelContext;
+import org.jim.server.protocol.AbstractProtocolHandler;
+import org.jim.server.protocol.ProtocolManager;
 
 import java.nio.ByteBuffer;
 import java.util.Objects;
@@ -17,7 +19,7 @@ import java.util.Objects;
  * @Date 2020/1/6 2:25
  * @Version 1.0
  **/
-public class DefaultImServerHandler implements ImServerHandler{
+public class DefaultImServerHandler implements ImServerHandler {
     /**
      * 处理消息包
      * @param imPacket

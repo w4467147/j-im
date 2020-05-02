@@ -1,16 +1,15 @@
 package org.jim.server.command.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImChannelContext;
-import org.jim.common.Jim;
-import org.jim.common.ImPacket;
-import org.jim.common.exception.ImException;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.packets.Command;
-import org.jim.common.ws.WsSessionContext;
+import org.jim.core.ImChannelContext;
+import org.jim.core.Jim;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.http.HttpRequest;
+import org.jim.core.packets.Command;
+import org.jim.core.ws.WsSessionContext;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.command.handler.processor.handshake.HandshakeCmdProcessor;
-import java.util.List;
+import org.jim.server.processor.handshake.HandshakeCmdProcessor;
+
 import java.util.Objects;
 
 /**

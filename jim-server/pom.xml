@@ -17,7 +17,7 @@
 	  </dependency>
   	  <dependency>
 			<groupId>org.j-im</groupId>
-			<artifactId>jim-common</artifactId>
+			<artifactId>jim-core</artifactId>
 	  </dependency>
 	  <dependency>
 			<groupId>io.github.lukehutch</groupId>

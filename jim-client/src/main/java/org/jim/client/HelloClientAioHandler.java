@@ -2,17 +2,17 @@ package org.jim.client;
 
 import java.nio.ByteBuffer;
 
-import org.jim.common.ImConst;
+import org.jim.core.ImConst;
 import org.tio.client.intf.ClientAioHandler;
 import org.tio.core.ChannelContext;
 import org.tio.core.GroupContext;
 import org.tio.core.exception.ImDecodeException;
 import org.tio.core.intf.AioHandler;
 import org.tio.core.intf.Packet;
-import org.jim.common.packets.Command;
-import org.jim.common.tcp.TcpPacket;
-import org.jim.common.tcp.TcpServerDecoder;
-import org.jim.common.tcp.TcpServerEncoder;
+import org.jim.core.packets.Command;
+import org.jim.core.tcp.TcpPacket;
+import org.jim.core.tcp.TcpServerDecoder;
+import org.jim.core.tcp.TcpServerEncoder;
 /**
  * 
  * 版本: [1.0]

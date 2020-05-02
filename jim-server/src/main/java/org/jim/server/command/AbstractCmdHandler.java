@@ -3,12 +3,10 @@
  */
 package org.jim.server.command;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
-import org.jim.common.config.ImConfig;
-import org.jim.server.command.handler.processor.SingleProtocolCmdProcessor;
-import org.jim.server.command.handler.processor.MultiProtocolCmdProcessor;
-import org.jim.server.config.ImServerConfig;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.server.processor.SingleProtocolCmdProcessor;
+import org.jim.server.processor.MultiProtocolCmdProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,16 +25,8 @@ public abstract class AbstractCmdHandler implements CmdHandler, ImConst {
 	 * 多协议业务处理器
 	 */
 	private List<MultiProtocolCmdProcessor> multiProcessors = new ArrayList<>();
-	/**
-	 * IM相关配置类
-	 */
-	private ImServerConfig imConfig = ImConfig.Global.get();
-	
-	public AbstractCmdHandler() {};
 
-	public ImServerConfig getImConfig() {
-		return imConfig;
-	}
+	public AbstractCmdHandler() {};
 
 	public SingleProtocolCmdProcessor getSingleProcessor() {
 		return singleProcessor;

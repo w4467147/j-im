@@ -3,8 +3,8 @@
  */
 package org.jim.server.config;
 
-import org.jim.common.http.HttpConfig;
-import org.jim.common.ws.WsConfig;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.ws.WsConfig;
 import org.jim.server.listener.ImServerListener;
 
 /**

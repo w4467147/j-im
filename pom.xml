@@ -28,7 +28,7 @@
         <url>git@gitee.com:xchao/j-im.git</url>
     </scm>
     <modules>
-        <module>jim-common</module>
+        <module>jim-core</module>
         <module>jim-server</module>
         <module>jim-server-demo</module>
         <!--<module>jim-client</module>-->
@@ -84,7 +84,7 @@
             </dependency>
             <dependency>
                 <groupId>org.j-im</groupId>
-                <artifactId>jim-common</artifactId>
+                <artifactId>jim-core</artifactId>
                 <version>${jim.version}</version>
             </dependency>
             <dependency>

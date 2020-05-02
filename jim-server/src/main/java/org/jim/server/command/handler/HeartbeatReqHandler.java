@@ -1,13 +1,13 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImPacket;
-import org.jim.common.exception.ImException;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.HeartbeatBody;
-import org.jim.common.packets.RespBody;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.HeartbeatBody;
+import org.jim.core.packets.RespBody;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.server.protocol.ProtocolManager;
 
 /**
  *

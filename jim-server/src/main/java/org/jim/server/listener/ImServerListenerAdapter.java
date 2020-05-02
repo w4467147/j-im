@@ -1,21 +1,26 @@
 package org.jim.server.listener;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.core.ImPacket;
 import org.jim.server.ImServerChannelContext;
-import org.jim.server.command.handler.processor.chat.MsgQueueRunnable;
 import org.jim.server.config.ImServerConfig;
+import org.jim.server.queue.MsgQueueRunnable;
 import org.tio.core.ChannelContext;
 import org.tio.core.intf.Packet;
 import org.tio.server.intf.ServerAioListener;
-/**
- *
- * @author WChao
- *
- */
-public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 
+/**
+ * @ClassName ImServerListenerAdapter
+ * @Description IM服务端连接监听适配器
+ * @Author WChao
+ * @Date 2020/1/4 9:35
+ * @Version 1.0
+ **/
+public class ImServerListenerAdapter implements ServerAioListener, ImConst{
+	/**
+     * 服务端监听器
+	 */
 	private ImServerListener imServerListener;
 
 	/**

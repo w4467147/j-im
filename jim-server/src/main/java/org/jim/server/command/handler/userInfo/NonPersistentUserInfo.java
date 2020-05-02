@@ -1,12 +1,12 @@
 package org.jim.server.command.handler.userInfo;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImChannelContext;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserReqBody;
-import org.jim.common.packets.UserStatusType;
-import org.jim.common.utils.ImKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.packets.Group;
+import org.jim.core.packets.User;
+import org.jim.core.packets.UserReqBody;
+import org.jim.core.packets.UserStatusType;
+import org.jim.core.utils.ImKit;
 
 import java.util.ArrayList;
 import java.util.List;

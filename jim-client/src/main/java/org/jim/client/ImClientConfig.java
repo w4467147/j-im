@@ -1,8 +1,8 @@
 package org.jim.client;
 
-import org.jim.common.ImHandler;
-import org.jim.common.config.ImConfig;
-import org.jim.common.listener.ImListener;
+import org.jim.core.ImHandler;
+import org.jim.core.config.ImConfig;
+import org.jim.core.listener.ImListener;
 
 /**
  * @ClassName ImClientConfig

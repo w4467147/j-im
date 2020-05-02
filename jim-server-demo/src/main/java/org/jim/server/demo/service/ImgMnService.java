@@ -59,7 +59,7 @@ public class ImgMnService {
 			}
 
 			int index = imgIndex.incrementAndGet() % list.size();// RandomUtil.randomInt(0, list.size() - 1);
-			log.info("图片index:" + index);
+			log.debug("图片index:" + index);
 			String imgsrc = list.get(index);
 			if (StringUtils.isNotBlank(imgsrc)) {
 				return imgsrc;
@@ -210,7 +210,7 @@ public class ImgMnService {
 					savefile(list);
 				}
 
-				log.info("抓取图片地址，打完收工，本次共找到:{}, 其中有效数据:{}，", count, invalidCount);
+				log.debug("抓取图片地址，打完收工，本次共找到:{}, 其中有效数据:{}，", count, invalidCount);
 
 
 
@@ -243,7 +243,7 @@ public class ImgMnService {
 			lock.lock();
 			List<String> list = imgListWithLock.getObj();
 			list.add(src);
-			log.info("{}、【{}】", list.size(), src);
+			log.debug("{}、【{}】", list.size(), src);
 			while (list.size() > maxSize) {
 				return false;
 			}

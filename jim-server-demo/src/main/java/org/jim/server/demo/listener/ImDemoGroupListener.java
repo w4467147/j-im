@@ -1,14 +1,13 @@
 package org.jim.server.demo.listener;
 
-import org.jim.common.*;
-import org.jim.common.exception.ImException;
-import org.jim.common.listener.ImGroupListener;
-import org.jim.common.packets.*;
-import org.jim.common.utils.JsonKit;
-import org.jim.server.handler.ProtocolManager;
+import org.jim.core.*;
+import org.jim.core.exception.ImException;
+import org.jim.core.listener.ImGroupListener;
+import org.jim.core.packets.*;
+import org.jim.core.utils.JsonKit;
+import org.jim.server.protocol.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tio.core.ChannelContext;
 
 /**
  * @author WChao 
@@ -30,37 +29,27 @@ public class ImDemoGroupListener implements ImGroupListener {
 		joinGroupNotify(group, imChannelContext);
 	}
 
-	@Override
-	public void onAfterBind(ImChannelContext imChannelContext, String groupId) throws ImException {
-
-	}
-
 	/**
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @param group
 	 * @throws Exception
 	 * @author: WChao
 	 */
 	@Override
-	public void onAfterUnbind(ImChannelContext channelContext, Group group) throws ImException {
-
-	}
-
-	@Override
-	public void onAfterUnbind(ImChannelContext imChannelContext, String groupId) throws ImException {
+	public void onAfterUnbind(ImChannelContext imChannelContext, Group group) throws ImException {
 		//发退出房间通知  COMMAND_EXIT_GROUP_NOTIFY_RESP
 		ExitGroupNotifyRespBody exitGroupNotifyRespBody = new ExitGroupNotifyRespBody();
-		exitGroupNotifyRespBody.setGroup(groupId);
+		exitGroupNotifyRespBody.setGroup(group.getGroupId());
 		User clientUser = imChannelContext.getSessionContext().getClient().getUser();
 		if(clientUser == null) {
 			return;
 		}
-		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
+		User notifyUser = User.newBuilder().userId(clientUser.getUserId()).nick(clientUser.getNick()).build();
 		exitGroupNotifyRespBody.setUser(notifyUser);
 
 		RespBody respBody = new RespBody(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP,exitGroupNotifyRespBody);
 		ImPacket imPacket = new ImPacket(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP, respBody.toByte());
-		Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(imPacket, imChannelContext));
+		Jim.sendToGroup(group.getGroupId(), ProtocolManager.Converter.respPacket(imPacket, imChannelContext));
 	}
 
 	/**
@@ -71,7 +60,7 @@ public class ImDemoGroupListener implements ImGroupListener {
 	public void joinGroupNotify(Group group, ImChannelContext imChannelContext)throws ImException{
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		User clientUser = imSessionContext.getClient().getUser();
-		User notifyUser = new User(clientUser.getUserId(),clientUser.getNick());
+		User notifyUser = User.newBuilder().userId(clientUser.getUserId()).nick(clientUser.getNick()).build();
 		String groupId = group.getGroupId();
 		//发进房间通知  COMMAND_JOIN_GROUP_NOTIFY_RESP
 		JoinGroupNotifyRespBody joinGroupNotifyRespBody = JoinGroupNotifyRespBody.success();

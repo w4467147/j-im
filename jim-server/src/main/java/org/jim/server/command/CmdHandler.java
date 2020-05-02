@@ -1,9 +1,9 @@
 package org.jim.server.command;
 
-import org.jim.common.ImChannelContext;
-import org.jim.common.ImPacket;
-import org.jim.common.exception.ImException;
-import org.jim.common.packets.Command;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.Command;
 /**
  * 
  * 版本: [1.0]
