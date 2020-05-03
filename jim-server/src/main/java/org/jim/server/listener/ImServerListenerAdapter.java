@@ -1,8 +1,10 @@
 package org.jim.server.listener;
 
+import com.alibaba.fastjson.JSONObject;
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
 import org.jim.core.ImPacket;
+import org.jim.core.ImSessionContext;
 import org.jim.core.config.ImConfig;
 import org.jim.core.message.MessageHelper;
 import org.jim.core.packets.User;
@@ -65,6 +67,7 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	public void onAfterSent(ChannelContext channelContext, Packet packet, boolean isSentSuccess)throws Exception{
 		imServerListener.onAfterSent((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), (ImPacket)packet, isSentSuccess);
 	}
+
 	/**
 	 * 连接关闭前触发本方法
 	 * @param channelContext the channelContext
@@ -77,15 +80,19 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	@Override
 	public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String remark, boolean isRemove)throws Exception{
 		ImServerChannelContext imServerChannelContext = (ImServerChannelContext) channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY);
-		ImServerConfig imServerConfig = ImConfig.Global.get();
-		MessageHelper messageHelper = imServerConfig.getMessageHelper();
-		User user = imServerChannelContext.getSessionContext().getImClientNode().getUser();
-		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore()) && Objects.nonNull(messageHelper) && Objects.nonNull(user);
-		if(isStore){
-			imServerConfig.getImUserListener().onAfterUnbind(imServerChannelContext, user);
+		ImSessionContext imSessionContext = imServerChannelContext.getSessionContext();
+		if(Objects.nonNull(imSessionContext)){
+			ImServerConfig imServerConfig = ImConfig.Global.get();
+			MessageHelper messageHelper = imServerConfig.getMessageHelper();
+			User user = imServerChannelContext.getSessionContext().getImClientNode().getUser();
+			boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore()) && Objects.nonNull(messageHelper) && Objects.nonNull(user);
+			if(isStore){
+				imServerConfig.getImUserListener().onAfterUnbind(imServerChannelContext, user);
+			}
 		}
 		imServerListener.onBeforeClose(imServerChannelContext, throwable, remark, isRemove);
 	}
+
 	/**
 	 * 解码成功后触发本方法
 	 * @param channelContext
@@ -98,6 +105,7 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	public void onAfterDecoded(ChannelContext channelContext, Packet packet,int packetSize) throws Exception {
 		imServerListener.onAfterDecoded((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), (ImPacket)packet, packetSize);
 	}
+
 	/**
 	 * 接收到TCP层传过来的数据后
 	 * @param channelContext
@@ -108,6 +116,7 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	public void onAfterReceivedBytes(ChannelContext channelContext,int receivedBytes) throws Exception {
 		imServerListener.onAfterReceivedBytes((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), receivedBytes);
 	}
+
 	/**
 	 * 处理一个消息包后
 	 * @param channelContext
@@ -124,4 +133,5 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	public boolean onHeartbeatTimeout(ChannelContext channelContext, Long aLong, int i) {
 		return imServerListener.onHeartbeatTimeout((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), aLong, i);
 	}
+
 }

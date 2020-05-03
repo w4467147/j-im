@@ -8,7 +8,7 @@
 <style type="text/css" media="screen">
 	*{margin:0;padding:0;}
 	#wrap{margin:10px auto; width:80%; height:99%;}
-	.unit{margin-bottom:5px; padding:5px; border:solid 1px #000; height:auto;  clear:both;box-sizing:border-box;}	
+	.unit{margin-bottom:5px; padding:5px; border:solid 1px #000; height:auto;  clear:both;box-sizing:border-box;}
 	.unit label{text-align:right;width:100px;line-height: 30px; display:inline-block;}
 	.unit input{line-height: 30px; width:100px; height:30px;}
 	.log {font-size:11px; font-family:Courier; overflow: auto; height:100%; background:black;width:85%;float:left}
@@ -38,7 +38,7 @@ function connect(){
 	logDiv = document.getElementById('logs');
 	socket = new WebSocket("ws:"+ip+":"+port+"?username="+username+"&password="+password);
 	socket.onopen = function(e){
-		
+
 	};
 	socket.onerror = function(e){
 		logDiv.innerHTML+="<font color='red' size='1'>异常:"+e+"</font><br>";
@@ -211,7 +211,7 @@ function initOnlineUsers(){
 	document.getElementById("onlinePanel").innerHTML = onlineUserStr;
 }
 function disConnect(){
-	socket.close(); 
+	socket.close();
 }
 
 function send(){
