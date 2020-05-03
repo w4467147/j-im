@@ -73,7 +73,7 @@ public class DefaultImServerHandler implements ImServerHandler {
         if(handler != null){
             return handler.decode(buffer, limit, position, readableLength, imServerChannelContext);
         }else{
-            throw new ImDecodeException("不支持的协议类型,无法找到对应的协议解码器!");
+            throw new ImDecodeException("unsupported protocol type, the protocol decoder cannot be found");
         }
     }
 }

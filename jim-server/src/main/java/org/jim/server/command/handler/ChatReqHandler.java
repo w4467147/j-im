@@ -62,8 +62,8 @@ public class ChatReqHandler extends AbstractCmdHandler {
 			}
 		//群聊
 		}else if(ChatType.CHAT_TYPE_PUBLIC.getNumber() == chatBody.getChatType()){
-			String group_id = chatBody.getGroup_id();
-			Jim.sendToGroup(group_id, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));
+			String groupId = chatBody.getGroupId();
+			Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));
 			//发送成功响应包
 			return ProtocolManager.Packet.success(channelContext);
 		}

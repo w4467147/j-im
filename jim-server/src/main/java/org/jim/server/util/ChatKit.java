@@ -39,7 +39,7 @@ public class ChatKit {
 		if(chatReqBody != null){
 			if(StringUtils.isEmpty(chatReqBody.getFrom())){
 				ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-				User user = imSessionContext.getClient().getUser();
+				User user = imSessionContext.getImClientNode().getUser();
 				if(user != null){
 					chatReqBody.setFrom(user.getNick());
 				}else{

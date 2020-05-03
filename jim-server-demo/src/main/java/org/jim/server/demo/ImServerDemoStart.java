@@ -4,6 +4,7 @@
 package org.jim.server.demo;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jim.core.Jim;
 import org.jim.core.config.ImConfig;
 import org.jim.core.packets.Command;
 import org.jim.core.utils.PropUtil;

@@ -7,11 +7,9 @@ import org.jim.core.ImSessionContext;
 import org.jim.core.cache.redis.RedisCache;
 import org.jim.core.cache.redis.RedisCacheManager;
 import org.jim.core.exception.ImException;
-import org.jim.core.listener.AbstractImBindListener;
-import org.jim.core.packets.Client;
+import org.jim.core.listener.AbstractImStoreBindListener;
 import org.jim.core.packets.Group;
 import org.jim.core.packets.User;
-import org.jim.core.utils.ImKit;
 import org.jim.server.config.ImServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,7 @@ import java.util.Objects;
  * @author WChao
  * @date 2018年4月8日 下午4:12:31
  */
-public class RedisImBindListener extends AbstractImBindListener{
+public class RedisImBindListener extends AbstractImStoreBindListener {
 
 	private static Logger logger = LoggerFactory.getLogger(RedisImBindListener.class);
 
@@ -108,13 +106,8 @@ public class RedisImBindListener extends AbstractImBindListener{
 			groupCache.listPushTail(group_user_key, userId);
 		}
 		initUserGroups(userId, groupId);
-		
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-		Client client = imSessionContext.getClient();
-		if(client == null) {
-			return;
-		}
-		User onlineUser = client.getUser();
+		User onlineUser = imSessionContext.getImClientNode().getUser();
 		if(onlineUser == null) {
 			return;
 		}

@@ -56,7 +56,7 @@ public abstract class BaseAsyncChatMessageProcessor implements SingleProtocolCmd
 	 */
 	private void pushGroupMessages(String pushTable, String storeTable , ChatBody chatBody, boolean isStore){
 		MessageHelper messageHelper = imServerConfig.getMessageHelper();
-		String group_id = chatBody.getGroup_id();
+		String group_id = chatBody.getGroupId();
 		//先将群消息持久化到存储Timeline;
 		writeMessage(storeTable,GROUP+":"+group_id,chatBody);
 		List<String> userIds = messageHelper.getGroupUsers(group_id);

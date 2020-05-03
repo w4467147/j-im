@@ -36,18 +36,18 @@ public class ChatBody extends Message {
 	/**
 	 * 消息发到哪个群组;
 	 */
-	private String group_id;
+	private String groupId;
 	
 	private ChatBody(){}
 	
-	private ChatBody(String id , String from , String to , Integer msgType , Integer chatType , String content , String group_id , Integer cmd , Long createTime , JSONObject extras){
+	private ChatBody(String id , String from , String to , Integer msgType , Integer chatType , String content , String groupId , Integer cmd , Long createTime , JSONObject extras){
 		this.id = id;
 		this.from = from ;
 		this.to = to;
 		this.msgType = msgType;
 		this.chatType = chatType;
 		this.content = content;
-		this.group_id = group_id;
+		this.groupId = groupId;
 		this.cmd = cmd;
 		this.createTime = createTime;
 		this.extras = extras;
@@ -56,9 +56,11 @@ public class ChatBody extends Message {
 	public static ChatBody.Builder newBuilder(){
 		return new ChatBody.Builder();
 	}
+
 	public String getFrom() {
 		return from;
 	}
+
 	public ChatBody setFrom(String from) {
 		this.from = from;
 		return this;
@@ -66,6 +68,7 @@ public class ChatBody extends Message {
 	public String getTo() {
 		return to;
 	}
+
 	public ChatBody setTo(String to) {
 		this.to = to;
 		return this;
@@ -74,6 +77,7 @@ public class ChatBody extends Message {
 	public Integer getMsgType() {
 		return msgType;
 	}
+
 	public ChatBody setMsgType(Integer msgType) {
 		this.msgType = msgType;
 		return this;
@@ -81,21 +85,24 @@ public class ChatBody extends Message {
 	public String getContent() {
 		return content;
 	}
+
 	public ChatBody setContent(String content) {
 		this.content = content;
 		return this;
 	}
-	
-	public String getGroup_id() {
-		return group_id;
+
+	public String getGroupId() {
+		return groupId;
 	}
-	public ChatBody setGroup_id(String group_id) {
-		this.group_id = group_id;
-		return this;
+
+	public void setGroupId(String groupId) {
+		this.groupId = groupId;
 	}
+
 	public Integer getChatType() {
 		return chatType;
 	}
+
 	public ChatBody setChatType(Integer chatType) {
 		this.chatType = chatType;
 		return this;
@@ -125,32 +132,32 @@ public class ChatBody extends Message {
 		/**
 		 * 消息发到哪个群组;
 		 */
-		private String group_id;
+		private String groupId;
 		
 		public Builder(){};
 		
-		public Builder setFrom(String from) {
+		public Builder from(String from) {
 			this.from = from;
 			return this;
 		}
-		public Builder setTo(String to) {
+		public Builder to(String to) {
 			this.to = to;
 			return this;
 		}
-		public Builder setMsgType(Integer msgType) {
+		public Builder msgType(Integer msgType) {
 			this.msgType = msgType;
 			return this;
 		}
-		public Builder setChatType(Integer chatType) {
+		public Builder chatType(Integer chatType) {
 			this.chatType = chatType;
 			return this;
 		}
-		public Builder setContent(String content) {
+		public Builder content(String content) {
 			this.content = content;
 			return this;
 		}
-		public Builder setGroup_id(String group_id) {
-			this.group_id = group_id;
+		public Builder groupId(String groupId) {
+			this.groupId = groupId;
 			return this;
 		}
 		@Override
@@ -160,7 +167,7 @@ public class ChatBody extends Message {
 
 		@Override
 		public ChatBody build(){
-			return new ChatBody(this.id , this.from , this.to , this.msgType , this.chatType , this.content , this.group_id ,this.cmd , this.createTime , this.extras);
+			return new ChatBody(this.id , this.from , this.to , this.msgType , this.chatType , this.content , this.groupId ,this.cmd , this.createTime , this.extras);
 		}
 	}
 }

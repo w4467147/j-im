@@ -13,7 +13,7 @@ import org.jim.core.http.HttpRequest;
 import org.jim.core.http.HttpRequestDecoder;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.protocol.IProtocolConverter;
-import org.jim.core.utils.ImUtils;
+import org.jim.core.utils.ImKit;
 
 /**
  * WebSocket协议判断器
@@ -34,7 +34,7 @@ public class WsProtocol extends AbstractProtocol {
 	@Override
 	protected void init(ImChannelContext imChannelContext) {
 		imChannelContext.setSessionContext(new WsSessionContext(imChannelContext));
-		ImUtils.setClient(imChannelContext);
+		ImKit.initImClientNode(imChannelContext);
 	}
 
 	@Override

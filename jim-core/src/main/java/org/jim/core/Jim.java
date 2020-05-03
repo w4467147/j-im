@@ -140,7 +140,7 @@ public class Jim implements ImConst{
 	 * @param userId 用户ID
 	 */
 	public static boolean bindUser(ImChannelContext imChannelContext, String userId){
-		User user = imChannelContext.getSessionContext().getClient().getUser();
+		User user = imChannelContext.getSessionContext().getImClientNode().getUser();
 		if(Objects.isNull(user)){
 			user = User.newBuilder().userId(userId).status(ONLINE).build();
 		}
@@ -166,7 +166,7 @@ public class Jim implements ImConst{
 			if(CollectionUtils.isEmpty(channelContextSetWithLock.getObj())){
 				return false;
 			}
-			imChannelContext.getSessionContext().getClient().setUser(user);
+			imChannelContext.getSessionContext().getImClientNode().setUser(user);
 			ImUserListener imUserListener = imConfig.getImUserListener();
 			if(Objects.nonNull(imUserListener)){
 				imUserListener.onAfterBind(imChannelContext, user);
@@ -213,7 +213,7 @@ public class Jim implements ImConst{
 				ImChannelContext imChannelContext = (ImChannelContext)channelContext.get(ImConst.Key.IM_CHANNEL_CONTEXT_KEY);
 				ImUserListener imUserListener = imConfig.getImUserListener();
 				if(Objects.isNull(imUserListener))continue;
-				User existUser = imChannelContext.getSessionContext().getClient().getUser();
+				User existUser = imChannelContext.getSessionContext().getImClientNode().getUser();
 				imUserListener.onAfterUnbind(imChannelContext, existUser);
 			}
 			Tio.unbindUser(tioConfig, userId);
@@ -224,6 +224,14 @@ public class Jim implements ImConst{
 			readLock.unlock();
 		}
 		return true;
+	}
+	/**
+	 * 绑定群组(如果配置了群组监听器,执行回调)
+	 * @param imChannelContext IM通道上下文
+	 * @param groupId 绑定群组ID
+	 */
+	public static boolean bindGroup(ImChannelContext imChannelContext, String groupId){
+		return bindGroup(imChannelContext, Group.newBuilder().groupId(groupId).build());
 	}
 
 	/**
@@ -247,8 +255,13 @@ public class Jim implements ImConst{
 	 * @param imChannelContext
 	 * @author WChao
 	 */
-	public static void unbindGroup(String groupId, ImChannelContext imChannelContext){
+	public static boolean unbindGroup(String groupId, ImChannelContext imChannelContext){
+		if(StringUtils.isEmpty(groupId)){
+			log.error("groupId is null");
+			return false;
+		}
 		Tio.unbindGroup(groupId, imChannelContext.getTioChannelContext());
+		return true;
 	}
 
 	/**
@@ -256,23 +269,29 @@ public class Jim implements ImConst{
 	 * @param imChannelContext
 	 * @author WChao
 	 */
-	public static void unbindGroup(ImChannelContext imChannelContext){
+	public static boolean unbindGroup(ImChannelContext imChannelContext){
 		Tio.unbindGroup(imChannelContext.getTioChannelContext());
+		return true;
 	}
 
 	/**
-	 * 将制定用户从指定群组解除绑定
-	 * @param userId
-	 * @param group
+	 * 将指定用户从指定群组解除绑定
+	 * @param userId 用户ID
+	 * @param groupId 群组ID
 	 */
-	public static void unbindGroup(String userId,String group){
-		Tio.unbindGroup(imConfig.getTioConfig(),userId,group);
+	public static boolean unbindGroup(String userId, String groupId){
+		if(StringUtils.isEmpty(groupId) || StringUtils.isEmpty(userId)){
+			log.error("groupId or userId is null");
+			return false;
+		}
+		Tio.unbindGroup(imConfig.getTioConfig(), userId, groupId);
+		return true;
 	}
 
 	/**
 	 * 移除用户, 和close方法一样，只不过不再进行重连等维护性的操作
-	 * @param userId
-	 * @param remark
+	 * @param userId 用户ID
+	 * @param remark 移除原因描述
 	 */
 	public static void remove(String userId, String remark){
 		SetWithLock<ChannelContext> userChannelContexts = Tio.getByUserid(imConfig.getTioConfig(), userId);

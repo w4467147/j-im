@@ -10,7 +10,7 @@ import org.jim.core.exception.ImException;
 import java.nio.ByteBuffer;
 
 /**
- * 判断协议接口
+ * 协议校验接口
  * @author WChao
  *
  */

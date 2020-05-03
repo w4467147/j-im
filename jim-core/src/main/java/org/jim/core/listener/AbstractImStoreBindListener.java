@@ -10,7 +10,7 @@ import org.jim.core.config.ImConfig;
  * @author WChao
  * 2018/08/26
  */
-public abstract class AbstractImBindListener implements ImStoreBindListener, ImConst {
+public abstract class AbstractImStoreBindListener implements ImStoreBindListener, ImConst {
 	
 	protected ImConfig imConfig;
 

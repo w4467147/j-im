@@ -230,7 +230,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 			return null;
 		}
 		for(ChatBody chatBody : messages){
-			String group = chatBody.getGroup_id();
+			String group = chatBody.getGroupId();
 			if(StringUtils.isEmpty(group)) {
 				continue;
 			}

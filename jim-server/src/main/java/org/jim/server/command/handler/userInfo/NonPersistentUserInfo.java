@@ -27,7 +27,7 @@ public class NonPersistentUserInfo implements IUserInfo {
 
     @Override
     public User getUserInfo(UserReqBody userReqBody, ImChannelContext imChannelContext) {
-        User user = imChannelContext.getSessionContext().getClient().getUser();
+        User user = imChannelContext.getSessionContext().getImClientNode().getUser();
         Integer type = userReqBody.getType();
         if(Objects.isNull(user)) {
             return null;

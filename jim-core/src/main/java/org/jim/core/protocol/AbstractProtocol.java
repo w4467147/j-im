@@ -12,6 +12,7 @@ import org.jim.core.ImPacket;
 import org.jim.core.ImSessionContext;
 import org.jim.core.exception.ImException;
 /**
+ * 协议校验接口抽象类
  * @author WChao
  * @date 2018-09-05 23:52:00
  */

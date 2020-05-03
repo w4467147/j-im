@@ -1,10 +1,12 @@
 package org.jim.core;
 
-import org.jim.core.packets.Client;
+import org.jim.core.packets.ImClientNode;
 import org.tio.monitor.RateLimiterWrap;
 
 /**
- * 
+ *
+ * @desc IM会话上下文信息
+ * @date 2018-05-01
  * @author wchao 
  *
  */
@@ -13,13 +15,21 @@ public class ImSessionContext {
 	 * 消息请求频率控制器
 	 */
 	protected RateLimiterWrap requestRateLimiter = null;
-	
-	protected Client client = null;
-	
+	/**
+	 * 客户端Node信息
+	 */
+	protected ImClientNode imClientNode = null;
+	/**
+	 * 客户端票据token,一般业务设置用
+	 */
 	protected String token = null;
-
+	/**
+	 * 所属通道上下文
+	 */
 	protected ImChannelContext imChannelContext;
-
+	/**
+	 * sessionContext唯一ID
+	 */
 	protected String id;
 
 	/**
@@ -31,20 +41,13 @@ public class ImSessionContext {
 	public ImSessionContext(ImChannelContext imChannelContext){
 		this.imChannelContext = imChannelContext;
 	}
-	/**
-	 * @return the client
-	 */
-	public Client getClient()
-	{
-		return client;
+
+	public ImClientNode getImClientNode() {
+		return imClientNode;
 	}
 
-	/**
-	 * @param client the client to set
-	 */
-	public void setClient(Client client)
-	{
-		this.client = client;
+	public void setImClientNode(ImClientNode imClientNode) {
+		this.imClientNode = imClientNode;
 	}
 
 	/**

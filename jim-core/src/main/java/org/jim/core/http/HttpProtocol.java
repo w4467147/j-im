@@ -11,13 +11,13 @@ import org.jim.core.exception.ImException;
 import org.jim.core.http.session.HttpSession;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.protocol.IProtocolConverter;
-import org.jim.core.utils.ImUtils;
+import org.jim.core.utils.ImKit;
 
 /**
  *
- * Http协议校验器
+ * @desc Http协议校验器
  * @author WChao
- *
+ * @date 2018-05-01
  */
 public class HttpProtocol extends AbstractProtocol {
 
@@ -33,7 +33,7 @@ public class HttpProtocol extends AbstractProtocol {
 	@Override
 	protected void init(ImChannelContext imChannelContext) {
 		imChannelContext.setSessionContext(new HttpSession(imChannelContext));
-		ImUtils.setClient(imChannelContext);
+		ImKit.initImClientNode(imChannelContext);
 	}
 
 	@Override

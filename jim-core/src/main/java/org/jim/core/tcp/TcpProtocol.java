@@ -11,12 +11,12 @@ import org.jim.core.ImSessionContext;
 import org.jim.core.exception.ImException;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.protocol.IProtocolConverter;
-import org.jim.core.utils.ImUtils;
+import org.jim.core.utils.ImKit;
 
 /**
- * Tcp协议判断器
+ * @desc Tcp协议校验器
  * @author WChao
- *
+ * @date 2018-05-01
  */
 public class TcpProtocol extends AbstractProtocol {
 
@@ -32,7 +32,7 @@ public class TcpProtocol extends AbstractProtocol {
 	@Override
 	protected void init(ImChannelContext imChannelContext) {
 		imChannelContext.setSessionContext(new TcpSessionContext(imChannelContext));
-		ImUtils.setClient(imChannelContext);
+		ImKit.initImClientNode(imChannelContext);
 	}
 
 	@Override
@@ -59,4 +59,5 @@ public class TcpProtocol extends AbstractProtocol {
 		}
 		return false;
 	}
+
 }

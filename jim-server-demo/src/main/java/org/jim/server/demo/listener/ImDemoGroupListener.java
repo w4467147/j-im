@@ -5,6 +5,7 @@ import org.jim.core.exception.ImException;
 import org.jim.core.listener.ImGroupListener;
 import org.jim.core.packets.*;
 import org.jim.core.utils.JsonKit;
+import org.jim.server.listener.AbstractImGroupListener;
 import org.jim.server.protocol.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +14,12 @@ import org.slf4j.LoggerFactory;
  * @author WChao 
  * 2017年5月13日 下午10:38:36
  */
-public class ImDemoGroupListener implements ImGroupListener {
+public class ImDemoGroupListener extends AbstractImGroupListener {
 
 	private  static Logger logger = LoggerFactory.getLogger(ImGroupListener.class);
 
 	@Override
-	public void onAfterBind(ImChannelContext imChannelContext, Group group) throws ImException {
+	public void doAfterBind(ImChannelContext imChannelContext, Group group) throws ImException {
 		logger.info("群组:{},绑定成功!", JsonKit.toJSONString(group));
 		JoinGroupRespBody joinGroupRespBody = JoinGroupRespBody.success();
 		//回一条消息，告诉对方进群结果
@@ -36,11 +37,11 @@ public class ImDemoGroupListener implements ImGroupListener {
 	 * @author: WChao
 	 */
 	@Override
-	public void onAfterUnbind(ImChannelContext imChannelContext, Group group) throws ImException {
+	public void doAfterUnbind(ImChannelContext imChannelContext, Group group) throws ImException {
 		//发退出房间通知  COMMAND_EXIT_GROUP_NOTIFY_RESP
 		ExitGroupNotifyRespBody exitGroupNotifyRespBody = new ExitGroupNotifyRespBody();
 		exitGroupNotifyRespBody.setGroup(group.getGroupId());
-		User clientUser = imChannelContext.getSessionContext().getClient().getUser();
+		User clientUser = imChannelContext.getSessionContext().getImClientNode().getUser();
 		if(clientUser == null) {
 			return;
 		}
@@ -59,7 +60,7 @@ public class ImDemoGroupListener implements ImGroupListener {
 	 */
 	public void joinGroupNotify(Group group, ImChannelContext imChannelContext)throws ImException{
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
-		User clientUser = imSessionContext.getClient().getUser();
+		User clientUser = imSessionContext.getImClientNode().getUser();
 		User notifyUser = User.newBuilder().userId(clientUser.getUserId()).nick(clientUser.getNick()).build();
 		String groupId = group.getGroupId();
 		//发进房间通知  COMMAND_JOIN_GROUP_NOTIFY_RESP
