@@ -6,14 +6,18 @@ package org.jim.core.cluster.redis;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.core.ImConst;
 import org.jim.core.Jim;
 import org.jim.core.ImPacket;
+import org.jim.core.cache.redis.JedisTemplate;
 import org.jim.core.cluster.ImClusterConfig;
 import org.jim.core.cluster.ImClusterVO;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.listener.MessageListener;
+import org.redisson.api.listener.StatusListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.Tio;

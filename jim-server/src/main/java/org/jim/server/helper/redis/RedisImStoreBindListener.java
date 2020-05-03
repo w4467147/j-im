@@ -1,5 +1,6 @@
 package org.jim.server.helper.redis;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.core.ImChannelContext;
 import org.jim.core.config.ImConfig;
@@ -8,6 +9,7 @@ import org.jim.core.cache.redis.RedisCache;
 import org.jim.core.cache.redis.RedisCacheManager;
 import org.jim.core.exception.ImException;
 import org.jim.core.listener.AbstractImStoreBindListener;
+import org.jim.core.message.MessageHelper;
 import org.jim.core.packets.Group;
 import org.jim.core.packets.User;
 import org.jim.server.config.ImServerConfig;
@@ -23,29 +25,14 @@ import java.util.Objects;
  * @author WChao
  * @date 2018年4月8日 下午4:12:31
  */
-public class RedisImBindListener extends AbstractImStoreBindListener {
+public class RedisImStoreBindListener extends AbstractImStoreBindListener {
 
-	private static Logger logger = LoggerFactory.getLogger(RedisImBindListener.class);
+	private static Logger logger = LoggerFactory.getLogger(RedisImStoreBindListener.class);
 
-	private RedisCache groupCache;
-	private RedisCache userCache;
-	private final String SUFFIX = ":";
+	private static final String SUFFIX = ":";
 	
-	public RedisImBindListener(){
-		this(ImServerConfig.Global.get());
-	}
-	
-	public RedisImBindListener(ImConfig imConfig){
-		this.imConfig = imConfig;
-		groupCache = RedisCacheManager.getCache(GROUP);
-		userCache = RedisCacheManager.getCache(USER);
-	}
-	
-	static{
-		RedisCacheManager.register(USER, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(GROUP, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(STORE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(PUSH, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	public RedisImStoreBindListener(ImConfig imConfig, MessageHelper messageHelper){
+		super(imConfig, messageHelper);
 	}
 	
 	@Override
@@ -64,9 +51,10 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 		String userId = imChannelContext.getUserId();
 		String groupId = group.getGroupId();
 		//移除群组成员;
-		groupCache.listRemove(groupId+SUFFIX+USER, userId);
+		RedisCacheManager.getCache(GROUP).listRemove(groupId+SUFFIX+USER, userId);
 		//移除成员群组;
-		userCache.listRemove(userId+SUFFIX+GROUP, groupId);
+		RedisCacheManager.getCache(USER).listRemove(userId+SUFFIX+GROUP, groupId);
+		//移除群组离线消息
 		RedisCacheManager.getCache(PUSH).remove(GROUP+SUFFIX+group+SUFFIX+userId);
 	}
 
@@ -75,17 +63,20 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 		if(!isStore() || Objects.isNull(user)) {
 			return;
 		}
-		updateUserTerminal(imChannelContext, user);
+		user.setStatus(ONLINE);
+		this.messageHelper.updateUserTerminal(user);
 		initUserInfo(user);
 	}
 
 	@Override
 	public void onAfterUserUnbind(ImChannelContext imChannelContext, User user) throws ImException {
-		if(!isStore()) {
+		if(!isStore() || Objects.isNull(user)) {
 			return;
 		}
-		
+		user.setStatus(OFFLINE);
+		this.messageHelper.updateUserTerminal(user);
 	}
+
 	/**
 	 * 初始化群组用户;
 	 * @param group
@@ -101,6 +92,7 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 			return;
 		}
 		String group_user_key = groupId+SUFFIX+USER;
+		RedisCache groupCache = RedisCacheManager.getCache(GROUP);
 		List<String> users = groupCache.listGetAll(group_user_key);
 		if(!users.contains(userId)){
 			groupCache.listPushTail(group_user_key, userId);
@@ -116,12 +108,12 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 			return;
 		}
 		for(Group storeGroup : groups){
-			if(groupId.equals(storeGroup.getGroupId())){
-				groupCache.put(groupId+SUFFIX+INFO, storeGroup);
-				break;
-			}
+			if(!groupId.equals(storeGroup.getGroupId()))continue;
+			groupCache.put(groupId+SUFFIX+INFO, storeGroup);
+			break;
 		}
 	}
+
 	/**
 	 * 初始化用户拥有哪些群组;
 	 * @param userId
@@ -134,24 +126,11 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 		if(StringUtils.isEmpty(group) || StringUtils.isEmpty(userId)) {
 			return;
 		}
-		List<String> groups = userCache.listGetAll(userId+SUFFIX+GROUP);
-		if(!groups.contains(group)){
-			userCache.listPushTail(userId+SUFFIX+GROUP, group);
-		}
+		List<String> groups = RedisCacheManager.getCache(USER).listGetAll(userId+SUFFIX+GROUP);
+		if(groups.contains(group))return;
+		RedisCacheManager.getCache(USER).listPushTail(userId+SUFFIX+GROUP, group);
 	}
-	/**
-	 * 更新用户终端协议类型及在线状态;
-	 * @param imChannelContext
-	 * @param user 更新用户信息
-	 */
-	private void updateUserTerminal(ImChannelContext imChannelContext , User user){
-		String userId = user.getUserId();String terminal = user.getTerminal();String status = user.getStatus();
-		if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(terminal) || StringUtils.isEmpty(status)) {
-			logger.error("userId:{},terminal:{},status:{} must not null", userId, terminal, status);
-			return;
-		}
-		userCache.put(userId+SUFFIX+TERMINAL+SUFFIX+terminal, user.getStatus());
-	}
+
 	/**
 	 * 初始化用户终端协议类型;
 	 * @param user
@@ -164,12 +143,13 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 		if(StringUtils.isEmpty(userId)) {
 			return;
 		}
+		RedisCache userCache = RedisCacheManager.getCache(USER);
 		userCache.put(userId+SUFFIX+INFO, user.clone());
 		List<Group> friends = user.getFriends();
-		if(friends != null){
-			userCache.put(userId+SUFFIX+FRIENDS, (Serializable) friends);
-		}
+		if(CollectionUtils.isEmpty(friends))return;
+		userCache.put(userId+SUFFIX+FRIENDS, (Serializable) friends);
 	}
+
 	/**
 	 * 是否开启持久化;
 	 * @return
@@ -177,6 +157,13 @@ public class RedisImBindListener extends AbstractImStoreBindListener {
 	public boolean isStore(){
 		ImServerConfig imServerConfig = ImServerConfig.Global.get();
 		return ImServerConfig.ON.equals(imServerConfig.getIsStore());
+	}
+
+	static{
+		RedisCacheManager.register(USER, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(GROUP, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(STORE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(PUSH, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 
 }

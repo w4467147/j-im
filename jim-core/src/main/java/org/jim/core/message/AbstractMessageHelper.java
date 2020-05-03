@@ -11,6 +11,7 @@ import org.jim.core.config.ImConfig;
  *
  */
 public abstract class AbstractMessageHelper implements MessageHelper,ImConst {
+
 	protected ImConfig imConfig;
 
 	public ImConfig getImConfig() {

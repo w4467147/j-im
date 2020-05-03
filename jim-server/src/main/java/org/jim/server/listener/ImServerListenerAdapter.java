@@ -3,12 +3,17 @@ package org.jim.server.listener;
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
 import org.jim.core.ImPacket;
+import org.jim.core.config.ImConfig;
+import org.jim.core.message.MessageHelper;
+import org.jim.core.packets.User;
 import org.jim.server.ImServerChannelContext;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.queue.MsgQueueRunnable;
 import org.tio.core.ChannelContext;
 import org.tio.core.intf.Packet;
 import org.tio.server.intf.ServerAioListener;
+
+import java.util.Objects;
 
 /**
  * @ClassName ImServerListenerAdapter
@@ -71,26 +76,15 @@ public class ImServerListenerAdapter implements ServerAioListener, ImConst{
 	 */
 	@Override
 	public void onBeforeClose(ChannelContext channelContext, Throwable throwable, String remark, boolean isRemove)throws Exception{
-		imServerListener.onBeforeClose((ImChannelContext)channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY), throwable, remark, isRemove);
-		/*if (imConfig == null) {
-			return;
+		ImServerChannelContext imServerChannelContext = (ImServerChannelContext) channelContext.get(Key.IM_CHANNEL_CONTEXT_KEY);
+		ImServerConfig imServerConfig = ImConfig.Global.get();
+		MessageHelper messageHelper = imServerConfig.getMessageHelper();
+		User user = imServerChannelContext.getSessionContext().getImClientNode().getUser();
+		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore()) && Objects.nonNull(messageHelper) && Objects.nonNull(user);
+		if(isStore){
+			imServerConfig.getImUserListener().onAfterUnbind(imServerChannelContext, user);
 		}
-		MessageHelper messageHelper = imConfig.getMessageHelper();
-		if(messageHelper != null){
-			ImSessionContext imSessionContext = (ImSessionContext)channelContext.getAttribute();
-			if(imSessionContext == null) {
-				return;
-			}
-			Client client = imSessionContext.getClient();
-			if(client == null) {
-				return;
-			}
-			User onlineUser = client.getUser();
-			if(onlineUser == null) {
-				return;
-			}
-			messageHelper.getBindListener().initUserTerminal(channelContext, onlineUser.getTerminal(), ImConst.OFFLINE);
-		}*/
+		imServerListener.onBeforeClose(imServerChannelContext, throwable, remark, isRemove);
 	}
 	/**
 	 * 解码成功后触发本方法

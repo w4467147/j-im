@@ -132,7 +132,7 @@ public class WsServerDecoder implements ImConst{
 				imSessionContext.setLastParts(lastParts);
 			}
 			lastParts.add(array);
-			log.error("payloadLength {}, lastParts size {}, array length {}", payloadLength, lastParts.size(), array.length);
+			log.warn("payloadLength {}, lastParts size {}, array length {}", payloadLength, lastParts.size(), array.length);
 			return websocketPacket;
 		} else {
 			int allLength = array.length;
@@ -152,7 +152,7 @@ public class WsServerDecoder implements ImConst{
 			}
 
 			websocketPacket.setBody(array);
-
+			websocketPacket.setByteCount(array.length);
 			if (opcode == Opcode.BINARY) {
 
 			} else {

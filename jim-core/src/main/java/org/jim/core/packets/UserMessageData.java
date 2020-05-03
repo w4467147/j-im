@@ -12,13 +12,23 @@ import java.util.Map;
 public class UserMessageData implements Serializable{
 
 	private static final long serialVersionUID = -1367597924020299919L;
-	private String userid;//用户id;
-	private Map<String,List<ChatBody>> friends = new HashMap<String, List<ChatBody>>();//好友消息;
-	private Map<String,List<ChatBody>> groups = new HashMap<String, List<ChatBody>>();//群组消息;
+	/**
+	 * 用户ID
+	 */
+	private String userId;
+	/**
+	 * 好友消息
+	 */
+	private Map<String,List<ChatBody>> friends = new HashMap<String, List<ChatBody>>();
+	/**
+	 * 群组消息
+	 */
+	private Map<String,List<ChatBody>> groups = new HashMap<String, List<ChatBody>>();
 	
 	public UserMessageData(){}
-	public UserMessageData(String userid){
-		this.userid = userid;
+
+	public UserMessageData(String userId){
+		this.userId = userId;
 	}
 	public Map<String, List<ChatBody>> getFriends() {
 		return friends;
@@ -32,10 +42,12 @@ public class UserMessageData implements Serializable{
 	public void setGroups(Map<String, List<ChatBody>> groups) {
 		this.groups = groups;
 	}
-	public String getUserid() {
-		return userid;
+
+	public String getUserId() {
+		return userId;
 	}
-	public void setUserid(String userid) {
-		this.userid = userid;
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }

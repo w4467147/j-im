@@ -68,6 +68,7 @@ public class TcpServerDecoder implements ImConst {
 		TcpPacket tcpPacket = new TcpPacket(Command.forNumber(cmdByte), body);
 		tcpPacket.setVersion(version);
 		tcpPacket.setMask(maskByte);
+		tcpPacket.setByteCount(bodyLen);
 		//同步发送设置同步序列号
 		if(synSeq > 0){
 			tcpPacket.setSynSeq(synSeq);
