@@ -7,7 +7,7 @@
     <name>${project.artifactId}</name>
     <version>3.0.0.v20200501-RELEASE</version>
     <description>jim is the dependent parent project of J-IM communication establishment.</description>
-    <url>http://www.j-im.org/</url>
+    <url>http://www.j-im.cn/</url>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
