@@ -31,7 +31,7 @@ http://www.j-im.cn
     "createTime": "消息创建时间long类型",
     "msgType": "消息类型int类型(0:text、1:image、2:voice、3:vedio、4:music、5:news)",
     "chatType":"聊天类型int类型(0:未知,1:公聊,2:私聊)",
-    "group_id":"群组id仅在chatType为(1)时需要,String类型",
+    "groupId":"群组id仅在chatType为(1)时需要,String类型",
     "content": "内容",
     "extras" : "扩展字段,JSON对象格式如：{'扩展字段名称':'扩展字段value'}"
 }
@@ -112,12 +112,22 @@ http://www.j-im.cn
 请求:COMMAND_GET_MESSAGE_REQ(19) 响应:COMMAND_GET_MESSAGE_RESP(20)
 
 ## 使用
-- 引入j-im(快速开发自己的高性能IM服务器),在你的pom.xml中加入如下代码片段
+
+- 服务端(快速开发自己的高性能IM服务器)：引入jim-server,在你的pom.xml中加入如下代码片段
 ```
 <dependency>
     <groupId>org.j-im</groupId>
     <artifactId>jim-server</artifactId>
-    <version>2.6.0.v20190114-RELEASE</version>
+    <version>3.0.0.v20200501-RELEASE</version>
+</dependency>
+```
+
+- 客户端(快速开发自己的IM客户端)：引入jim-client,在你的pom.xml中加入如下代码片段
+```
+<dependency>
+    <groupId>org.j-im</groupId>
+    <artifactId>jim-client</artifactId>
+    <version>3.0.0.v20200501-RELEASE</version>
 </dependency>
 ```
 
