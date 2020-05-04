@@ -1,17 +1,16 @@
 package org.jim.server.command.handler;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImAio;
-import org.jim.common.ImPacket;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.packets.Command;
-import org.jim.common.ws.WsSessionContext;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.http.HttpRequest;
+import org.jim.core.packets.Command;
+import org.jim.core.ws.WsSessionContext;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
-import org.jim.server.command.handler.processor.handshake.HandshakeCmdProcessor;
-import org.tio.core.Aio;
-import org.tio.core.ChannelContext;
+import org.jim.server.processor.handshake.HandshakeCmdProcessor;
 
-import java.util.List;
+import java.util.Objects;
 
 /**
  * 版本: [1.0]
@@ -21,22 +20,22 @@ import java.util.List;
 public class HandshakeReqHandler extends AbstractCmdHandler {
 	
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception {
-		List<HandshakeCmdProcessor> handshakeProcessors = this.getProcessor(channelContext,HandshakeCmdProcessor.class);
-		if(CollectionUtils.isEmpty(handshakeProcessors)){
-			Aio.remove(channelContext, "没有对应的握手协议处理器HandshakeProCmd...");
+	public ImPacket handler(ImPacket packet, ImChannelContext channelContext) throws ImException {
+
+		HandshakeCmdProcessor handshakeProcessor = this.getMultiProcessor(channelContext,HandshakeCmdProcessor.class);
+		if(Objects.isNull(handshakeProcessor)){
+			JimServerAPI.remove(channelContext, "没有对应的握手协议处理器HandshakeCmdProcessor...");
 			return null;
 		}
-		HandshakeCmdProcessor handShakeProCmdHandler = handshakeProcessors.get(0);
-		ImPacket handShakePacket = handShakeProCmdHandler.handshake(packet, channelContext);
+		ImPacket handShakePacket = handshakeProcessor.handshake(packet, channelContext);
 		if (handShakePacket == null) {
-			Aio.remove(channelContext, "业务层不同意握手");
+			JimServerAPI.remove(channelContext, "业务层不同意握手");
 			return null;
 		}
-		ImAio.send(channelContext, handShakePacket);
-		WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getAttribute();
+		JimServerAPI.send(channelContext, handShakePacket);
+		WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getSessionContext();
 		HttpRequest request = wsSessionContext.getHandshakeRequestPacket();
-		handShakeProCmdHandler.onAfterHandshaked(request, channelContext);
+		handshakeProcessor.onAfterHandshake(request, channelContext);
 		return null;
 	}
 

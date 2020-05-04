@@ -3,115 +3,62 @@
  */
 package org.jim.server.command;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.jim.common.ImConfig;
-import org.jim.server.command.handler.processor.CmdProcessor;
-import org.tio.core.ChannelContext;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.server.processor.SingleProtocolCmdProcessor;
+import org.jim.server.processor.MultiProtocolCmdProcessor;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 /**
  * 版本: [1.0]
  * 功能说明: 
  * @author: WChao 创建时间: 2017年9月11日 下午2:07:44
  */
-public abstract class AbstractCmdHandler implements CmdHandler {
+public abstract class AbstractCmdHandler implements CmdHandler, ImConst {
 	/**
-	 * 不同协议cmd处理命令如(ws、socket、自定义协议)握手、心跳命令等.
+	 * 单协议业务处理器
 	 */
-	protected Map<String,CmdProcessor> processors = new HashMap<String,CmdProcessor>();
+	private SingleProtocolCmdProcessor singleProcessor;
 	/**
-	 * IM相关配置类
+	 * 多协议业务处理器
 	 */
-	protected ImConfig imConfig;
-	
+	private List<MultiProtocolCmdProcessor> multiProcessors = new ArrayList<>();
+
 	public AbstractCmdHandler() {};
-	
-	public AbstractCmdHandler(ImConfig imConfig) {
-		this.imConfig = imConfig;
+
+	public SingleProtocolCmdProcessor getSingleProcessor() {
+		return singleProcessor;
 	}
 
-	public AbstractCmdHandler addProcessor(CmdProcessor processor){
-		this.processors.put(processor.name(), processor);
+	public AbstractCmdHandler setSingleProcessor(SingleProtocolCmdProcessor singleProcessor) {
+		this.singleProcessor = singleProcessor;
+		return this;
+	}
+
+	public <T> T getSingleProcessor(Class<T> clazz) {
+		return (T)singleProcessor;
+	}
+
+	public AbstractCmdHandler addMultiProtocolProcessor(MultiProtocolCmdProcessor processor) {
+		this.multiProcessors.add(processor);
 		return this;
 	}
 
 	/**
 	 * 根据当前通道所属协议获取cmd业务处理器
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 */
-	public <T> List<T> getProcessor(ChannelContext channelContext,Class<T> clazz){
-		List<T> processorList = null;
-		for(Entry<String,CmdProcessor> processorEntry : processors.entrySet()){
-			CmdProcessor processor = processorEntry.getValue();
-			if(processor.isProtocol(channelContext)){
-				if(CollectionUtils.isEmpty(processorList)){
-					processorList = Lists.newArrayList();
-				}
-				processorList.add((T)processor);
+	public <T> T getMultiProcessor(ImChannelContext imChannelContext, Class<T> clazz){
+		T multiCmdProcessor = null;
+		for(MultiProtocolCmdProcessor multiProcessor : multiProcessors){
+			if(multiProcessor.isProtocol(imChannelContext)){
+				multiCmdProcessor = (T)multiProcessor;
 			}
 		}
-		return processorList;
+		return multiCmdProcessor;
 	}
 
-	/**
-	 * 根据cmdProcessor名字获取cmd业务处理器
-	 * @param name
-	 * @return
-	 */
-	public <T> List<T> getProcessor(String name, Class<T> clazz){
-		List<T> processorList = null;
-		for(Entry<String,CmdProcessor> processorEntry : processors.entrySet()){
-			CmdProcessor processor = processorEntry.getValue();
-			if(name.equals(processor.name())){
-				if(CollectionUtils.isEmpty(processorList)){
-					processorList = Lists.newArrayList();
-				}
-				processorList.add((T)processor);
-			}
-		}
-		return processorList;
-	}
-	/**
-	 * 获取不包含指定名字的cmdProcessor
-	 * @param names
-	 * @param clazz
-	 * @return
-	 */
-	public <T> List<T> getProcessorNotEqualName(Set<String> names, Class<T> clazz){
-		List<T> processorList = null;
-		for(Entry<String,CmdProcessor> processorEntry : processors.entrySet()){
-			CmdProcessor processor = processorEntry.getValue();
-			if(CollectionUtils.isEmpty(processorList)){
-				processorList = Lists.newArrayList();
-			}
-			if(CollectionUtils.isEmpty(names)){
-				processorList.add((T)processor);
-			}else {
-				if(!names.contains(processor.name())){
-					processorList.add((T)processor);
-				}
-			}
-		}
-		return processorList;
-	}
-	public CmdProcessor removeProcessor(String name){
-		
-		return processors.remove(name);
-	}
-	
-	public ImConfig getImConfig() {
-		return imConfig;
-	}
-
-	public void setImConfig(ImConfig imConfig) {
-		this.imConfig = imConfig;
-	}
-	
 }

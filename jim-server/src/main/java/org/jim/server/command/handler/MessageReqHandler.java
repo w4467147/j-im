@@ -1,18 +1,20 @@
 package org.jim.server.command.handler;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
-import org.tio.core.ChannelContext;
-import org.jim.common.message.MessageHelper;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
-import org.jim.common.packets.UserMessageData;
-import org.jim.common.packets.MessageReqBody;
-import org.jim.common.utils.ImKit;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.ImStatus;
+import org.jim.core.config.ImConfig;
+import org.jim.core.exception.ImException;
+import org.jim.server.config.ImServerConfig;
+import org.jim.core.message.MessageHelper;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.RespBody;
+import org.jim.core.packets.UserMessageData;
+import org.jim.core.packets.MessageReqBody;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
+import org.jim.server.protocol.ProtocolManager;
 
 /**
  * 获取聊天消息命令处理器
@@ -28,17 +30,18 @@ public class MessageReqHandler extends AbstractCmdHandler {
 	}
 
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception {
-		RespBody resPacket = null;
-		MessageReqBody messageReqBody = null;
+	public ImPacket handler(ImPacket packet, ImChannelContext imChannelContext) throws ImException {
+		RespBody resPacket;
+		MessageReqBody messageReqBody;
 		try{
 			messageReqBody = JsonKit.toBean(packet.getBody(),MessageReqBody.class);
 		}catch (Exception e) {
 			//用户消息格式不正确
-			return getMessageFailedPacket(channelContext);
+			return getMessageFailedPacket(imChannelContext);
 		}
 		UserMessageData messageData = null;
-		MessageHelper messageHelper = imConfig.getMessageHelper();
+		ImServerConfig imServerConfig = ImConfig.Global.get();
+		MessageHelper messageHelper = imServerConfig.getMessageHelper();
 		//群组ID;
 		String groupId = messageReqBody.getGroupId();
 		//当前用户ID;
@@ -56,8 +59,8 @@ public class MessageReqHandler extends AbstractCmdHandler {
 		//消息类型;
 		int type = messageReqBody.getType();
 		//如果用户ID为空或者type格式不正确，获取消息失败;
-		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImConst.ON.equals(imConfig.getIsStore())){
-			return getMessageFailedPacket(channelContext);
+		if(StringUtils.isEmpty(userId) || (0 != type && 1 != type) || !ImServerConfig.ON.equals(imServerConfig.getIsStore())){
+			return getMessageFailedPacket(imChannelContext);
 		}
 		if(type == 0){
 			resPacket = new RespBody(Command.COMMAND_GET_MESSAGE_RESP,ImStatus.C10016);
@@ -78,7 +81,7 @@ public class MessageReqHandler extends AbstractCmdHandler {
 			if(0 == type){
 				messageData = messageHelper.getFriendsOfflineMessage(userId);
 			}else{
-				return getMessageFailedPacket(channelContext);
+				return getMessageFailedPacket(imChannelContext);
 			}
 		}else{
 			//获取与指定用户离线消息;
@@ -90,15 +93,15 @@ public class MessageReqHandler extends AbstractCmdHandler {
 			}
 		}
 		resPacket.setData(messageData);
-		return ImKit.ConvertRespPacket(resPacket, channelContext);
+		return ProtocolManager.Converter.respPacket(resPacket, imChannelContext);
 	}
 	/**
 	 * 获取用户消息失败响应包;
-	 * @param channelContext
+	 * @param imChannelContext
 	 * @return
 	 */
-	public ImPacket getMessageFailedPacket(ChannelContext channelContext){
+	public ImPacket getMessageFailedPacket(ImChannelContext imChannelContext) throws ImException{
 		RespBody resPacket = new RespBody(Command.COMMAND_GET_MESSAGE_RESP,ImStatus.C10015);
-		return ImKit.ConvertRespPacket(resPacket, channelContext);
+		return ProtocolManager.Converter.respPacket(resPacket, imChannelContext);
 	}
 }

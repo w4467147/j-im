@@ -9,7 +9,7 @@ import java.util.Properties;
 public class CommandConfiguration {
 	private  int cmd ;
 	private  String cmdHandler ;
-	private  List<String> proCmdHandlers = new ArrayList<String>();
+	private  List<String> cmdProcessors = new ArrayList<String>();
 	
 	public CommandConfiguration(){}
 	
@@ -21,7 +21,7 @@ public class CommandConfiguration {
 			if(values.length >1){
 				for(int i = 0 ; i < values.length ; i++){
 					if(i > 0) {
-						proCmdHandlers.add(values[i]);
+						cmdProcessors.add(values[i]);
 					}
 				}
 			}
@@ -44,13 +44,11 @@ public class CommandConfiguration {
 		this.cmdHandler = cmdHandler;
 	}
 
-	public List<String> getProCmdHandlers() {
-		return proCmdHandlers;
+	public List<String> getCmdProcessors() {
+		return cmdProcessors;
 	}
 
-	public void setProCmdHandlers(List<String> proCmdHandlers) {
-		this.proCmdHandlers = proCmdHandlers;
+	public void setCmdProcessors(List<String> cmdProcessors) {
+		this.cmdProcessors = cmdProcessors;
 	}
-	
-	
 }

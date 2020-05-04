@@ -1,9 +1,10 @@
 package org.jim.server.util;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImSessionContext;
+import org.jim.server.config.ImServerConfig;
 import org.tio.core.ChannelContext;
-import org.tio.core.GroupContext;
-import org.jim.common.http.GroupContextKey;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpRequest;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.http.HttpRequest;
 /**
  * @author WChao
  * 2017年8月18日 下午5:47:00
@@ -16,10 +17,8 @@ public class HttpServerUtils {
 	 * @author WChao
 	 */
 	public static HttpConfig getHttpConfig(HttpRequest request) {
-		ChannelContext channelContext = request.getChannelContext();
-		GroupContext groupContext = channelContext.getGroupContext();
-		HttpConfig httpConfig = (HttpConfig) groupContext.getAttribute(GroupContextKey.HTTP_SERVER_CONFIG);
-		return httpConfig;
+		ImServerConfig imServerConfig = (ImServerConfig)request.getImChannelContext().getImConfig();
+		return imServerConfig.getHttpConfig();
 	}
 
 	/**

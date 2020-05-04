@@ -1,15 +1,17 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImConst;
-import org.jim.common.ImPacket;
-import org.jim.common.ImStatus;
-import org.tio.core.ChannelContext;
-import org.jim.common.packets.AuthReqBody;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.RespBody;
-import org.jim.common.utils.ImKit;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImConst;
+import org.jim.core.ImPacket;
+import org.jim.core.ImStatus;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.AuthReqBody;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.RespBody;
+import org.jim.core.utils.JsonKit;
 import org.jim.server.command.AbstractCmdHandler;
+import org.jim.server.protocol.ProtocolManager;
+
 /**
  * 
  * 版本: [1.0]
@@ -19,11 +21,11 @@ import org.jim.server.command.AbstractCmdHandler;
 public class AuthReqHandler extends AbstractCmdHandler
 {
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception
+	public ImPacket handler(ImPacket packet, ImChannelContext channelContext) throws ImException
 	{
 		if (packet.getBody() == null) {
 			RespBody respBody = new RespBody(Command.COMMAND_AUTH_RESP,ImStatus.C10010);
-			return ImKit.ConvertRespPacket(respBody, channelContext);
+			return ProtocolManager.Converter.respPacket(respBody, channelContext);
 		}
 		AuthReqBody authReqBody = JsonKit.toBean(packet.getBody(), AuthReqBody.class);
 		String token = authReqBody.getToken() == null ? "" : authReqBody.getToken();
@@ -31,7 +33,7 @@ public class AuthReqHandler extends AbstractCmdHandler
 		authReqBody.setToken(data);
 		authReqBody.setCmd(null);
 		RespBody respBody = new RespBody(Command.COMMAND_AUTH_RESP,ImStatus.C10009).setData(authReqBody);
-		return ImKit.ConvertRespPacket(respBody, channelContext);
+		return ProtocolManager.Converter.respPacket(respBody, channelContext);
 	}
 
 	@Override

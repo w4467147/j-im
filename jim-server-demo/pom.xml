@@ -5,9 +5,8 @@
   <name>jim-server-demo</name>
   <parent>
 		<groupId>org.j-im</groupId>
-		<artifactId>jim-parent</artifactId>
-		<version>2.5.0.v20181115-RELEASE</version>
-		<relativePath>../jim-parent/pom.xml</relativePath>
+		<artifactId>jim</artifactId>
+		<version>3.0.0.v20200501-RELEASE</version>
   </parent>
   <dependencies>
   	 	<dependency>
@@ -20,7 +19,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>   
 		        <artifactId>maven-compiler-plugin</artifactId>   
-		        <version>2.3.2</version>   
+		        <version>${maven-compiler-plugin-version}</version>
 		        <configuration>   
 		            <source>${jdk.version}</source>   
 		            <target>${jdk.version}</target>   

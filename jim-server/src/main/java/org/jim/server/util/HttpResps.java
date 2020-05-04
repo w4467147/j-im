@@ -8,14 +8,15 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jim.core.ImConst;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jim.common.http.HttpConfig;
-import org.jim.common.http.HttpConst;
-import org.jim.common.http.HttpRequest;
-import org.jim.common.http.HttpResponse;
-import org.jim.common.http.HttpResponseStatus;
-import org.jim.common.http.MimeType;
+import org.jim.core.http.HttpConfig;
+import org.jim.core.http.HttpConst;
+import org.jim.core.http.HttpRequest;
+import org.jim.core.http.HttpResponse;
+import org.jim.core.http.HttpResponseStatus;
+import org.jim.core.http.MimeType;
 import org.tio.utils.json.Json;
 
 import cn.hutool.core.io.FileUtil;
@@ -24,7 +25,7 @@ import cn.hutool.core.io.FileUtil;
  * @author WChao
  * 2017年6月29日 下午4:17:24
  */
-public class HttpResps {
+public class HttpResps implements ImConst.Http {
 	private static Logger log = LoggerFactory.getLogger(HttpResps.class);
 
 	/**
@@ -92,7 +93,7 @@ public class HttpResps {
 		String filename = fileOnServer.getName();
 		String extension = FilenameUtils.getExtension(filename);
 		ret = file(request, bodyBytes, extension);
-		ret.addHeader(HttpConst.ResponseHeaderKey.Last_Modified, lastModified.getTime() + "");
+		ret.addHeader(ResponseHeaderKey.Last_Modified, lastModified.getTime() + "");
 		return ret;
 	}
 
@@ -107,7 +108,7 @@ public class HttpResps {
 	public static HttpResponse fileWithContentType(HttpRequest request, byte[] bodyBytes, String contentType) {
 		HttpResponse ret = new HttpResponse(request, HttpServerUtils.getHttpConfig(request));
 		ret.setBodyAndGzip(bodyBytes, request);
-		ret.addHeader(HttpConst.ResponseHeaderKey.Content_Type, contentType);
+		ret.addHeader(ResponseHeaderKey.Content_Type, contentType);
 		return ret;
 	}
 
@@ -227,7 +228,7 @@ public class HttpResps {
 	public static HttpResponse redirect(HttpRequest request, String path) {
 		HttpResponse ret = new HttpResponse(request, HttpServerUtils.getHttpConfig(request));
 		ret.setStatus(HttpResponseStatus.C302);
-		ret.addHeader(HttpConst.ResponseHeaderKey.Location, path);
+		ret.addHeader(ResponseHeaderKey.Location, path);
 		return ret;
 	}
 
@@ -261,7 +262,7 @@ public class HttpResps {
 				log.error(e.toString(), e);
 			}
 		}
-		ret.addHeader(HttpConst.ResponseHeaderKey.Content_Type, Content_Type);
+		ret.addHeader(ResponseHeaderKey.Content_Type, Content_Type);
 		return ret;
 	}
 
@@ -273,7 +274,8 @@ public class HttpResps {
 	 * @author WChao
 	 */
 	public static HttpResponse try304(HttpRequest request, long lastModifiedOnServer) {
-		String If_Modified_Since = request.getHeader(HttpConst.RequestHeaderKey.If_Modified_Since);//If-Modified-Since
+		//If-Modified-Since
+		String If_Modified_Since = request.getHeader(RequestHeaderKey.If_Modified_Since);
 		if (StringUtils.isNoneBlank(If_Modified_Since)) {
 			Long If_Modified_Since_Date = null;
 			try {
@@ -285,7 +287,7 @@ public class HttpResps {
 					return ret;
 				}
 			} catch (NumberFormatException e) {
-				log.warn("{}, {}不是整数，浏览器信息:{}", request.getRemote(), If_Modified_Since, request.getHeader(HttpConst.RequestHeaderKey.User_Agent));
+				log.warn("{}, {}不是整数，浏览器信息:{}", request.getRemote(), If_Modified_Since, request.getHeader(RequestHeaderKey.User_Agent));
 				return null;
 			}
 		}

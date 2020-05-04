@@ -3,16 +3,18 @@
  */
 package org.jim.server.command;
 
-import org.jim.common.ImConfig;
-import org.jim.common.packets.Command;
-import org.jim.server.command.handler.processor.CmdProcessor;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.Command;
+import org.jim.server.processor.MultiProtocolCmdProcessor;
+import org.jim.server.processor.SingleProtocolCmdProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
+
 /**
  * 版本: [1.0]
  * 功能说明: 命令执行管理器;
@@ -24,9 +26,7 @@ public class CommandManager{
 	 */
 	private static  Map<Integer, AbstractCmdHandler> handlerMap = new HashMap<>();
 	private static Logger LOG = LoggerFactory.getLogger(CommandManager.class);
-	
-	private static ImConfig imConfig;
-	
+
 	private CommandManager(){};
 	
 	static{
@@ -40,33 +40,36 @@ public class CommandManager{
 	
 	private static void init(List<CommandConfiguration> configurations) throws Exception{
 		for(CommandConfiguration configuration : configurations){
-			Class<AbstractCmdHandler> cmdHandlerClazz = (Class<AbstractCmdHandler>)Class.forName(configuration.getCmdHandler());
-			AbstractCmdHandler cmdHandler = cmdHandlerClazz.newInstance();
-			List<String> proCmdHandlerList = configuration.getProCmdHandlers();
-			if(!proCmdHandlerList.isEmpty()){
-				for(String proCmdHandlerClass : proCmdHandlerList){
-					Class<CmdProcessor> proCmdHandlerClazz = (Class<CmdProcessor>)Class.forName(proCmdHandlerClass);
-					CmdProcessor proCmdHandler = proCmdHandlerClazz.newInstance();
-					cmdHandler.addProcessor(proCmdHandler);
+			AbstractCmdHandler cmdHandler = ((Class<AbstractCmdHandler>)Class.forName(configuration.getCmdHandler())).newInstance();
+			List<String> cmdProcessors = configuration.getCmdProcessors();
+			if(!cmdProcessors.isEmpty()){
+				for(String cmdProcessor : cmdProcessors){
+					Object cmdProcessorObj = Class.forName(cmdProcessor).newInstance();
+					if(cmdProcessorObj instanceof MultiProtocolCmdProcessor){
+						cmdHandler.addMultiProtocolProcessor((MultiProtocolCmdProcessor)cmdProcessorObj);
+					}else if(cmdProcessorObj instanceof SingleProtocolCmdProcessor){
+						cmdHandler.setSingleProcessor((SingleProtocolCmdProcessor)cmdProcessorObj);
+					}
 				}
 			}
 			registerCommand(cmdHandler);
 		}
 	}
+
 	public static AbstractCmdHandler registerCommand(AbstractCmdHandler imCommandHandler) throws Exception{
 		if(imCommandHandler == null || imCommandHandler.command() == null) {
 			return null;
 		}
 		int cmd_number = imCommandHandler.command().getNumber();
-		if(Command.forNumber(cmd_number) == null) {
-			throw new Exception("注册cmd处理器失败,不合法的cmd命令码:" + cmd_number + ",请在Command枚举类中添加!");
+		if(Objects.isNull(Command.forNumber(cmd_number))) {
+			throw new ImException("failed to register cmd handler, illegal cmd code:" + cmd_number + ",use Command.addAndGet () to add in the enumerated Command class!");
 		}
-		if(handlerMap.get(cmd_number) == null)
+		if(Objects.isNull(handlerMap.get(cmd_number)))
 		{
-			imCommandHandler.setImConfig(imConfig);
 			return handlerMap.put(cmd_number,imCommandHandler);
+		}else{
+			throw new ImException("cmd code:"+cmd_number+",has been registered, please correct!");
 		}
-		return null;
 	}
 	
 	public static AbstractCmdHandler removeCommand(Command command){
@@ -94,19 +97,5 @@ public class CommandManager{
 			return null;
 		}
 		return handlerMap.get(command.getNumber());
-	}
-	
-	public static void init(ImConfig config) {
-		imConfig = config;
-		for(Entry<Integer,AbstractCmdHandler> entry : handlerMap.entrySet()){
-			try {
-				entry.getValue().setImConfig(imConfig);
-			} catch (Exception e) {
-				LOG.error(e.toString());
-			}
-		}
-	}
-	public static ImConfig getImConfig() {
-		return imConfig;
 	}
 }

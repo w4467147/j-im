@@ -3,7 +3,7 @@
 [![maven最新版本](https://maven-badges.herokuapp.com/maven-central/org.j-im/jim-server/badge.svg "maven最新版本")](https://maven-badges.herokuapp.com/maven-central/org.j-im/jim-server)
 ## J-IM简介（3.0.0版本大重构中,可以前往3.0.0-dev分支体验）
 
- J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十万至百万在线用户IM，主要目标降低即时通讯门槛，快速打造低成本接入在线IM系统，通过极简洁的消息格式就可以实现多端不同协议间的消息发送如内置(Http、Websocket、Tcp自定义IM协议)等，并提供通过http协议的api接口进行消息发送无需关心接收端属于什么协议，一个消息格式搞定一切！
+J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十万至百万在线用户IM，主要目标降低即时通讯门槛，快速打造低成本接入在线IM系统，通过极简洁的消息格式就可以实现多端不同协议间的消息发送如内置(Http、Websocket、Tcp自定义IM协议)等，并提供通过http协议的api接口进行消息发送无需关心接收端属于什么协议，一个消息格式搞定一切！  
 
 ## 官方网站
 
@@ -111,7 +111,6 @@
 ```
 请求:COMMAND_GET_MESSAGE_REQ(19) 响应:COMMAND_GET_MESSAGE_RESP(20)
 
-
 ## 使用
 - 引入j-im(快速开发自己的高性能IM服务器),在你的pom.xml中加入如下代码片段
 ```
@@ -129,6 +128,7 @@
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041930_9b8ee6dc_410355.png "屏幕截图.png")
 
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041841_e7a8a173_410355.png "屏幕截图.png")
+
 ## J-IM老版一些截图
 
   Web访问地址:http://localhost:8888

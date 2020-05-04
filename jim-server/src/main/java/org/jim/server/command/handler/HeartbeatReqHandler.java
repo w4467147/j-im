@@ -1,13 +1,13 @@
 package org.jim.server.command.handler;
 
-import org.jim.common.ImPacket;
-import org.jim.common.Protocol;
-import org.jim.common.packets.Command;
-import org.jim.common.packets.HeartbeatBody;
-import org.jim.common.packets.RespBody;
-import org.jim.common.utils.ImKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.ImPacket;
+import org.jim.core.exception.ImException;
+import org.jim.core.packets.Command;
+import org.jim.core.packets.HeartbeatBody;
+import org.jim.core.packets.RespBody;
 import org.jim.server.command.AbstractCmdHandler;
-import org.tio.core.ChannelContext;
+import org.jim.server.protocol.ProtocolManager;
 
 /**
  *
@@ -15,10 +15,10 @@ import org.tio.core.ChannelContext;
 public class HeartbeatReqHandler extends AbstractCmdHandler
 {
 	@Override
-	public ImPacket handler(ImPacket packet, ChannelContext channelContext) throws Exception
+	public ImPacket handler(ImPacket packet, ImChannelContext channelContext) throws ImException
 	{
 		RespBody heartbeatBody = new RespBody(Command.COMMAND_HEARTBEAT_REQ).setData(new HeartbeatBody(Protocol.HEARTBEAT_BYTE));
-		ImPacket heartbeatPacket = ImKit.ConvertRespPacket(heartbeatBody,channelContext);
+		ImPacket heartbeatPacket = ProtocolManager.Converter.respPacket(heartbeatBody,channelContext);
 		return heartbeatPacket;
 	}
 

@@ -1,83 +1,63 @@
 package org.jim.server.helper.redis;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jim.common.ImConfig;
-import org.jim.common.cache.redis.JedisTemplate;
-import org.jim.common.cache.redis.RedisCache;
-import org.jim.common.cache.redis.RedisCacheManager;
-import org.jim.common.listener.ImBindListener;
-import org.jim.common.message.AbstractMessageHelper;
-import org.jim.common.packets.ChatBody;
-import org.jim.common.packets.Group;
-import org.jim.common.packets.User;
-import org.jim.common.packets.UserMessageData;
-import org.jim.common.utils.ChatKit;
-import org.jim.common.utils.JsonKit;
+import org.jim.core.ImChannelContext;
+import org.jim.core.cache.redis.JedisTemplate;
+import org.jim.core.cache.redis.RedisCache;
+import org.jim.core.cache.redis.RedisCacheManager;
+import org.jim.core.config.ImConfig;
+import org.jim.core.listener.ImStoreBindListener;
+import org.jim.core.message.AbstractMessageHelper;
+import org.jim.core.packets.*;
+import org.jim.core.utils.JsonKit;
+import org.jim.server.util.ChatKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Redis获取持久化+同步消息助手;
  * @author WChao
  * @date 2018年4月9日 下午4:39:30
  */
-@SuppressWarnings("unchecked")
 public class RedisMessageHelper extends AbstractMessageHelper{
-	
-	private RedisCache groupCache = null;
-	private RedisCache pushCache = null;
-	private RedisCache storeCache = null;
-	private RedisCache userCache = null;
-	
-	private final String SUBFIX = ":";
+
 	private Logger log = LoggerFactory.getLogger(RedisMessageHelper.class);
-	
-	static{
-		RedisCacheManager.register(USER, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(GROUP, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(STORE, Integer.MAX_VALUE, Integer.MAX_VALUE);
-		RedisCacheManager.register(PUSH, Integer.MAX_VALUE, Integer.MAX_VALUE);
-	}
-	
+
+	private static final String SUFFIX = ":";
+
+
 	public RedisMessageHelper(){
-		this(null);
-	}
-	public RedisMessageHelper(ImConfig imConfig){
-		this.groupCache = RedisCacheManager.getCache(GROUP);
-		this.pushCache = RedisCacheManager.getCache(PUSH);
-		this.storeCache = RedisCacheManager.getCache(STORE);
-		this.userCache = RedisCacheManager.getCache(USER);
-		this.imConfig = imConfig;
+		this.imConfig =  ImConfig.Global.get();
 	}
 	
 	@Override
-	public ImBindListener getBindListener() {
+	public ImStoreBindListener getBindListener() {
 		
-		return new RedisImBindListener(imConfig);
+		return new RedisImStoreBindListener(imConfig, this);
 	}
 	
 	@Override
-	public boolean isOnline(String userid) {
+	public boolean isOnline(String userId) {
 		try{
-		Set<String> keys = JedisTemplate.me().keys(USER+SUBFIX+userid+SUBFIX+TERMINAL);
-		if(keys != null && keys.size() > 0){
-			Iterator<String> keyitr = keys.iterator();
-			while(keyitr.hasNext()){
-				String key = keyitr.next();
-				key = key.substring(key.indexOf(userid));
-				String isOnline = userCache.get(key, String.class);
-				if(ONLINE.equals(isOnline)){
+			String keyPattern = USER+SUFFIX+userId+SUFFIX+TERMINAL;
+			Set<String> terminalKeys = JedisTemplate.me().keys(keyPattern);
+			if(CollectionUtils.isEmpty(terminalKeys)){
+				return false;
+			}
+			Iterator<String> terminalKeyIterator = terminalKeys.iterator();
+			while(terminalKeyIterator.hasNext()){
+				String terminalKey = terminalKeyIterator.next();
+				terminalKey = terminalKey.substring(terminalKey.indexOf(userId));
+				String isOnline = RedisCacheManager.getCache(USER).get(terminalKey, String.class);
+				if(UserStatusType.ONLINE.getStatus().equals(isOnline)){
 					return true;
 				}
 			}
-		}
 		}catch(Exception e){
 			log.error(e.toString(),e);
 		}
@@ -85,10 +65,9 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 	}
 	
 	@Override
-	public List<String> getGroupUsers(String group_id) {
-		String group_user_key = group_id+SUBFIX+USER;
-		List<String> users = groupCache.listGetAll(group_user_key);
-		return users;
+	public List<String> getGroupUsers(String groupId) {
+		String groupUserKey = groupId+SUFFIX+USER;
+		return RedisCacheManager.getCache(GROUP).listGetAll(groupUserKey);
 	}
 
 	
@@ -100,388 +79,360 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 
 
 	@Override
-	public void addGroupUser(String userid, String group_id) {
-		List<String> users = groupCache.listGetAll(group_id);
-		if(!users.contains(userid)){
-			groupCache.listPushTail(group_id, userid);
+	public void addGroupUser(String userId, String groupId) {
+		List<String> users = RedisCacheManager.getCache(GROUP).listGetAll(groupId);
+		if(users.contains(userId)){
+			return;
 		}
+		RedisCacheManager.getCache(GROUP).listPushTail(groupId, userId);
 	}
 
 	@Override
-	public void removeGroupUser(String userid, String group_id) {
-		groupCache.listRemove(group_id,userid);
+	public void removeGroupUser(String userId, String groupId) {
+		RedisCacheManager.getCache(GROUP).listRemove(groupId, userId);
 	}
 
 	@Override
-	public UserMessageData getFriendsOfflineMessage(String userid, String from_userid) {
-		String key = USER+SUBFIX+userid+SUBFIX+from_userid;
-		List<String> messageList = pushCache.sortSetGetAll(key);
-		List<ChatBody> datas = JsonKit.toArray(messageList, ChatBody.class);
-		pushCache.remove(key);
-		return putFriendsMessage(new UserMessageData(userid), datas);
+	public UserMessageData getFriendsOfflineMessage(String userId, String fromUserId) {
+		String userFriendKey = USER+SUFFIX+userId+SUFFIX+fromUserId;
+		List<String> messageList = RedisCacheManager.getCache(PUSH).sortSetGetAll(userFriendKey);
+		List<ChatBody> messageDataList = JsonKit.toArray(messageList, ChatBody.class);
+		RedisCacheManager.getCache(PUSH).remove(userFriendKey);
+		return putFriendsMessage(new UserMessageData(userId), messageDataList, null);
 	}
 
 	@Override
-	public UserMessageData getFriendsOfflineMessage(String userid) {
+	public UserMessageData getFriendsOfflineMessage(String userId) {
+		UserMessageData messageData = new UserMessageData(userId);
 		try{
-			Set<String> keys = JedisTemplate.me().keys(PUSH+SUBFIX+USER+SUBFIX+userid);
-			UserMessageData messageData = new UserMessageData(userid);
-			if(keys != null && keys.size() > 0){
-				List<ChatBody> results = new ArrayList<ChatBody>();
-				Iterator<String> keyitr = keys.iterator();
-				//获取好友离线消息;
-				while(keyitr.hasNext()){
-					String key = keyitr.next();
-					key = key.substring(key.indexOf(USER+SUBFIX));
-					List<String> messages = pushCache.sortSetGetAll(key);
-					pushCache.remove(key);
-					results.addAll(JsonKit.toArray(messages, ChatBody.class));
+			Set<String> userKeys = JedisTemplate.me().keys(PUSH+SUFFIX+USER+SUFFIX+userId);
+			//获取好友离线消息;
+			if(CollectionUtils.isNotEmpty(userKeys)){
+				List<ChatBody> messageList = new ArrayList<ChatBody>();
+				Iterator<String> userKeyIterator = userKeys.iterator();
+				while(userKeyIterator.hasNext()){
+					String userKey = userKeyIterator.next();
+					userKey = userKey.substring(userKey.indexOf(USER+SUFFIX));
+					List<String> messages = RedisCacheManager.getCache(GROUP).sortSetGetAll(userKey);
+					RedisCacheManager.getCache(GROUP).remove(userKey);
+					messageList.addAll(JsonKit.toArray(messages, ChatBody.class));
 				}
-				putFriendsMessage(messageData, results);
+				putFriendsMessage(messageData, messageList, null);
 			}
-			List<String> groups = userCache.listGetAll(userid+SUBFIX+GROUP);
+			List<String> groupIdList = RedisCacheManager.getCache(USER).listGetAll(userId+SUFFIX+GROUP);
 			//获取群组离线消息;
-			if(groups != null){
-				for(String groupid : groups){
-					UserMessageData groupMessageData = getGroupOfflineMessage(userid, groupid);
-					if(groupMessageData != null){
-						putGroupMessage(messageData, groupMessageData.getGroups().get(groupid));
-					}
-				}
+			if(CollectionUtils.isNotEmpty(groupIdList)){
+				groupIdList.forEach(groupId->{
+					UserMessageData groupMessageData = getGroupOfflineMessage(userId, groupId);
+					if(Objects.isNull(groupMessageData))return;
+					putGroupMessage(messageData, groupMessageData.getGroups().get(groupId));
+				});
 			}
-			return messageData;
 		}catch (Exception e) {
 			log.error(e.toString(),e);
 		}
-		return null;
+		return messageData;
 	}
 
 	@Override
-	public UserMessageData getGroupOfflineMessage(String userid, String groupid) {
-		String key = GROUP+SUBFIX+groupid+SUBFIX+userid;
-		List<String> messages = pushCache.sortSetGetAll(key);
+	public UserMessageData getGroupOfflineMessage(String userId, String groupId) {
+		UserMessageData messageData = new UserMessageData(userId);
+		String userGroupKey = GROUP+SUFFIX+groupId+SUFFIX+userId;
+		List<String> messages = RedisCacheManager.getCache(PUSH).sortSetGetAll(userGroupKey);
 		if(CollectionUtils.isEmpty(messages)) {
-			return null;
+			return messageData;
 		}
-		UserMessageData messageData = new UserMessageData(userid);
 		putGroupMessage(messageData, JsonKit.toArray(messages, ChatBody.class));
-		pushCache.remove(key);
+		RedisCacheManager.getCache(PUSH).remove(userGroupKey);
 		return messageData;
 	}
 
 	@Override
-	public UserMessageData getFriendHistoryMessage(String userid, String from_userid,Double beginTime,Double endTime,Integer offset,Integer count) {
-		String sessionId = ChatKit.sessionId(userid, from_userid);
-		List<String> messages = null;
-		String key = USER+SUBFIX+sessionId;
-		boolean isTimeBetween = (beginTime != null && endTime != null);
-		boolean isPage = (offset != null && count != null);
-		//消息区间，不分页
-		if(isTimeBetween && !isPage){
-			messages = storeCache.sortSetGetAll(key, beginTime, endTime);
-		//消息区间，并且分页;
-		}else if(isTimeBetween && isPage){
-			messages = storeCache.sortSetGetAll(key, beginTime, endTime,offset,count);
-		//所有消息，并且分页;
-		}else if(!isTimeBetween &&  isPage){
-			messages = storeCache.sortSetGetAll(key, 0, Double.MAX_VALUE,offset,count);
-		//所有消息，不分页;
-		}else{
-			messages = storeCache.sortSetGetAll(key);
-		}
-		if(CollectionUtils.isEmpty(messages)) {
-			return null;
-		}
-		UserMessageData messageData = new UserMessageData(userid);
-		putFriendsHistoryMessage(messageData, JsonKit.toArray(messages, ChatBody.class),from_userid);
+	public UserMessageData getFriendHistoryMessage(String userId, String fromUserId, Double beginTime, Double endTime, Integer offset, Integer count) {
+		String sessionId = ChatKit.sessionId(userId, fromUserId);
+		String userSessionKey = USER+SUFFIX+sessionId;
+		List<String> messages = getHistoryMessage(userSessionKey, beginTime, endTime, offset, count);
+		UserMessageData messageData = new UserMessageData(userId);
+		putFriendsMessage(messageData, JsonKit.toArray(messages, ChatBody.class), fromUserId);
 		return messageData;
 	}
 
 	@Override
-	public UserMessageData getGroupHistoryMessage(String userid, String groupid,Double beginTime,Double endTime,Integer offset,Integer count) {
-		String key = GROUP+SUBFIX+groupid;
-		List<String> messages = null;
-		boolean isTimeBetween = (beginTime != null && endTime != null);
-		boolean isPage = (offset != null && count != null);
-		//消息区间，不分页
-		if(isTimeBetween && !isPage){
-			messages = storeCache.sortSetGetAll(key, beginTime, endTime);
-		//消息区间，并且分页;
-		}else if(isTimeBetween && isPage){
-			messages = storeCache.sortSetGetAll(key, beginTime, endTime,offset,count);
-		//所有消息，并且分页;
-		}else if(!isTimeBetween &&  isPage){
-			messages = storeCache.sortSetGetAll(key, 0, Double.MAX_VALUE,offset,count);
-		//所有消息，不分页;
-		}else{
-			messages = storeCache.sortSetGetAll(key);
-		}
-		if(CollectionUtils.isEmpty(messages)) {
-			return null;
-		}
-		UserMessageData messageData = new UserMessageData(userid);
+	public UserMessageData getGroupHistoryMessage(String userId, String groupId, Double beginTime, Double endTime, Integer offset, Integer count) {
+		String groupKey = GROUP+SUFFIX+groupId;
+		List<String> messages = getHistoryMessage(groupKey, beginTime, endTime, offset, count);
+		UserMessageData messageData = new UserMessageData(userId);
 		putGroupMessage(messageData, JsonKit.toArray(messages, ChatBody.class));
 		return messageData;
 	}
-	
+
+	private List<String> getHistoryMessage(String historyKey, Double beginTime, Double endTime, Integer offset, Integer count){
+		boolean isTimeBetween = (beginTime != null && endTime != null);
+		boolean isPage = (offset != null && count != null);
+		RedisCache storeCache = RedisCacheManager.getCache(STORE);
+		//消息区间，不分页
+		if(isTimeBetween && !isPage){
+			return storeCache.sortSetGetAll(historyKey, beginTime, endTime);
+			//消息区间，并且分页;
+		}else if(isTimeBetween && isPage){
+			return storeCache.sortSetGetAll(historyKey, beginTime, endTime, offset, count);
+			//所有消息，并且分页;
+		}else if(isPage){
+			return storeCache.sortSetGetAll(historyKey, 0, Double.MAX_VALUE, offset, count);
+			//所有消息，不分页;
+		}else{
+			return storeCache.sortSetGetAll(historyKey);
+		}
+	}
+
 	/**
 	 * 放入用户群组消息;
 	 * @param userMessage
 	 * @param messages
 	 */
-	public UserMessageData putGroupMessage(UserMessageData userMessage,List<ChatBody> messages){
-		if(userMessage == null || messages == null) {
-			return null;
+	public UserMessageData putGroupMessage(UserMessageData userMessage, List<ChatBody> messages){
+		if(Objects.isNull(userMessage)|| CollectionUtils.isEmpty(messages)) {
+			return userMessage;
 		}
-		for(ChatBody chatBody : messages){
-			String group = chatBody.getGroup_id();
-			if(StringUtils.isEmpty(group)) {
-				continue;
+		messages.forEach(chatBody -> {
+			String groupId = chatBody.getGroupId();
+			if(StringUtils.isEmpty(groupId)) {
+				return;
 			}
-			List<ChatBody> groupMessages = userMessage.getGroups().get(group);
-			if(groupMessages == null){
-				groupMessages = new ArrayList<ChatBody>();
-				userMessage.getGroups().put(group, groupMessages);
+			List<ChatBody> groupMessages = userMessage.getGroups().get(groupId);
+			if(CollectionUtils.isEmpty(groupMessages)){
+				groupMessages = new ArrayList();
+				userMessage.getGroups().put(groupId, groupMessages);
 			}
 			groupMessages.add(chatBody);
-		}
+		});
 		return userMessage;
 	}
+
 	/**
-	 * 放入用户好友消息;
+	 * 组装放入用户好友消息;
 	 * @param userMessage
 	 * @param messages
 	 */
-	public UserMessageData putFriendsMessage(UserMessageData userMessage , List<ChatBody> messages){
-		if(userMessage == null || messages == null) {
-			return null;
+	public UserMessageData putFriendsMessage(UserMessageData userMessage , List<ChatBody> messages, String friendId){
+		if(Objects.isNull(userMessage)|| CollectionUtils.isEmpty(messages)) {
+			return userMessage;
 		}
-		for(ChatBody chatBody : messages){
-			String fromUserId = chatBody.getFrom();
-			if(StringUtils.isEmpty(fromUserId)) {
-				continue;
+		messages.forEach(chatBody -> {
+			String fromId = chatBody.getFrom();
+			if(StringUtils.isEmpty(fromId)) {
+				return;
 			}
-			List<ChatBody> friendMessages = userMessage.getFriends().get(fromUserId);
-			if(friendMessages == null){
-				friendMessages = new ArrayList<ChatBody>();
-				userMessage.getFriends().put(fromUserId, friendMessages);
+			String targetFriendId = friendId;
+			if(StringUtils.isEmpty(targetFriendId)){
+				targetFriendId = fromId;
 			}
-			friendMessages.add(chatBody);
-		}
-		return userMessage;
-	}
-	/**
-	 * 放入用户好友历史消息;
-	 * @param userMessage
-	 * @param messages
-	 */
-	public UserMessageData putFriendsHistoryMessage(UserMessageData userMessage , List<ChatBody> messages,String friendId){
-		if(userMessage == null || messages == null) {
-			return null;
-		}
-		for(ChatBody chatBody : messages){
-			String fromUserId = chatBody.getFrom();
-			if(StringUtils.isEmpty(fromUserId)) {
-				continue;
-			}
-			List<ChatBody> friendMessages = userMessage.getFriends().get(friendId);
-			if(friendMessages == null){
-				friendMessages = new ArrayList<ChatBody>();
-				userMessage.getFriends().put(friendId, friendMessages);
+			List<ChatBody> friendMessages = userMessage.getFriends().get(targetFriendId);
+			if(CollectionUtils.isEmpty(friendMessages)){
+				friendMessages = new ArrayList();
+				userMessage.getFriends().put(targetFriendId, friendMessages);
 			}
 			friendMessages.add(chatBody);
-		}
+		});
 		return userMessage;
 	}
+
 	/**
 	 * 获取群组所有成员信息
-	 * @param group_id
+	 * @param groupId 群组ID
 	 * @param type(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线])
 	 * @return
 	 */
 	@Override
-	public Group getGroupUsers(String group_id, Integer type) {
-		if(group_id == null || type == null) {
+	public Group getGroupUsers(String groupId, Integer type) {
+		if(Objects.isNull(groupId) || Objects.isNull(type)) {
+			log.warn("group:{} or type:{} is null", groupId, type);
 			return null;
 		}
-		Group group = groupCache.get(group_id+SUBFIX+INFO , Group.class);
-		if(group == null) {
+		Group group = RedisCacheManager.getCache(GROUP).get(groupId+SUFFIX+INFO , Group.class);
+		if(Objects.isNull(group)) {
 			return null;
 		}
-		List<String> userIds = this.getGroupUsers(group_id);
+		List<String> userIds = this.getGroupUsers(groupId);
 		if(CollectionUtils.isEmpty(userIds)) {
 			return null;
 		}
 		List<User> users = new ArrayList<User>();
-		for(String userId : userIds){
+		userIds.forEach(userId -> {
 			User user = getUserByType(userId, type);
-			if(user != null){
-				String status = user.getStatus();
-				if(type == 0 && ONLINE.equals(status)){
-					users.add(user);
-				}else if(type == 1 && OFFLINE.equals(status)){
-					users.add(user);
-				}else if(type == 2){
-					users.add(user);
-				}
-			}
-		}
+			if(Objects.isNull(user))return;
+			validateStatusByType(type, users, user);
+		});
 		group.setUsers(users);
 		return group;
 	}
+
 	/**
-	 * 根据在线类型获取用户信息;
-	 * @param userid
+	 * 根据获取type校验是否组装User
 	 * @param type
-	 * @return
+	 * @param users
+	 * @param user
 	 */
-	@Override
-	public User getUserByType(String userid,Integer type){
-		User user = userCache.get(userid+SUBFIX+INFO, User.class);
-		if(user == null) {
-			return null;
+	private void validateStatusByType(Integer type, List<User> users, User user) {
+		String status = user.getStatus();
+		if(UserStatusType.ONLINE.getNumber() == type && UserStatusType.ONLINE.getStatus().equals(status)){
+			users.add(user);
+		}else if(UserStatusType.OFFLINE.getNumber() == type && UserStatusType.OFFLINE.getStatus().equals(status)){
+			users.add(user);
+		}else if(UserStatusType.ALL.getNumber() == type){
+			users.add(user);
 		}
-		boolean isOnline = this.isOnline(userid);
-		String status = isOnline ? ONLINE : OFFLINE;
-		if(type == 0 || type == 1){
-			if(type == 0 && isOnline){
-				user.setStatus(status);
-			}else if(type == 1 && !isOnline){
-				user.setStatus(status);
-			}
-		}else if(type == 2){
-			user.setStatus(status);
-		}
-		return user;
 	}
-	/**
-	 * 获取好友分组所有成员信息
-	 * @param user_id
-	 * @param friend_group_id
-	 * @param type(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线])
-	 * @return
-	 */
-	
+
 	@Override
-	public Group getFriendUsers(String user_id , String friend_group_id, Integer type) {
-		if(user_id == null || friend_group_id == null || type == null) {
+	public User getUserByType(String userId, Integer type){
+		User user = RedisCacheManager.getCache(USER).get(userId+SUFFIX+INFO, User.class);
+		if(Objects.isNull(user)) {
 			return null;
 		}
-		List<Group> friends = userCache.get(user_id+SUBFIX+FRIENDS, List.class);
-		if(friends == null || friends.isEmpty()) {
-			return null;
-		}
-		for(Group group : friends){
-			if(friend_group_id.equals(group.getGroup_id())){
-				List<User> users = group.getUsers();
-				if(CollectionUtils.isEmpty(users)) {
-					return null;
-				}
-				List<User> userResults = new ArrayList<User>();
-				for(User user : users){
-					initUserStatus(user);
-					String status = user.getStatus();
-					if(type == 0 && ONLINE.equals(status)){
-						userResults.add(user);
-					}else if(type == 1 && OFFLINE.equals(status)){
-						userResults.add(user);
-					}else{
-						userResults.add(user);
-					}
-				}
-				group.setUsers(userResults);
-				return group;
-			}
+		boolean isOnline = this.isOnline(userId);
+		String status = isOnline ? UserStatusType.ONLINE.getStatus() : UserStatusType.OFFLINE.getStatus();
+		if( UserStatusType.ONLINE.getNumber() == type && isOnline){
+			user.setStatus(status);
+			return user;
+		}else if(UserStatusType.OFFLINE.getNumber() == type && !isOnline){
+			user.setStatus(status);
+			return user;
+		}else if(type == UserStatusType.ALL.getNumber()){
+			user.setStatus(status);
+			return user;
 		}
 		return null;
 	}
-	/**
-	 * 初始化用户在线状态;
-	 * @param user
-	 */
-	public void initUserStatus(User user){
-		if(user == null) {
-			return;
-		}
-		String userId = user.getId();
-		boolean isOnline = this.isOnline(userId);
-		if(isOnline){
-			user.setStatus(ONLINE);
-		}else{
-			user.setStatus(OFFLINE);
-		}
-	}
-	/**
-	 * 获取好友分组所有成员信息
-	 * @param user_id
-	 * @param type(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线])
-	 * @return
-	 */
+
 	@Override
-	public List<Group> getAllFriendUsers(String user_id,Integer type) {
-		if(user_id == null) {
+	public Group getFriendUsers(String userId , String friendGroupId, Integer type) {
+		boolean isTrue = Objects.isNull(userId) || Objects.isNull(friendGroupId) || Objects.isNull(type);
+		if(isTrue) {
+			log.warn("userId:{} or friendGroupId:{} or type:{} is null");
 			return null;
 		}
-		List<JSONObject> friendJsonArray = userCache.get(user_id+SUBFIX+FRIENDS, List.class);
-		if(CollectionUtils.isEmpty(friendJsonArray)) {
+		List<Group> friends = RedisCacheManager.getCache(USER).get(userId+SUFFIX+FRIENDS, List.class);
+		if(CollectionUtils.isEmpty(friends)) {
 			return null;
 		}
-		List<Group> friends = new ArrayList<Group>();
-		for(JSONObject groupJson : friendJsonArray){
-			Group group = JSONObject.toJavaObject(groupJson, Group.class);
+		for(Group group : friends){
+			if(!friendGroupId.equals(group.getGroupId()))continue;
 			List<User> users = group.getUsers();
 			if(CollectionUtils.isEmpty(users)) {
-				continue;
+				return group;
 			}
 			List<User> userResults = new ArrayList<User>();
 			for(User user : users){
 				initUserStatus(user);
-				String status = user.getStatus();
-				if(type == 0 && ONLINE.equals(status)){
-					userResults.add(user);
-				}else if(type == 1 && OFFLINE.equals(status)){
-					userResults.add(user);
-				}else if(type == 2){
-					userResults.add(user);
-				}
+				validateStatusByType(type, userResults, user);
 			}
 			group.setUsers(userResults);
-			friends.add(group);
+			return group;
 		}
-		return friends;
+		return null;
 	}
+
 	/**
-	 * 获取群组所有成员信息（在线+离线)
-	 * @param user_id
+	 * 初始化用户在线状态;
+	 * @param user
+	 */
+	public boolean initUserStatus(User user){
+		if(Objects.isNull(user) || Objects.isNull(user.getUserId())) {
+			return false;
+		}
+		String userId = user.getUserId();
+		boolean isOnline = this.isOnline(userId);
+		if(isOnline){
+			user.setStatus(UserStatusType.ONLINE.getStatus());
+		}else{
+			user.setStatus(UserStatusType.OFFLINE.getStatus());
+		}
+		return true;
+	}
+
+	/**
+	 * 获取好友分组所有成员信息
+	 * @param userId 用户ID
 	 * @param type(0:所有在线用户,1:所有离线用户,2:所有用户[在线+离线])
 	 * @return
 	 */
 	@Override
-	public List<Group> getAllGroupUsers(String user_id,Integer type) {
-		if(user_id == null) {
+	public List<Group> getAllFriendUsers(String userId, Integer type) {
+		if(Objects.isNull(userId)) {
 			return null;
 		}
-		List<String> group_ids = userCache.listGetAll(user_id+SUBFIX+GROUP);
-		if(CollectionUtils.isEmpty(group_ids)) {
+		List<JSONObject> friendJsonArray = RedisCacheManager.getCache(USER).get(userId+SUFFIX+FRIENDS, List.class);
+		if(CollectionUtils.isEmpty(friendJsonArray)) {
+			return null;
+		}
+		List<Group> friends = new ArrayList<Group>();
+		friendJsonArray.forEach(groupJson -> {
+			Group group = JSONObject.toJavaObject(groupJson, Group.class);
+			List<User> users = group.getUsers();
+			if(CollectionUtils.isEmpty(users)) {
+				return;
+			}
+			List<User> userResults = new ArrayList<User>();
+			for(User user : users){
+				initUserStatus(user);
+				validateStatusByType(type, userResults, user);
+			}
+			group.setUsers(userResults);
+			friends.add(group);
+		});
+		return friends;
+	}
+
+	@Override
+	public List<Group> getAllGroupUsers(String userId, Integer type) {
+		if(Objects.isNull(userId)) {
+			return null;
+		}
+		List<String> groupIds = RedisCacheManager.getCache(USER).listGetAll(userId+SUFFIX+GROUP);
+		if(CollectionUtils.isEmpty(groupIds)) {
 			return null;
 		}
 		List<Group> groups = new ArrayList<Group>();
-		for(String group_id : group_ids){
-			Group group = getGroupUsers(group_id, type);
-			if(group != null){
-				groups.add(group);
-			}
-		}
+		groupIds.forEach(groupId -> {
+			Group group = getGroupUsers(groupId, type);
+			if(Objects.isNull(group))return;
+			groups.add(group);
+		});
 		return groups;
 	}
+
+	/**
+	 * 更新用户终端协议类型及在线状态;
+	 * @param user 用户信息
+	 */
+	@Override
+	public boolean updateUserTerminal(User user){
+		String userId = user.getUserId();String terminal = user.getTerminal();String status = user.getStatus();
+		if(StringUtils.isEmpty(userId) || StringUtils.isEmpty(terminal) || StringUtils.isEmpty(status)) {
+			log.error("userId:{},terminal:{},status:{} must not null", userId, terminal, status);
+			return false;
+		}
+		RedisCacheManager.getCache(USER).put(userId+SUFFIX+TERMINAL+SUFFIX+terminal, user.getStatus());
+		return true;
+	}
+
 	/**
 	 * 获取用户拥有的群组;
-	 * @param user_id
+	 * @param userId
 	 * @return
 	 */
 	@Override
-	public List<String> getGroups(String user_id) {
-		List<String> groups = userCache.listGetAll(user_id+SUBFIX+GROUP);
+	public List<String> getGroups(String userId) {
+		List<String> groups = RedisCacheManager.getCache(USER).listGetAll(userId+SUFFIX+GROUP);
 		return groups;
 	}
+
+	static{
+		RedisCacheManager.register(USER, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(GROUP, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(STORE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+		RedisCacheManager.register(PUSH, Integer.MAX_VALUE, Integer.MAX_VALUE);
+	}
+
 }
