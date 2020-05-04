@@ -37,11 +37,8 @@ public class ChatReqHandler extends AbstractCmdHandler {
 			ImPacket respChatPacket = ProtocolManager.Packet.dataInCorrect(channelContext);
 			return respChatPacket;
 		}
-		MsgQueueRunnable msgQueueRunnable = (MsgQueueRunnable)imServerChannelContext.getMsgQue();
-		if(Objects.isNull(msgQueueRunnable.getProtocolCmdProcessor())){
-			msgQueueRunnable.setProtocolCmdProcessor(this.getSingleProcessor());
-		}
 		//异步调用业务处理消息接口
+		MsgQueueRunnable msgQueueRunnable = getMsgQueueRunnable(imServerChannelContext);
 		msgQueueRunnable.addMsg(chatBody);
 		msgQueueRunnable.executor.execute(msgQueueRunnable);
 		ImPacket chatPacket = new ImPacket(Command.COMMAND_CHAT_REQ,new RespBody(Command.COMMAND_CHAT_REQ,chatBody).toByte());
@@ -74,4 +71,21 @@ public class ChatReqHandler extends AbstractCmdHandler {
 	public Command command() {
 		return Command.COMMAND_CHAT_REQ;
 	}
+
+	/**
+	 * 获取聊天业务处理异步消息队列
+	 * @param imServerChannelContext IM通道上下文
+	 * @return
+	 */
+	private MsgQueueRunnable getMsgQueueRunnable(ImServerChannelContext imServerChannelContext){
+		MsgQueueRunnable msgQueueRunnable = (MsgQueueRunnable)imServerChannelContext.getMsgQue();
+		if(Objects.nonNull(msgQueueRunnable.getProtocolCmdProcessor())){
+			return msgQueueRunnable;
+		}
+		synchronized (MsgQueueRunnable.class){
+			msgQueueRunnable.setProtocolCmdProcessor(this.getSingleProcessor());
+		}
+		return msgQueueRunnable;
+	}
+
 }
