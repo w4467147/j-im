@@ -60,9 +60,9 @@ J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十
 ```
 {
     "cmd":"命令码(5)int类型",
-    "loginname": "用户名",
+    "userId": "用户账号",
     "password": "密码",
-    "token": "校验码(此字段可与logingname、password共存,也可只选一种方式)"
+    "token": "校验码(此字段可与userId、password共存,也可只选一种方式)"
 }
 ```
 请求:COMMAND_LOGIN_REQ(5) 响应:COMMAND_LOGIN_RESP(6)
@@ -80,7 +80,7 @@ J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十
 ```
 {
     "cmd":"命令码(14)int类型",
-    "userId":"用户id"
+    "userId":"用户ID"
 }
 ```
 请求:COMMAND_CLOSE_REQ(14) 响应:无
@@ -95,7 +95,7 @@ J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十
 ```
 请求:COMMAND_GET_USER_REQ(17) 响应:COMMAND_GET_USER_RESP(18)
 
-**8.获取用户消息请求结构** 
+**8.获取持久化聊天消息(离线+历史+漫游)请求结构** 
 ```
 {
      "cmd":"命令码(19)int类型",
@@ -112,14 +112,25 @@ J-IM 是用JAVA语言,基于t-io开发的轻量、高性能、单机支持几十
 请求:COMMAND_GET_MESSAGE_REQ(19) 响应:COMMAND_GET_MESSAGE_RESP(20)
 
 ## 使用
-- 引入j-im(快速开发自己的高性能IM服务器),在你的pom.xml中加入如下代码片段
+
+- 服务端(快速开发自己的高性能IM服务器)：引入jim-server,在你的pom.xml中加入如下代码片段
 ```
 <dependency>
     <groupId>org.j-im</groupId>
     <artifactId>jim-server</artifactId>
-    <version>2.5.0.v20181115-RELEASE</version>
+    <version>3.0.0.v20200501-RELEASE</version>
 </dependency>
 ```
+
+- 客户端(快速开发自己的IM客户端)：引入jim-client,在你的pom.xml中加入如下代码片段
+```
+<dependency>
+    <groupId>org.j-im</groupId>
+    <artifactId>jim-client</artifactId>
+    <version>3.0.0.v20200501-RELEASE</version>
+</dependency>
+```
+
 ## J-IM新版官网截图
 ![输入图片说明](https://images.gitee.com/uploads/images/2020/0413/041753_1561ab18_410355.png "屏幕截图.png")
 
