@@ -60,9 +60,9 @@ http://www.j-im.cn
 ```
 {
     "cmd":"命令码(5)int类型",
-    "loginname": "用户名",
+    "userId": "用户账号",
     "password": "密码",
-    "token": "校验码(此字段可与logingname、password共存,也可只选一种方式)"
+    "token": "校验码(此字段可与userId、password共存,也可只选一种方式)"
 }
 ```
 请求:COMMAND_LOGIN_REQ(5) 响应:COMMAND_LOGIN_RESP(6)
@@ -80,7 +80,7 @@ http://www.j-im.cn
 ```
 {
     "cmd":"命令码(14)int类型",
-    "userid":"用户id"
+    "userId":"用户ID"
 }
 ```
 请求:COMMAND_CLOSE_REQ(14) 响应:无
@@ -89,13 +89,13 @@ http://www.j-im.cn
 ```
 {
      "cmd":"命令码(17)int类型",
-     "userid":"用户id(必填项)",
+     "userId":"用户id(必填项)",
      "type":"获取类型(0:所有在线用户,1:所有离线线用户,2:所有用户[在线+离线])"
 }
 ```
 请求:COMMAND_GET_USER_REQ(17) 响应:COMMAND_GET_USER_RESP(18)
 
-**8.获取用户消息请求结构** 
+**8.获取持久化聊天消息(离线+历史+漫游)请求结构** 
 ```
 {
      "cmd":"命令码(19)int类型",
