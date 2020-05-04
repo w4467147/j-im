@@ -5,7 +5,7 @@
     <artifactId>jim</artifactId>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
-    <version>3.0.0.v20200101-RELEASE</version>
+    <version>3.0.0.v20200501-RELEASE</version>
     <description>jim is the dependent parent project of J-IM communication establishment.</description>
     <url>http://www.j-im.org/</url>
     <licenses>
@@ -35,7 +35,7 @@
         <module>jim-client-demo</module>
     </modules>
     <properties>
-        <jim.version>3.0.0.v20200101-RELEASE</jim.version>
+        <jim.version>3.0.0.v20200501-RELEASE</jim.version>
         <tio-core.version>3.5.8.v20191228-RELEASE</tio-core.version>
         <tio-utils.version>3.5.8.v20191228-RELEASE</tio-utils.version>
 
