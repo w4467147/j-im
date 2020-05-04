@@ -70,8 +70,8 @@ public class HttpResponseEncoder implements ImConst {
 					sb.append(Http.ResponseHeaderKey.Set_Cookie).append(": ");
 					sb.append(cookie.toString());
 					sb.append("\r\n");
-					if (log.isInfoEnabled()) {
-						log.info("{}, set-cookie:{}", channelContext, cookie.toString());
+					if (log.isDebugEnabled()) {
+						log.debug("{}, set-cookie:{}", channelContext, cookie.toString());
 					}
 				}
 			}

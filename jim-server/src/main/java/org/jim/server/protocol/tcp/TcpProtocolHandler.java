@@ -11,6 +11,7 @@ import org.jim.core.packets.Command;
 import org.jim.core.packets.RespBody;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.tcp.*;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
 import org.jim.server.config.ImServerConfig;
@@ -54,12 +55,12 @@ public class TcpProtocolHandler extends AbstractProtocolHandler {
 		AbstractCmdHandler cmdHandler = CommandManager.getCommand(tcpPacket.getCommand());
 		if(cmdHandler == null){
 			ImPacket imPacket = new ImPacket(Command.COMMAND_UNKNOW, new RespBody(Command.COMMAND_UNKNOW,ImStatus.C10017).toByte());
-			Jim.send(imChannelContext, imPacket);
+			JimServerAPI.send(imChannelContext, imPacket);
 			return;
 		}
 		ImPacket response = cmdHandler.handler(tcpPacket, imChannelContext);
 		if(Objects.nonNull(response) && tcpPacket.getSynSeq() < 1){
-			Jim.send(imChannelContext, response);
+			JimServerAPI.send(imChannelContext, response);
 		}
 	}
 

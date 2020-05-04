@@ -1,12 +1,12 @@
 package org.jim.server.command.handler;
 
 import org.jim.core.ImChannelContext;
-import org.jim.core.Jim;
 import org.jim.core.ImPacket;
 import org.jim.core.exception.ImException;
 import org.jim.core.http.HttpRequest;
 import org.jim.core.packets.Command;
 import org.jim.core.ws.WsSessionContext;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.processor.handshake.HandshakeCmdProcessor;
 
@@ -24,15 +24,15 @@ public class HandshakeReqHandler extends AbstractCmdHandler {
 
 		HandshakeCmdProcessor handshakeProcessor = this.getMultiProcessor(channelContext,HandshakeCmdProcessor.class);
 		if(Objects.isNull(handshakeProcessor)){
-			Jim.remove(channelContext, "没有对应的握手协议处理器HandshakeCmdProcessor...");
+			JimServerAPI.remove(channelContext, "没有对应的握手协议处理器HandshakeCmdProcessor...");
 			return null;
 		}
 		ImPacket handShakePacket = handshakeProcessor.handshake(packet, channelContext);
 		if (handShakePacket == null) {
-			Jim.remove(channelContext, "业务层不同意握手");
+			JimServerAPI.remove(channelContext, "业务层不同意握手");
 			return null;
 		}
-		Jim.send(channelContext, handShakePacket);
+		JimServerAPI.send(channelContext, handShakePacket);
 		WsSessionContext wsSessionContext = (WsSessionContext) channelContext.getSessionContext();
 		HttpRequest request = wsSessionContext.getHandshakeRequestPacket();
 		handshakeProcessor.onAfterHandshake(request, channelContext);

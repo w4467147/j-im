@@ -63,7 +63,7 @@ public class TcpServerDecoder implements ImConst {
 		}catch(Exception e){
 			logger.error(e.toString());
 		}
-		logger.info("TCP解码成功...");
+		logger.debug("TCP解码成功...");
 		//byteBuffer的总长度是 = 1byte协议版本号+1byte消息标志位+4byte同步序列号(如果是同步发送则多4byte同步序列号,否则无4byte序列号)+1byte命令码+4byte消息的长度+消息体的长度
 		TcpPacket tcpPacket = new TcpPacket(Command.forNumber(cmdByte), body);
 		tcpPacket.setVersion(version);

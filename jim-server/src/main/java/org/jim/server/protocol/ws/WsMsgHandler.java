@@ -2,15 +2,14 @@ package org.jim.server.protocol.ws;
 
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
-import org.jim.core.Jim;
 import org.jim.core.ImPacket;
-import org.jim.core.config.ImConfig;
 import org.jim.core.packets.ChatBody;
 import org.jim.core.ws.IWsMsgHandler;
 import org.jim.core.ws.Opcode;
 import org.jim.core.ws.WsRequestPacket;
 import org.jim.core.ws.WsResponsePacket;
 import org.jim.core.ws.WsConfig;
+import org.jim.server.JimServerAPI;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.protocol.ProtocolManager;
 import org.jim.server.util.ChatKit;
@@ -42,7 +41,7 @@ public class WsMsgHandler implements IWsMsgHandler{
 		boolean isStore = ImServerConfig.ON.equals(imServerConfig.getIsStore());
 		String toId = chatBody.getTo();
 		if(ChatKit.isOnline(toId,isStore)){
-			Jim.sendToUser(toId, wsRequestPacket);
+			JimServerAPI.sendToUser(toId, wsRequestPacket);
 			ImPacket sendSuccessPacket = ProtocolManager.Packet.success(imChannelContext);
 			text = new String(sendSuccessPacket.getBody(), ImConst.Http.CHARSET_NAME);
 		}else{
@@ -85,7 +84,7 @@ public class WsMsgHandler implements IWsMsgHandler{
 		WsResponsePacket wsResponse = null;
 		if (opcode == Opcode.TEXT) {
 			if (bytes == null || bytes.length == 0) {
-				Jim.remove(imChannelContext, "错误的webSocket包，body为空");
+				JimServerAPI.remove(imChannelContext, "错误的webSocket包，body为空");
 				return null;
 			}
 			String text = new String(bytes, wsServerConfig.getCharset());
@@ -95,7 +94,7 @@ public class WsMsgHandler implements IWsMsgHandler{
 			return wsResponse;
 		} else if (opcode == Opcode.BINARY) {
 			if (bytes == null || bytes.length == 0) {
-				Jim.remove(imChannelContext, "错误的webSocket包，body为空");
+				JimServerAPI.remove(imChannelContext, "错误的webSocket包，body为空");
 				return null;
 			}
 			Object retObj = this.onBytes(wsRequest, bytes, imChannelContext);
@@ -111,7 +110,7 @@ public class WsMsgHandler implements IWsMsgHandler{
 			wsResponse = processRetObj(retObj, methodName, imChannelContext);
 			return wsResponse;
 		} else {
-			Jim.remove(imChannelContext, "错误的webSocket包，错误的Opcode");
+			JimServerAPI.remove(imChannelContext, "错误的webSocket包，错误的Opcode");
 			return null;
 		}
 	}
@@ -149,7 +148,7 @@ public class WsMsgHandler implements IWsMsgHandler{
 	}
 	@Override
 	public Object onClose(WsRequestPacket webSocketPacket, byte[] bytes, ImChannelContext imChannelContext) throws Exception {
-		Jim.remove(imChannelContext, "receive close flag");
+		JimServerAPI.remove(imChannelContext, "receive close flag");
 		return null;
 	}
 

@@ -30,6 +30,13 @@ public class TcpConvertPacket implements IProtocolConverter {
 		}
 		return null;
 	}
+
+	@Override
+	public ImPacket RespPacket(ImPacket imPacket, Command command, ImChannelContext imChannelContext) {
+
+		return this.RespPacket(imPacket.getBody(), command, imChannelContext);
+	}
+
 	/**
 	 * 转TCP协议请求包;
 	 */

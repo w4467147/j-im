@@ -5,13 +5,13 @@ package org.jim.server.demo.command;
 
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
-import org.jim.core.Jim;
 import org.jim.core.ImPacket;
 import org.jim.core.exception.ImException;
 import org.jim.core.http.HttpRequest;
 import org.jim.core.packets.Command;
 import org.jim.core.packets.LoginReqBody;
 import org.jim.core.utils.JsonKit;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.LoginReqHandler;
 import org.jim.server.processor.handshake.WsHandshakeProcessor;
@@ -38,7 +38,7 @@ public class DemoWsHandshakeProcessor extends WsHandshakeProcessor {
 		}
 		ImPacket loginRespPacket = loginHandler.handler(request, imChannelContext);
 		if(loginRespPacket != null){
-			Jim.send(imChannelContext, loginRespPacket);
+			JimServerAPI.send(imChannelContext, loginRespPacket);
 		}
 	}
 }

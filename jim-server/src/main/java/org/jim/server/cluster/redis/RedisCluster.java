@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.jim.core.cluster.redis;
+package org.jim.server.cluster.redis;
 
 import org.jim.core.ImPacket;
 import org.jim.core.cluster.ImCluster;

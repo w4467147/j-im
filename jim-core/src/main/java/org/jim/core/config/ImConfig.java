@@ -12,6 +12,7 @@ import org.jim.core.listener.ImGroupListenerAdapter;
 import org.jim.core.listener.ImListener;
 import org.jim.core.listener.ImUserListener;
 import org.tio.core.TioConfig;
+import org.tio.core.ssl.SslConfig;
 import org.tio.utils.Threads;
 import org.tio.utils.prop.MapWithLockPropSupport;
 import org.tio.utils.thread.pool.DefaultThreadFactory;
@@ -28,11 +29,11 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
     /**
      * IP地址
      */
-    protected String bindIp;
+    protected String bindIp = "0.0.0.0";
     /**
      * 监听端口
      */
-    protected Integer bindPort = 80;
+    protected Integer bindPort = 0;
 
     /**
      *  默认的接收数据的buffer size
@@ -41,7 +42,7 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
     /**
      * 配置名称
      */
-    protected String name = "j-im";
+    protected String name = "J-IM";
     /**
      * 集群配置
      * 如果此值不为null，就表示要集群
@@ -51,12 +52,17 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
      * tio相关配置信息
      */
     protected TioConfig tioConfig;
-
+    /**
+     * SSL配置
+     */
+    protected SslConfig sslConfig;
     /**
      * 心跳包发送时长heartbeatTimeout/2
      */
     protected long heartbeatTimeout = 0;
-
+    /**
+     * J-IM内部线程池
+     */
     protected SynThreadPoolExecutor jimExecutor;
     /**
      * 群组绑定监听器
@@ -116,15 +122,15 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
         /**
          * IP地址
          */
-        protected String bindIp;
+        protected String bindIp = "0.0.0.0";
         /**
          * 监听端口
          */
-        protected Integer bindPort = 80;
+        protected Integer bindPort = 0;
         /**
          * 配置名称
          */
-        protected String name = "j-im";
+        protected String name = "J-IM";
 
         /**
          *  默认的接收数据的buffer size
@@ -141,10 +147,9 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
          */
         protected ImCluster cluster;
         /**
-         * tio相关配置信息
+         * SSL配置
          */
-        protected TioConfig tioConfig;
-
+        protected SslConfig sslConfig;
         /**
          * 群组绑定监听器
          */
@@ -191,8 +196,8 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
             this.cluster = cluster;
             return theBuilder;
         }
-        public B tioConfig(TioConfig tioConfig){
-            this.tioConfig = tioConfig;
+        public B sslConfig(SslConfig sslConfig){
+            this.sslConfig = sslConfig;
             return  theBuilder;
         }
         public B groupListener(ImGroupListener imGroupListener){
@@ -289,6 +294,21 @@ public abstract class ImConfig extends MapWithLockPropSupport implements ImConst
 
     public void setCluster(ImCluster cluster) {
         this.cluster = cluster;
+    }
+
+    public SslConfig getSslConfig() {
+        return sslConfig;
+    }
+
+    public void setSslConfig(SslConfig sslConfig) {
+        this.sslConfig = sslConfig;
+        this.tioConfig.setSslConfig(sslConfig);
+    }
+
+    public String toBindAddressString(){
+        StringBuilder builder = new StringBuilder();
+        builder.append(bindIp).append(":").append(bindPort);
+        return builder.toString();
     }
 
     static {

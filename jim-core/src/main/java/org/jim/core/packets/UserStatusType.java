@@ -8,7 +8,7 @@ public enum UserStatusType {
      *
      * <code>ONLINE = 0;</code>
      */
-    ONLINE(0),
+    ONLINE(0, "online", "在线"),
     /**
      * <pre>
      *离线
@@ -16,7 +16,7 @@ public enum UserStatusType {
      *
      * <code>OFFLINE = 1;</code>
      */
-    OFFLINE(1),
+    OFFLINE(1, "offline", "离线"),
     /**
      * <pre>
      * ALL所有(在线+离线)
@@ -24,7 +24,7 @@ public enum UserStatusType {
      *
      * <code>ALL = 2;</code>
      */
-    ALL(2);
+    ALL(2, "all", "所有");
 
 
     public final int getNumber() {
@@ -45,7 +45,22 @@ public enum UserStatusType {
     }
     private final int value;
 
-    UserStatusType(int value) {
+    private final String status;
+
+    private final String desc;
+
+    UserStatusType(int value, String status, String desc) {
         this.value = value;
+        this.status = status;
+        this.desc = desc;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
 }

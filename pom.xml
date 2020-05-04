@@ -30,8 +30,9 @@
     <modules>
         <module>jim-core</module>
         <module>jim-server</module>
+        <module>jim-client</module>
         <module>jim-server-demo</module>
-        <!--<module>jim-client</module>-->
+        <module>jim-client-demo</module>
     </modules>
     <properties>
         <jim.version>3.0.0.v20200101-RELEASE</jim.version>
@@ -93,7 +94,11 @@
                 <artifactId>jim-server</artifactId>
                 <version>${jim.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.j-im</groupId>
+                <artifactId>jim-client</artifactId>
+                <version>${jim.version}</version>
+            </dependency>
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>

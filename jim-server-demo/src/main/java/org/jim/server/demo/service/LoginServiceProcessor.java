@@ -5,10 +5,7 @@ package org.jim.server.demo.service;
 
 import cn.hutool.core.util.RandomUtil;
 import org.jim.core.*;
-import org.jim.core.packets.Group;
-import org.jim.core.packets.LoginReqBody;
-import org.jim.core.packets.LoginRespBody;
-import org.jim.core.packets.User;
+import org.jim.core.packets.*;
 import org.jim.core.session.id.impl.UUIDSessionIdGenerator;
 import org.jim.core.utils.Md5;
 import org.jim.server.processor.login.LoginCmdProcessor;
@@ -70,7 +67,7 @@ public class LoginServiceProcessor extends AbstractProtocolCmdProcessor implemen
 				.addGroup(Group.newBuilder().groupId("100").name("J-IM朋友圈").build());
 		 //模拟的用户好友,正式根据业务去查数据库或者缓存;
 		initFriends(builder);
-		builder.avatar(nextImg()).status(ONLINE);
+		builder.avatar(nextImg()).status(UserStatusType.ONLINE.getStatus());
 		user = builder.build();
 		if (tokenMap.size() > 10000) {
 			tokenMap.clear();

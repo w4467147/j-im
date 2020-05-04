@@ -34,6 +34,12 @@ public class WsConvertPacket implements IProtocolConverter {
 	}
 
 	@Override
+	public ImPacket RespPacket(ImPacket imPacket, Command command, ImChannelContext imChannelContext) {
+
+		return this.RespPacket(imPacket.getBody(), command, imChannelContext);
+	}
+
+	@Override
 	public ImPacket ReqPacket(byte[] body, Command command, ImChannelContext channelContext) {
 		
 		return null;

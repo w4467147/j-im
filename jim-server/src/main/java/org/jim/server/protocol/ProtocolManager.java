@@ -110,46 +110,72 @@ public class ProtocolManager implements ImConst{
 		/**
 		 * 功能描述：[转换不同协议响应包]
 		 * @author：WChao 创建时间: 2017年9月21日 下午3:21:54
-		 * @param respBody
-		 * @param channelContext
+		 * @param respBody 响应消息体
+		 * @param imChannelContext IM通道上下文
 		 * @return
 		 *
 		 */
-		public static ImPacket respPacket(RespBody respBody, ImChannelContext channelContext)throws ImException {
+		public static ImPacket respPacket(RespBody respBody, ImChannelContext imChannelContext)throws ImException {
 			if(Objects.isNull(respBody)) {
 				throw new ImException("响应包体不能为空!");
 			}
-			return respPacket(respBody.toByte(), respBody.getCommand(), channelContext);
+			return respPacket(respBody.toByte(), respBody.getCommand(), imChannelContext);
+		}
+
+		/**
+		 * 功能描述：[转换不同协议响应包]
+		 * @param body 消息体字节
+		 * @param command 命令码
+		 * @param imChannelContext IM通道上下文
+		 * @return
+		 * @throws ImException
+		 */
+		public static ImPacket respPacket(byte[] body, Command command, ImChannelContext imChannelContext)throws ImException{
+			return getProtocolConverter(imChannelContext).RespPacket(body, command, imChannelContext);
+		}
+
+		/**
+		 * 功能描述：[转换不同协议响应包]
+		 * @param imPacket 消息包
+		 * @param imChannelContext IM通道上下文
+		 * @return
+		 * @throws ImException
+		 */
+		public static ImPacket respPacket(ImPacket imPacket, ImChannelContext imChannelContext)throws ImException{
+			return respPacket(imPacket, imPacket.getCommand(), imChannelContext);
 		}
 
 		/**
 		 * 功能描述：[转换不同协议响应包]
 		 * @author：WChao 创建时间: 2017年9月21日 下午3:21:54
-		 * @param body
-		 * @param channelContext
+		 * @param imPacket 消息包
+		 * @param command 命令码
+		 * @param imChannelContext IM通道上下文
 		 * @return
 		 *
 		 */
-		public static ImPacket respPacket(byte[] body, Command command, ImChannelContext channelContext)throws ImException{
-			ImServerChannelContext serverChannelContext = (ImServerChannelContext)channelContext;
+		public static ImPacket respPacket(ImPacket imPacket,Command command, ImChannelContext imChannelContext)throws ImException{
+			return  getProtocolConverter(imChannelContext).RespPacket(imPacket, command, imChannelContext);
+		}
+
+		/**
+		 * 通过通道获取当前通道协议
+		 * @param imChannelContext IM通道上下文
+		 * @return
+		 * @throws ImException
+		 */
+		private static IProtocolConverter getProtocolConverter(ImChannelContext imChannelContext) throws ImException{
+			ImServerChannelContext serverChannelContext = (ImServerChannelContext)imChannelContext;
 			AbstractProtocolHandler protocolHandler = serverChannelContext.getProtocolHandler();
 			if(Objects.isNull(protocolHandler)){
 				throw new ImException("协议[ProtocolHandler]未初始化,协议包转化失败");
 			}
 			IProtocolConverter converter = protocolHandler.getProtocol().getConverter();
 			if(converter != null){
-				return converter.RespPacket(body, command, channelContext);
+				return converter;
 			}else {
 				throw new ImException("未获取到协议转化器[ProtocolConverter]");
 			}
-		}
-
-		public static ImPacket respPacket(ImPacket imPacket, ImChannelContext channelContext)throws ImException{
-			return respPacket(imPacket, imPacket.getCommand(), channelContext);
-		}
-
-		public static ImPacket respPacket(ImPacket imPacket,Command command, ImChannelContext channelContext)throws ImException{
-			return respPacket(imPacket.getBody(), command, channelContext);
 		}
 
 	}

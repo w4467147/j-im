@@ -6,7 +6,7 @@ import org.jim.core.packets.Group;
 import org.jim.core.packets.User;
 import org.jim.core.packets.UserReqBody;
 import org.jim.core.packets.UserStatusType;
-import org.jim.core.utils.ImKit;
+import org.jim.server.util.ImServerKit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,13 +71,13 @@ public class NonPersistentUserInfo implements IUserInfo {
             if(FRIEND_GROUP_FLAG == flag){
                 users = group.getUsers();
             }else if(GROUP_FLAG == flag){
-                users = ImKit.getUsersByGroup(group.getGroupId());
+                users = ImServerKit.getUsersByGroup(group.getGroupId());
             }
             resultGroups.add(cloneGroup);
             if(CollectionUtils.isEmpty(users))return;
             List<User> cloneUsers = new ArrayList<User>();
             users.forEach(user -> {
-                User onlineUser = ImKit.getUser(user.getUserId());
+                User onlineUser = ImServerKit.getUser(user.getUserId());
                 //在线
                 if(onlineUser != null && UserStatusType.ONLINE.getNumber() == type){
                     cloneUsers.add(onlineUser.clone());

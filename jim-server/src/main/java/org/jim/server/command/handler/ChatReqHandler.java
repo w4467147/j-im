@@ -2,7 +2,6 @@ package org.jim.server.command.handler;
 
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImPacket;
-import org.jim.core.Jim;
 import org.jim.core.config.ImConfig;
 import org.jim.core.exception.ImException;
 import org.jim.core.packets.ChatBody;
@@ -10,6 +9,7 @@ import org.jim.core.packets.ChatType;
 import org.jim.core.packets.Command;
 import org.jim.core.packets.RespBody;
 import org.jim.server.ImServerChannelContext;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.protocol.ProtocolManager;
@@ -53,7 +53,7 @@ public class ChatReqHandler extends AbstractCmdHandler {
 		if(ChatType.CHAT_TYPE_PRIVATE.getNumber() == chatBody.getChatType()){
 			String toId = chatBody.getTo();
 			if(ChatKit.isOnline(toId, isStore)){
-				Jim.sendToUser(toId, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));
+				JimServerAPI.sendToUser(toId, chatPacket);
 				//发送成功响应包
 				return ProtocolManager.Packet.success(channelContext);
 			}else{
@@ -63,7 +63,7 @@ public class ChatReqHandler extends AbstractCmdHandler {
 		//群聊
 		}else if(ChatType.CHAT_TYPE_PUBLIC.getNumber() == chatBody.getChatType()){
 			String groupId = chatBody.getGroupId();
-			Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(chatPacket, imServerChannelContext));
+			JimServerAPI.sendToGroup(groupId, chatPacket);
 			//发送成功响应包
 			return ProtocolManager.Packet.success(channelContext);
 		}

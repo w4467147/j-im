@@ -35,6 +35,17 @@ public class HttpConvertPacket implements IProtocolConverter {
 	}
 
 	@Override
+	public ImPacket RespPacket(ImPacket imPacket, Command command, ImChannelContext imChannelContext) {
+		ImSessionContext sessionContext = imChannelContext.getSessionContext();
+		if(sessionContext instanceof HttpSession){
+			HttpResponse response = (HttpResponse)imPacket;
+			response.setCommand(command);
+			return response;
+		}
+		return null;
+	}
+
+	@Override
 	public ImPacket ReqPacket(byte[] body, Command command, ImChannelContext channelContext) {
 		
 		return null;

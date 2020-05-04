@@ -9,12 +9,12 @@ import org.apache.log4j.Logger;
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
 import org.jim.core.ImSessionContext;
-import org.jim.core.Jim;
 import org.jim.core.config.ImConfig;
 import org.jim.core.packets.ChatBody;
 import org.jim.core.packets.User;
 import org.jim.core.session.id.impl.UUIDSessionIdGenerator;
 import org.jim.core.utils.JsonKit;
+import org.jim.server.JimServerAPI;
 import org.jim.server.config.ImServerConfig;
 import java.util.List;
 
@@ -106,7 +106,7 @@ public class ChatKit {
 			ImServerConfig imServerConfig = ImConfig.Global.get();
 			return imServerConfig.getMessageHelper().isOnline(userId);
 		 }
-    	 List<ImChannelContext> imChannelContexts = Jim.getByUserId(userId);
+    	 List<ImChannelContext> imChannelContexts = JimServerAPI.getByUserId(userId);
     	 if(CollectionUtils.isNotEmpty(imChannelContexts)){
     		 return true;
     	 }

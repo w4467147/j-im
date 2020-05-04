@@ -4,11 +4,9 @@
 package org.jim.server.demo;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jim.core.Jim;
-import org.jim.core.config.ImConfig;
 import org.jim.core.packets.Command;
 import org.jim.core.utils.PropUtil;
-import org.jim.server.ImServerStarter;
+import org.jim.server.JimServer;
 import org.jim.server.command.CommandManager;
 import org.jim.server.command.handler.ChatReqHandler;
 import org.jim.server.command.handler.HandshakeReqHandler;
@@ -37,7 +35,7 @@ public class ImServerDemoStart {
 		imServerConfig.setImGroupListener(new ImDemoGroupListener());
 		//设置绑定用户监听器，非必须，根据需要自己选择性实现;
 		imServerConfig.setImUserListener(new ImDemoUserListener());
-		ImServerStarter imServerStarter = new ImServerStarter(imServerConfig);
+		JimServer jimServer = new JimServer(imServerConfig);
 
 		/*****************start 以下处理器根据业务需要自行添加与扩展，每个Command都可以添加扩展,此处为demo中处理**********************************/
 
@@ -51,7 +49,7 @@ public class ImServerDemoStart {
 		ChatReqHandler chatReqHandler = CommandManager.getCommand(Command.COMMAND_CHAT_REQ, ChatReqHandler.class);
 		chatReqHandler.setSingleProcessor(new DefaultAsyncChatMessageProcessor());
 		/*****************end *******************************************************************************************/
-		imServerStarter.start();
+		jimServer.start();
 	}
 
 	/**

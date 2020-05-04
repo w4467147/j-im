@@ -54,7 +54,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 				String terminalKey = terminalKeyIterator.next();
 				terminalKey = terminalKey.substring(terminalKey.indexOf(userId));
 				String isOnline = RedisCacheManager.getCache(USER).get(terminalKey, String.class);
-				if(ONLINE.equals(isOnline)){
+				if(UserStatusType.ONLINE.getStatus().equals(isOnline)){
 					return true;
 				}
 			}
@@ -275,9 +275,9 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 	 */
 	private void validateStatusByType(Integer type, List<User> users, User user) {
 		String status = user.getStatus();
-		if(UserStatusType.ONLINE.getNumber() == type && ONLINE.equals(status)){
+		if(UserStatusType.ONLINE.getNumber() == type && UserStatusType.ONLINE.getStatus().equals(status)){
 			users.add(user);
-		}else if(UserStatusType.OFFLINE.getNumber() == type && OFFLINE.equals(status)){
+		}else if(UserStatusType.OFFLINE.getNumber() == type && UserStatusType.OFFLINE.getStatus().equals(status)){
 			users.add(user);
 		}else if(UserStatusType.ALL.getNumber() == type){
 			users.add(user);
@@ -291,7 +291,7 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 			return null;
 		}
 		boolean isOnline = this.isOnline(userId);
-		String status = isOnline ? ONLINE : OFFLINE;
+		String status = isOnline ? UserStatusType.ONLINE.getStatus() : UserStatusType.OFFLINE.getStatus();
 		if( UserStatusType.ONLINE.getNumber() == type && isOnline){
 			user.setStatus(status);
 			return user;
@@ -344,9 +344,9 @@ public class RedisMessageHelper extends AbstractMessageHelper{
 		String userId = user.getUserId();
 		boolean isOnline = this.isOnline(userId);
 		if(isOnline){
-			user.setStatus(ONLINE);
+			user.setStatus(UserStatusType.ONLINE.getStatus());
 		}else{
-			user.setStatus(OFFLINE);
+			user.setStatus(UserStatusType.OFFLINE.getStatus());
 		}
 		return true;
 	}

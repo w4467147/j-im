@@ -24,13 +24,13 @@ public interface ImHandler {
      * @return
      * @throws ImDecodeException
      */
-    ImPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext) throws ImDecodeException;
+    ImPacket decode(ByteBuffer buffer, int limit, int position, int readableLength, ImChannelContext imChannelContext) throws ImDecodeException, ImDecodeException;
 
     /**
-     * 编码
-     * @param imPacket
-     * @param imConfig
-     * @param imChannelContext
+     * 将业务包编码为网络byte字节传输
+     * @param imPacket 业务消息包
+     * @param imConfig IM配置
+     * @param imChannelContext 通道上下文
      * @return
      * @author: WChao
      */
@@ -38,8 +38,8 @@ public interface ImHandler {
 
     /**
      * 处理消息包
-     * @param imPacket
-     * @param imChannelContext
+     * @param imPacket 业务消息包
+     * @param imChannelContext 通道上下文
      * @throws ImException
      * @author: WChao
      */

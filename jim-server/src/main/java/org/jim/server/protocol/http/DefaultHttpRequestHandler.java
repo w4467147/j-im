@@ -326,7 +326,9 @@ public class DefaultHttpRequestHandler implements IHttpRequestHandler,ImConst.Ht
 			cookie = new Cookie(domain, name, sessionId, maxAge);
 			httpResponse.addCookie(cookie);
 			httpConfig.getSessionStore().put(sessionId, httpSession);
-			log.info("{} 创建会话Cookie, {}", request.getImChannelContext(), cookie);
+			if(log.isDebugEnabled()){
+				log.info("{} 创建会话Cookie, {}", request.getImChannelContext(), cookie);
+			}
 		} else {
 			sessionId = cookie.getValue();
 			HttpSession httpSession1 = (HttpSession) httpConfig.getSessionStore().get(sessionId);

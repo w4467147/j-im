@@ -35,7 +35,7 @@ public class User extends Message implements Serializable{
 	/**
 	 * 在线状态(online、offline)
 	 */
-	private String status = ImConst.OFFLINE;
+	private String status = UserStatusType.OFFLINE.getStatus();
 	/**
 	 * 个性签名;
 	 */
@@ -151,7 +151,7 @@ public class User extends Message implements Serializable{
 		/**
 		 * 在线状态(online、offline)
 		 */
-		private String status = ImConst.OFFLINE;
+		private String status = UserStatusType.OFFLINE.getStatus();
 		/**
 		 * 个性签名;
 		 */

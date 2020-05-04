@@ -3,6 +3,7 @@ package org.jim.server.command.handler;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.core.*;
 import org.jim.core.exception.ImException;
+import org.jim.server.JimServerAPI;
 import org.jim.server.processor.group.GroupCmdProcessor;
 import org.jim.server.protocol.ProtocolManager;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 		String groupId = joinGroup.getGroupId();
 		if (StringUtils.isBlank(groupId)) {
 			log.error("group is null,{}", imChannelContext);
-			Jim.close(imChannelContext, "group is null when join group");
+			JimServerAPI.close(imChannelContext, "group is null when join group");
 			return null;
 		}
 		//实际绑定之前执行处理器动作
@@ -48,7 +49,7 @@ public class JoinGroupReqHandler extends AbstractCmdHandler {
 			}
 		}
 		//处理完处理器内容后
-		Jim.bindGroup(imChannelContext, joinGroup);
+		JimServerAPI.bindGroup(imChannelContext, joinGroup);
 		return null;
 	}
 	@Override

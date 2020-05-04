@@ -1,7 +1,6 @@
 package org.jim.server.command.handler;
 
 import org.jim.core.ImChannelContext;
-import org.jim.core.Jim;
 import org.jim.core.ImPacket;
 import org.jim.core.ImStatus;
 import org.jim.core.exception.ImException;
@@ -9,6 +8,7 @@ import org.jim.core.packets.CloseReqBody;
 import org.jim.core.packets.Command;
 import org.jim.core.packets.RespBody;
 import org.jim.core.utils.JsonKit;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.protocol.ProtocolManager;
 
@@ -29,12 +29,12 @@ public class CloseReqHandler extends AbstractCmdHandler
 			//关闭请求消息格式不正确
 			return ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10020), imChannelContext);
 		}
-		Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10021), imChannelContext));
+		JimServerAPI.bSend(imChannelContext, ProtocolManager.Converter.respPacket(new RespBody(Command.COMMAND_CLOSE_REQ, ImStatus.C10021), imChannelContext));
 		if(closeReqBody == null || closeReqBody.getUserId() == null){
-			Jim.remove(imChannelContext, "收到关闭请求");
+			JimServerAPI.remove(imChannelContext, "收到关闭请求");
 		}else{
 			String userId = closeReqBody.getUserId();
-			Jim.remove(userId, "收到关闭请求!");
+			JimServerAPI.remove(userId, "收到关闭请求!");
 		}
 		return null;
 	}

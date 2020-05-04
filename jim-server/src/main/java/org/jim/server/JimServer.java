@@ -6,9 +6,8 @@ package org.jim.server;
 import com.google.common.base.Stopwatch;
 import org.jim.core.ImConst;
 import org.jim.core.cache.redis.RedissonTemplate;
-import org.jim.core.cluster.redis.RedisCluster;
-import org.jim.core.cluster.redis.RedisClusterConfig;
-import org.jim.core.config.ImConfig;
+import org.jim.server.cluster.redis.RedisCluster;
+import org.jim.server.cluster.redis.RedisClusterConfig;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.protocol.ProtocolManager;
 import org.jim.server.helper.redis.RedisMessageHelper;
@@ -24,13 +23,13 @@ import java.util.concurrent.TimeUnit;
  * @author WChao
  *
  */
-public class ImServerStarter {
+public class JimServer {
 
-	private static Logger log = LoggerFactory.getLogger(ImServerStarter.class);
+	private static Logger log = LoggerFactory.getLogger(JimServer.class);
 	private TioServer tioServer = null;
 	private ImServerConfig imServerConfig;
 
-	public ImServerStarter(ImServerConfig imServerConfig){
+	public JimServer(ImServerConfig imServerConfig){
 		this.imServerConfig = imServerConfig;
 	}
 	
@@ -55,10 +54,10 @@ public class ImServerStarter {
 	
 	public void start() throws IOException {
 		Stopwatch timeWatch = Stopwatch.createStarted();
-		log.warn("J-IM server start");
+		log.warn("J-IM Server start");
 		init(imServerConfig);
 		tioServer.start(this.imServerConfig.getBindIp(), this.imServerConfig.getBindPort());
-		log.warn("J-IM server started at address: {} time:{}ms", imServerConfig.getBindIp()+":"+imServerConfig.getBindPort(), timeWatch.elapsed(TimeUnit.MILLISECONDS));
+		log.warn("J-IM Server started at address: {} time:{}ms", imServerConfig.getBindIp()+":"+imServerConfig.getBindPort(), timeWatch.elapsed(TimeUnit.MILLISECONDS));
 	}
 	
 	public void stop(){

@@ -43,10 +43,6 @@ public class ImServerConfig extends ImConfig {
      */
     private MessageHelper messageHelper;
     /**
-     * SSL配置
-     */
-    private SslConfig sslConfig;
-    /**
      * http相关配置;
      */
     private HttpConfig httpConfig;
@@ -108,8 +104,6 @@ public class ImServerConfig extends ImConfig {
 
         private String isSSL =  OFF;
 
-        private SslConfig sslConfig;
-
         private HttpConfig httpConfig;
 
         private WsConfig wsConfig;
@@ -141,11 +135,6 @@ public class ImServerConfig extends ImConfig {
 
         public Builder isSSL(String isSSL){
             this.isSSL = isSSL;
-            return getThis();
-        }
-
-        public Builder sslConfig(SslConfig sslConfig){
-            this.sslConfig = sslConfig;
             return getThis();
         }
 

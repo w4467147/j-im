@@ -23,17 +23,17 @@ public class SslDemoStarter {
 		
 		NioSslClient client = new NioSslClient("TLSv1.2", "localhost", 9222,"./src/main/resources/keystore.jks","214323428310224");
 		client.connect();
-		byte[] loginBody = new LoginReqBody("hello_client","123").toByte();
+		byte[] loginBody = new LoginReqBody("ssl_hello_client","123").toByte();
 		TcpPacket loginPacket = new TcpPacket(Command.COMMAND_LOGIN_REQ,loginBody);
 		ByteBuffer loginByteBuffer = TcpServerEncoder.encode(loginPacket, null, null);
 		client.write(loginByteBuffer.array());
 		ChatBody chatBody =  ChatBody.newBuilder()
-				.setFrom("hello_client")
-				.setTo("admin")
-				.setMsgType(0)
-				.setChatType(1)
-				.setGroup_id("100")
-				.setContent("Socket普通客户端消息测试!").build();
+				.from("ssl_hello_client")
+				.to("admin")
+				.msgType(0)
+				.chatType(1)
+				.groupId("100")
+				.content("SSL-Socket普通客户端消息测试!").build();
 		TcpPacket chatPacket = new TcpPacket(Command.COMMAND_CHAT_REQ,chatBody.toByte());
 		ByteBuffer chatByteBuffer = TcpServerEncoder.encode(chatPacket,null, null);
 		client.write(chatByteBuffer.array());

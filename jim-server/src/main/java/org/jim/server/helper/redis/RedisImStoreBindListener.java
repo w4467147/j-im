@@ -12,6 +12,7 @@ import org.jim.core.listener.AbstractImStoreBindListener;
 import org.jim.core.message.MessageHelper;
 import org.jim.core.packets.Group;
 import org.jim.core.packets.User;
+import org.jim.core.packets.UserStatusType;
 import org.jim.server.config.ImServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +64,7 @@ public class RedisImStoreBindListener extends AbstractImStoreBindListener {
 		if(!isStore() || Objects.isNull(user)) {
 			return;
 		}
-		user.setStatus(ONLINE);
+		user.setStatus(UserStatusType.ONLINE.getStatus());
 		this.messageHelper.updateUserTerminal(user);
 		initUserInfo(user);
 	}
@@ -73,7 +74,7 @@ public class RedisImStoreBindListener extends AbstractImStoreBindListener {
 		if(!isStore() || Objects.isNull(user)) {
 			return;
 		}
-		user.setStatus(OFFLINE);
+		user.setStatus(UserStatusType.OFFLINE.getStatus());
 		this.messageHelper.updateUserTerminal(user);
 	}
 

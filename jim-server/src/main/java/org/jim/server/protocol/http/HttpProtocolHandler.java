@@ -6,7 +6,6 @@ package org.jim.server.protocol.http;
 import org.jim.core.ImChannelContext;
 import org.jim.core.ImConst;
 import org.jim.core.ImPacket;
-import org.jim.core.Jim;
 import org.jim.core.config.ImConfig;
 import org.jim.core.exception.ImDecodeException;
 import org.jim.core.exception.ImException;
@@ -14,7 +13,8 @@ import org.jim.core.http.*;
 import org.jim.core.http.handler.IHttpRequestHandler;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.session.id.impl.UUIDSessionIdGenerator;
-import org.jim.server.ImServerStarter;
+import org.jim.server.JimServer;
+import org.jim.server.JimServerAPI;
 import org.jim.server.config.ImServerConfig;
 import org.jim.server.protocol.AbstractProtocolHandler;
 import org.jim.server.protocol.http.mvc.Routes;
@@ -59,11 +59,11 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 		}
 		if(Objects.isNull(httpConfig.getScanPackages())){
 			//J-IM MVC需要扫描的根目录包
-			String[] scanPackages = new String[] { ImServerStarter.class.getPackage().getName() };
+			String[] scanPackages = new String[] { JimServer.class.getPackage().getName() };
 			httpConfig.setScanPackages(scanPackages);
 		}else{
 			String[] scanPackages = new String[httpConfig.getScanPackages().length+1];
-			scanPackages[0] = ImServerStarter.class.getPackage().getName();
+			scanPackages[0] = JimServer.class.getPackage().getName();
 			System.arraycopy(httpConfig.getScanPackages(), 0, scanPackages, 1, httpConfig.getScanPackages().length);
 			httpConfig.setScanPackages(scanPackages);
 		}
@@ -84,7 +84,7 @@ public class HttpProtocolHandler extends AbstractProtocolHandler {
 	public void handler(ImPacket imPacket, ImChannelContext imChannelContext)throws ImException {
 		HttpRequest httpRequestPacket = (HttpRequest) imPacket;
 		HttpResponse httpResponsePacket = httpRequestHandler.handler(httpRequestPacket, httpRequestPacket.getRequestLine());
-		Jim.send(imChannelContext, httpResponsePacket);
+		JimServerAPI.send(imChannelContext, httpResponsePacket);
 	}
 
 	@Override

@@ -5,14 +5,11 @@ import org.jim.core.*;
 import org.jim.core.config.ImConfig;
 import org.jim.core.exception.ImException;
 import org.jim.core.message.MessageHelper;
-import org.jim.core.packets.Command;
-import org.jim.core.packets.Group;
-import org.jim.core.packets.LoginReqBody;
-import org.jim.core.packets.LoginRespBody;
-import org.jim.core.packets.User;
+import org.jim.core.packets.*;
 import org.jim.core.protocol.IProtocol;
 import org.jim.core.utils.JsonKit;
 import org.jim.server.ImServerChannelContext;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
 import org.jim.server.processor.login.LoginCmdProcessor;
@@ -41,7 +38,7 @@ public class LoginReqHandler extends AbstractCmdHandler {
 		User user = getUserByProcessor(imChannelContext, loginProcessor, loginReqBody, loginRespBody);
 		IProtocol protocol = imServerChannelContext.getProtocolHandler().getProtocol();
 		user.setTerminal(Objects.isNull(protocol) ? Protocol.UNKNOWN : protocol.name());
-		Jim.bindUser(imServerChannelContext, user);
+		JimServerAPI.bindUser(imServerChannelContext, user);
 		//初始化绑定或者解绑群组;
 		initGroup(imChannelContext, user);
 		loginProcessor.onSuccess(user, imChannelContext);
@@ -59,15 +56,15 @@ public class LoginReqHandler extends AbstractCmdHandler {
 	 */
 	private User getUserByProcessor(ImChannelContext imChannelContext, LoginCmdProcessor loginProcessor, LoginReqBody loginReqBody, LoginRespBody loginRespBody)throws ImException{
 		if(Objects.isNull(loginProcessor)){
-			User user = User.newBuilder().userId(loginReqBody.getUserId()).status(ONLINE).build();
+			User user = User.newBuilder().userId(loginReqBody.getUserId()).status(UserStatusType.ONLINE.getStatus()).build();
 			return user;
 		}
 		loginRespBody = loginProcessor.doLogin(loginReqBody, imChannelContext);
 		if (Objects.isNull(loginRespBody) || loginRespBody.getCode() != ImStatus.C10007.getCode()) {
 			log.error("login failed, userId:{}, password:{}", loginReqBody.getUserId(), loginReqBody.getPassword());
 			loginProcessor.onFailed(imChannelContext);
-			Jim.bSend(imChannelContext, ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext));
-			Jim.remove(imChannelContext, "userId or token is incorrect");
+			JimServerAPI.bSend(imChannelContext, ProtocolManager.Converter.respPacket(loginRespBody, imChannelContext));
+			JimServerAPI.remove(imChannelContext, "userId or token is incorrect");
 			return null;
 		}
 		return loginProcessor.getUser(loginReqBody, imChannelContext);

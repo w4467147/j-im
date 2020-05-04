@@ -17,6 +17,7 @@ import org.jim.core.packets.RespBody;
 import org.jim.core.protocol.AbstractProtocol;
 import org.jim.core.utils.JsonKit;
 import org.jim.core.ws.*;
+import org.jim.server.JimServerAPI;
 import org.jim.server.command.AbstractCmdHandler;
 import org.jim.server.command.CommandManager;
 import org.jim.server.config.ImServerConfig;
@@ -87,12 +88,12 @@ public class WsProtocolHandler extends AbstractProtocolHandler {
 				return;
 			}
 			ImPacket wsPacket = new ImPacket(Command.COMMAND_UNKNOW, new RespBody(Command.COMMAND_UNKNOW,ImStatus.C10017).toByte());
-			Jim.send(imChannelContext, wsPacket);
+			JimServerAPI.send(imChannelContext, wsPacket);
 			return;
 		}
 		ImPacket response = cmdHandler.handler(wsRequestPacket, imChannelContext);
 		if(Objects.nonNull(response)){
-			Jim.send(imChannelContext, response);
+			JimServerAPI.send(imChannelContext, response);
 		}
 	}
 

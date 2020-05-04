@@ -287,10 +287,6 @@ public interface ImConst
 	
 	String FRIENDS = "friends";
 	
-	String ONLINE = "online";
-	
-	String OFFLINE = "offline";
-	
 	String JIM = "J-IM";
 
 }

@@ -1,27 +1,23 @@
 /**
  * 
  */
-package org.jim.core.cluster.redis;
+package org.jim.server.cluster.redis;
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
-import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.jim.core.ImConst;
-import org.jim.core.Jim;
 import org.jim.core.ImPacket;
-import org.jim.core.cache.redis.JedisTemplate;
 import org.jim.core.cluster.ImClusterConfig;
 import org.jim.core.cluster.ImClusterVO;
+import org.jim.server.JimServerAPI;
 import org.redisson.api.RTopic;
 import org.redisson.api.RedissonClient;
-import org.redisson.api.listener.MessageListener;
-import org.redisson.api.listener.StatusListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tio.core.Tio;
 import org.tio.utils.json.Json;
+
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @desc Redis集群配置
@@ -91,12 +87,12 @@ public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 			//发送给指定组
 			String group = imClusterVo.getGroup();
 			if (StringUtils.isNotBlank(group)) {
-				Jim.sendToGroup(group, packet);
+				JimServerAPI.sendToGroup(group, packet);
 			}
 			//发送给指定用户
 			String userId = imClusterVo.getUserId();
 			if (StringUtils.isNotBlank(userId)) {
-				Jim.sendToUser(userId, packet);
+				JimServerAPI.sendToUser(userId, packet);
 			}
 			//发送给指定token
 			String token = imClusterVo.getToken();
@@ -106,7 +102,7 @@ public class RedisClusterConfig extends ImClusterConfig implements ImConst {
 			//发送给指定ip
 			String ip = imClusterVo.getIp();
 			if (StringUtils.isNotBlank(ip)) {
-				//Jim.sendToIp(me.groupContext, ip, packet);
+				JimServerAPI.sendToIp(ip, packet);
 			}
 		});
 		return me;

@@ -29,4 +29,13 @@ public interface IProtocolConverter {
 	 * @return
 	 */
 	ImPacket RespPacket(byte[] body,Command command, ImChannelContext imChannelContext);
+
+	/**
+	 * 转化响应包
+	 * @param imPacket
+	 * @param command
+	 * @param imChannelContext
+	 * @return
+	 */
+	ImPacket RespPacket(ImPacket imPacket, Command command, ImChannelContext imChannelContext);
 }

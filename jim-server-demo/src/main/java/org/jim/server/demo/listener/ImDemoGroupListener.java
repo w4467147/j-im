@@ -2,21 +2,22 @@ package org.jim.server.demo.listener;
 
 import org.jim.core.*;
 import org.jim.core.exception.ImException;
-import org.jim.core.listener.ImGroupListener;
 import org.jim.core.packets.*;
 import org.jim.core.utils.JsonKit;
+import org.jim.server.JimServerAPI;
 import org.jim.server.listener.AbstractImGroupListener;
 import org.jim.server.protocol.ProtocolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 群组绑定监听器
  * @author WChao 
  * 2017年5月13日 下午10:38:36
  */
 public class ImDemoGroupListener extends AbstractImGroupListener {
 
-	private  static Logger logger = LoggerFactory.getLogger(ImGroupListener.class);
+	private  static Logger logger = LoggerFactory.getLogger(ImDemoGroupListener.class);
 
 	@Override
 	public void doAfterBind(ImChannelContext imChannelContext, Group group) throws ImException {
@@ -50,7 +51,7 @@ public class ImDemoGroupListener extends AbstractImGroupListener {
 
 		RespBody respBody = new RespBody(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP,exitGroupNotifyRespBody);
 		ImPacket imPacket = new ImPacket(Command.COMMAND_EXIT_GROUP_NOTIFY_RESP, respBody.toByte());
-		Jim.sendToGroup(group.getGroupId(), ProtocolManager.Converter.respPacket(imPacket, imChannelContext));
+		JimServerAPI.sendToGroup(group.getGroupId(), imPacket);
 	}
 
 	/**
@@ -61,12 +62,12 @@ public class ImDemoGroupListener extends AbstractImGroupListener {
 	public void joinGroupNotify(Group group, ImChannelContext imChannelContext)throws ImException{
 		ImSessionContext imSessionContext = imChannelContext.getSessionContext();
 		User clientUser = imSessionContext.getImClientNode().getUser();
-		User notifyUser = User.newBuilder().userId(clientUser.getUserId()).nick(clientUser.getNick()).build();
+		User notifyUser = User.newBuilder().userId(clientUser.getUserId()).nick(clientUser.getNick()).status(UserStatusType.ONLINE.getStatus()).build();
 		String groupId = group.getGroupId();
 		//发进房间通知  COMMAND_JOIN_GROUP_NOTIFY_RESP
 		JoinGroupNotifyRespBody joinGroupNotifyRespBody = JoinGroupNotifyRespBody.success();
 		joinGroupNotifyRespBody.setGroup(groupId).setUser(notifyUser);
-		Jim.sendToGroup(groupId, ProtocolManager.Converter.respPacket(joinGroupNotifyRespBody,imChannelContext));
+		JimServerAPI.sendToGroup(groupId, ProtocolManager.Converter.respPacket(joinGroupNotifyRespBody,imChannelContext));
 	}
 
 }

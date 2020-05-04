@@ -1,8 +1,9 @@
 package org.jim.core.cluster;
 
+import org.jim.core.ImPacket;
+
 import java.util.UUID;
 
-import org.jim.core.ImPacket;
 /**
  * 成员变量group, userId, ip谁有值就发给谁，toAll为true则发给所有<br>
  * packet是不允许为null的
