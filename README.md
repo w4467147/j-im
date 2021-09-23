@@ -164,7 +164,7 @@
    个人Email:wchaojava@163.com
 
    官方QQ群号：245513673 <a target="_blank"  href="//shang.qq.com/wpa/qunwpa?idkey=c876012ca4131bfdb6a32c9e5b4cde730b686fa1d20cc2ebd795a0fe2760b5d8"><img border="0" src="//pub.idqqimg.com/wpa/images/group.png" alt="J-IM朋友圈" title="J-IM朋友圈"></a><br>
-
+   想加入优质微信群的朋友，先进入QQ群后私聊我视情况拉入！
 ### 重点说明： 申请进群时提供的是码云star显示的名字(列如下图)，管理员会挨个审核是否已star，如果没有star或者乱填的直接拒绝，出现拒绝2次的永久不允许进群：
 ![码云名称说明](https://images.gitee.com/uploads/images/2020/0408/160035_caf78b5d_410355.png "屏幕截图.png")
 ![群二维码](https://gitee.com/uploads/images/2018/0415/131601_e2cf7bde_410355.png "1523769300727.png")
