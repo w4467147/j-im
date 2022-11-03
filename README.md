@@ -7,7 +7,7 @@
 
 ## 官方网站
 
- http://www.j-im.cn
+ http://www.j-im.cloud
                                                                      
 ## 主要特点
         1、高性能(单机可支持几十万至百万人同时在线)
